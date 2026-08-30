@@ -38,6 +38,46 @@ const formatOrderDates = (order) => {
 
 
 // =====================================================
+// FORMAT PAYMENT
+// =====================================================
+
+const formatPayment = (payment) => {
+  if (!payment) {
+    return payment;
+  }
+
+  return {
+    ...payment,
+
+    verified_at: formatToWIB(
+      payment.verified_at
+    ),
+  };
+};
+
+
+// =====================================================
+// FORMAT PAYMENTS
+// Bisa object atau array
+// =====================================================
+
+const formatPayments = (payments) => {
+  if (!payments) {
+    return payments;
+  }
+
+  if (Array.isArray(payments)) {
+    return payments.map(
+      (payment) =>
+        formatPayment(payment)
+    );
+  }
+
+  return formatPayment(payments);
+};
+
+
+// =====================================================
 // CREATE ORDER
 // =====================================================
 
@@ -51,11 +91,13 @@ export const createOrder = async (
       items,
     } = req.validated.body;
 
+
     const result =
       await createOrderService(
         req.user.id,
         items
       );
+
 
     return successResponse(
       res,
@@ -87,6 +129,7 @@ export const getMyOrders = async (
   next
 ) => {
   try {
+
     const {
       data,
       error,
@@ -123,9 +166,12 @@ export const getMyOrders = async (
         "user_id",
         req.user.id
       )
-      .order("created_at", {
-        ascending: false,
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false,
+        }
+      );
 
 
     if (error) {
@@ -141,19 +187,9 @@ export const getMyOrders = async (
           ),
 
           payments:
-            order.payments?.map(
-              (payment) => ({
-                ...payment,
-
-                verified_at:
-                  formatToWIB(
-                    payment.verified_at
-                  ),
-              })
-            ) || [],
-
-          order_items:
-            order.order_items || [],
+            formatPayments(
+              order.payments
+            ),
         })
       );
 
@@ -180,6 +216,7 @@ export const getOrderById = async (
   next
 ) => {
   try {
+
     const {
       id,
     } = req.params;
@@ -244,8 +281,11 @@ export const getOrderById = async (
     }
 
 
-    // Customer hanya boleh
-    // melihat order miliknya
+    // =========================================
+    // CUSTOMER HANYA BOLEH MELIHAT MILIKNYA
+    // ADMIN BOLEH MELIHAT SEMUA
+    // =========================================
+
     if (
       req.user.role !== "admin" &&
       data.user_id !== req.user.id
@@ -264,16 +304,9 @@ export const getOrderById = async (
       ),
 
       payments:
-        data.payments?.map(
-          (payment) => ({
-            ...payment,
-
-            verified_at:
-              formatToWIB(
-                payment.verified_at
-              ),
-          })
-        ) || [],
+        formatPayments(
+          data.payments
+        ),
     };
 
 
@@ -299,6 +332,7 @@ export const getAllOrders = async (
   next
 ) => {
   try {
+
     const {
       status,
     } = req.query;
@@ -334,10 +368,17 @@ export const getAllOrders = async (
           verified_at
         )
       `)
-      .order("created_at", {
-        ascending: false,
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false,
+        }
+      );
 
+
+    // =========================================
+    // FILTER STATUS
+    // =========================================
 
     if (status) {
       query = query.eq(
@@ -366,16 +407,9 @@ export const getAllOrders = async (
           ),
 
           payments:
-            order.payments?.map(
-              (payment) => ({
-                ...payment,
-
-                verified_at:
-                  formatToWIB(
-                    payment.verified_at
-                  ),
-              })
-            ) || [],
+            formatPayments(
+              order.payments
+            ),
         })
       );
 
@@ -402,6 +436,7 @@ export const cancelOrder = async (
   next
 ) => {
   try {
+
     const {
       id,
     } = req.params;
@@ -447,7 +482,7 @@ export const cancelOrder = async (
 
 
     // =========================================
-    // CEK PEMILIK
+    // CEK PEMILIK ORDER
     // =========================================
 
     if (
@@ -541,7 +576,7 @@ export const cancelOrder = async (
 
 
     // =========================================
-    // UPDATE ORDER
+    // UPDATE ORDER → CANCELLED
     // =========================================
 
     const {

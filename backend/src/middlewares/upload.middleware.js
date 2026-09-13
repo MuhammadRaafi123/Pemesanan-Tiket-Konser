@@ -64,3 +64,21 @@ export const upload = multer({
     fileSize: 5 * 1024 * 1024,
   },
 });
+
+const paymentFileFilter = (req, file, cb) => {
+  const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Bukti pembayaran harus berformat JPG, PNG, atau PDF"));
+  }
+};
+
+export const paymentUpload = multer({
+  storage,
+  fileFilter: paymentFileFilter,
+  limits: {
+    fileSize: 2 * 1024 * 1024,
+  },
+});

@@ -7,6 +7,7 @@ import ticketCategoryRoutes from "./ticketCategory.routes.js";
 import orderRoutes from "./order.routes.js";
 import paymentRoutes from "./payment.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
+import adminOrderRoutes from "./adminOrder.routes.js";
 
 const router = express.Router();
 
@@ -44,6 +45,11 @@ router.use(
 router.use(
   "/dashboard",
   dashboardRoutes
+);
+
+router.use(
+  "/admin",
+  adminOrderRoutes
 );
 
 

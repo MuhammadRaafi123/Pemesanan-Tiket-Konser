@@ -15,7 +15,7 @@ import {
 } from "../middlewares/role.middleware.js";
 
 import {
-  upload,
+  paymentUpload,
 } from "../middlewares/upload.middleware.js";
 
 import {
@@ -34,7 +34,7 @@ const router = express.Router();
 router.post(
   "/",
   authenticate,
-  upload.single("proof_image"),
+  paymentUpload.single("proof_image"),
   validate(createPaymentSchema),
   createPayment
 );

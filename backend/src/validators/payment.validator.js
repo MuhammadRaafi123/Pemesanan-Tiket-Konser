@@ -24,5 +24,19 @@ export const verifyPaymentSchema = z.object({
           "Status harus approved atau rejected",
       }
     ),
+
+    rejection_reason: z
+      .string()
+      .min(3, "Alasan penolakan minimal 3 karakter")
+      .max(500, "Alasan penolakan maksimal 500 karakter")
+      .optional(),
   }),
+}).superRefine(({ body }, ctx) => {
+  if (body.status === "rejected" && !body.rejection_reason) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["body", "rejection_reason"],
+      message: "Alasan penolakan wajib diisi",
+    });
+  }
 });

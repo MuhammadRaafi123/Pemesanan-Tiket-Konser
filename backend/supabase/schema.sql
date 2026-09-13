@@ -21,6 +21,10 @@ CREATE TABLE users (
     role VARCHAR(20) NOT NULL DEFAULT 'customer'
         CHECK (role IN ('admin', 'customer')),
 
+    reset_password_token TEXT,
+
+    reset_password_expires_at TIMESTAMPTZ,
+
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -96,6 +100,9 @@ CREATE TABLE ticket_categories (
             AND remaining <= quota
         ),
 
+    reserved INTEGER NOT NULL DEFAULT 0
+        CHECK (reserved >= 0 AND reserved <= remaining),
+
     created_at TIMESTAMPTZ DEFAULT NOW(),
 
     CONSTRAINT fk_ticket_event
@@ -114,6 +121,11 @@ CREATE TABLE orders (
 
     user_id BIGINT NOT NULL,
 
+    created_by BIGINT,
+
+    order_source VARCHAR(20) NOT NULL DEFAULT 'online'
+        CHECK (order_source IN ('online', 'offline')),
+
     order_code VARCHAR(100) NOT NULL UNIQUE,
 
     total DECIMAL(14, 2) NOT NULL
@@ -131,10 +143,17 @@ CREATE TABLE orders (
 
     qr_code TEXT,
 
+    expires_at TIMESTAMPTZ,
+
     created_at TIMESTAMPTZ DEFAULT NOW(),
 
     CONSTRAINT fk_order_user
         FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_order_creator
+        FOREIGN KEY (created_by)
         REFERENCES users(id)
         ON DELETE RESTRICT
 );
@@ -180,7 +199,7 @@ CREATE TABLE payments (
 
     payment_method VARCHAR(100) NOT NULL,
 
-    proof_image TEXT NOT NULL,
+    proof_image TEXT,
 
     status VARCHAR(20) NOT NULL DEFAULT 'pending'
         CHECK (
@@ -193,12 +212,21 @@ CREATE TABLE payments (
 
     verified_at TIMESTAMPTZ,
 
+    verified_by BIGINT,
+
+    rejection_reason TEXT,
+
     created_at TIMESTAMPTZ DEFAULT NOW(),
 
     CONSTRAINT fk_payment_order
         FOREIGN KEY (order_id)
         REFERENCES orders(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_payment_verifier
+        FOREIGN KEY (verified_by)
+        REFERENCES users(id)
+        ON DELETE RESTRICT
 );
 
 
@@ -228,3 +256,184 @@ ON order_items(order_id);
 
 CREATE INDEX idx_payments_order_id
 ON payments(order_id);
+
+CREATE INDEX idx_orders_pending_expiry
+ON orders(expires_at)
+WHERE status = 'pending';
+
+-- Reserve stok secara atomik. `remaining` adalah stok fisik yang belum terjual;
+-- stok tersedia untuk order baru = remaining - reserved.
+CREATE OR REPLACE FUNCTION reserve_ticket_stock(
+    p_ticket_category_id BIGINT,
+    p_qty INTEGER
+)
+RETURNS TABLE(id BIGINT, remaining INTEGER, reserved INTEGER)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF p_qty IS NULL OR p_qty <= 0 THEN
+        RAISE EXCEPTION 'Jumlah tiket harus lebih dari 0';
+    END IF;
+
+    RETURN QUERY
+    UPDATE ticket_categories
+    SET reserved = ticket_categories.reserved + p_qty
+    WHERE ticket_categories.id = p_ticket_category_id
+      AND ticket_categories.remaining - ticket_categories.reserved >= p_qty
+    RETURNING ticket_categories.id, ticket_categories.remaining, ticket_categories.reserved;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION release_ticket_stock(
+    p_ticket_category_id BIGINT,
+    p_qty INTEGER
+)
+RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE ticket_categories
+    SET reserved = GREATEST(reserved - p_qty, 0)
+    WHERE id = p_ticket_category_id;
+END;
+$$;
+
+-- Melepas reservasi order online yang melewati tenggat pembayaran.
+CREATE OR REPLACE FUNCTION expire_pending_orders()
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_order RECORD;
+    v_item RECORD;
+    v_count INTEGER := 0;
+BEGIN
+    FOR v_order IN
+        SELECT id FROM orders
+        WHERE status = 'pending'
+          AND expires_at IS NOT NULL
+          AND expires_at <= NOW()
+        FOR UPDATE
+    LOOP
+        FOR v_item IN SELECT ticket_category_id, qty FROM order_items WHERE order_id = v_order.id LOOP
+            PERFORM release_ticket_stock(v_item.ticket_category_id, v_item.qty);
+        END LOOP;
+
+        UPDATE orders SET status = 'cancelled' WHERE id = v_order.id;
+        v_count := v_count + 1;
+    END LOOP;
+
+    RETURN v_count;
+END;
+$$;
+
+-- Verifikasi, perubahan stok, dan perubahan order dijalankan dalam satu transaksi DB.
+CREATE OR REPLACE FUNCTION verify_payment_transaction(
+    p_payment_id BIGINT,
+    p_status VARCHAR,
+    p_verified_by BIGINT,
+    p_rejection_reason TEXT DEFAULT NULL,
+    p_qr_code TEXT DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_order_id BIGINT;
+    v_order_status VARCHAR;
+    v_expires_at TIMESTAMPTZ;
+    v_item RECORD;
+BEGIN
+    SELECT o.id, o.status, o.expires_at
+    INTO v_order_id, v_order_status, v_expires_at
+    FROM payments p
+    JOIN orders o ON o.id = p.order_id
+    WHERE p.id = p_payment_id AND p.status = 'pending'
+    FOR UPDATE OF p, o;
+
+    IF NOT FOUND THEN RAISE EXCEPTION 'Pembayaran sudah diverifikasi atau tidak ditemukan'; END IF;
+    IF v_order_status <> 'pending' OR (v_expires_at IS NOT NULL AND v_expires_at <= NOW()) THEN
+        RAISE EXCEPTION 'Order sudah tidak dapat diverifikasi';
+    END IF;
+    IF p_status NOT IN ('approved', 'rejected') THEN RAISE EXCEPTION 'Status pembayaran tidak valid'; END IF;
+
+    FOR v_item IN
+        SELECT oi.ticket_category_id, oi.qty FROM order_items oi WHERE oi.order_id = v_order_id
+    LOOP
+        PERFORM 1 FROM ticket_categories WHERE id = v_item.ticket_category_id FOR UPDATE;
+        IF NOT FOUND THEN RAISE EXCEPTION 'Kategori tiket tidak ditemukan'; END IF;
+
+        IF p_status = 'approved' THEN
+            UPDATE ticket_categories
+            SET remaining = remaining - v_item.qty, reserved = reserved - v_item.qty
+            WHERE id = v_item.ticket_category_id AND reserved >= v_item.qty;
+            IF NOT FOUND THEN RAISE EXCEPTION 'Reservasi tiket tidak mencukupi'; END IF;
+        ELSE
+            PERFORM release_ticket_stock(v_item.ticket_category_id, v_item.qty);
+        END IF;
+    END LOOP;
+
+    UPDATE payments SET status = p_status, verified_at = NOW(), verified_by = p_verified_by,
+        rejection_reason = CASE WHEN p_status = 'rejected' THEN p_rejection_reason ELSE NULL END
+    WHERE id = p_payment_id;
+    UPDATE orders SET status = CASE WHEN p_status = 'approved' THEN 'paid' ELSE 'rejected' END,
+        qr_code = CASE WHEN p_status = 'approved' THEN p_qr_code ELSE qr_code END
+    WHERE id = v_order_id;
+END;
+$$;
+
+-- Transaksi loket: order, item, pembayaran, dan pengurangan stok dibuat atomik.
+CREATE OR REPLACE FUNCTION create_offline_order_transaction(
+    p_user_id BIGINT,
+    p_created_by BIGINT,
+    p_order_code VARCHAR,
+    p_payment_method VARCHAR,
+    p_items JSONB
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_item JSONB;
+    v_ticket RECORD;
+    v_total DECIMAL(14,2) := 0;
+    v_order_id BIGINT;
+BEGIN
+    IF jsonb_array_length(p_items) = 0 THEN RAISE EXCEPTION 'Minimal harus memilih 1 tiket'; END IF;
+    IF NOT EXISTS (SELECT 1 FROM users WHERE id = p_user_id) THEN RAISE EXCEPTION 'Customer tidak ditemukan'; END IF;
+
+    FOR v_item IN SELECT value FROM jsonb_array_elements(p_items) LOOP
+        SELECT tc.id, tc.price, tc.remaining, e.status, e.title
+        INTO v_ticket
+        FROM ticket_categories tc JOIN events e ON e.id = tc.event_id
+        WHERE tc.id = (v_item->>'ticket_category_id')::BIGINT
+        FOR UPDATE OF tc;
+
+        IF NOT FOUND THEN RAISE EXCEPTION 'Kategori tiket tidak ditemukan'; END IF;
+        IF v_ticket.status <> 'open' THEN RAISE EXCEPTION 'Penjualan event % sudah ditutup', v_ticket.title; END IF;
+        IF (v_item->>'qty')::INTEGER <= 0 OR v_ticket.remaining - v_ticket.reserved < (v_item->>'qty')::INTEGER THEN
+            RAISE EXCEPTION 'Stok tiket tidak mencukupi';
+        END IF;
+        v_total := v_total + v_ticket.price * (v_item->>'qty')::INTEGER;
+    END LOOP;
+
+    INSERT INTO orders (user_id, created_by, order_source, order_code, total, status)
+    VALUES (p_user_id, p_created_by, 'offline', p_order_code, v_total, 'paid')
+    RETURNING id INTO v_order_id;
+
+    FOR v_item IN SELECT value FROM jsonb_array_elements(p_items) LOOP
+        SELECT price INTO v_ticket FROM ticket_categories WHERE id = (v_item->>'ticket_category_id')::BIGINT;
+        INSERT INTO order_items (order_id, ticket_category_id, qty, subtotal)
+        VALUES (v_order_id, (v_item->>'ticket_category_id')::BIGINT,
+            (v_item->>'qty')::INTEGER, v_ticket.price * (v_item->>'qty')::INTEGER);
+        UPDATE ticket_categories
+        SET remaining = remaining - (v_item->>'qty')::INTEGER
+        WHERE id = (v_item->>'ticket_category_id')::BIGINT;
+    END LOOP;
+
+    INSERT INTO payments (order_id, payment_method, status, verified_at, verified_by)
+    VALUES (v_order_id, p_payment_method, 'approved', NOW(), p_created_by);
+
+    RETURN v_order_id;
+END;
+$$;

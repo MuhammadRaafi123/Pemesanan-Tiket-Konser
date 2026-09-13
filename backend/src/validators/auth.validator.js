@@ -27,8 +27,8 @@ export const registerSchema = z.object({
     password: z
       .string()
       .min(
-        6,
-        "Password minimal 6 karakter"
+        8,
+        "Password minimal 8 karakter"
       )
       .max(
         100,
@@ -105,8 +105,8 @@ export const resetPasswordSchema =
       new_password: z
         .string()
         .min(
-          6,
-          "Password baru minimal 6 karakter"
+          8,
+          "Password baru minimal 8 karakter"
         )
         .max(
           100,

@@ -86,6 +86,17 @@ export const createPayment = async (
       );
     }
 
+    if (
+      order.expires_at &&
+      new Date(order.expires_at) <= new Date()
+    ) {
+      return errorResponse(
+        res,
+        "Order sudah melewati batas waktu pembayaran",
+        400
+      );
+    }
+
 
     // =========================================
     // CEK PEMBAYARAN SUDAH ADA
@@ -302,7 +313,74 @@ export const verifyPayment = async (
 
     const {
       status,
+      rejection_reason,
     } = req.validated.body;
+
+
+    // QR dibuat sebelum RPC; seluruh perubahan data penting di bawah ini
+    // tetap terjadi atomik di PostgreSQL melalui verify_payment_transaction.
+    let qrCode = null;
+
+    if (status === "approved") {
+      const { data: paymentForQr, error: paymentForQrError } = await supabase
+        .from("payments")
+        .select(`
+          order_id,
+          orders (id, order_code, user_id)
+        `)
+        .eq("id", id)
+        .maybeSingle();
+
+      if (paymentForQrError) throw paymentForQrError;
+      if (!paymentForQr?.orders) {
+        return errorResponse(res, "Pembayaran tidak ditemukan", 404);
+      }
+
+      qrCode = await generateQRCode({
+        order_id: paymentForQr.orders.id,
+        order_code: paymentForQr.orders.order_code,
+        user_id: paymentForQr.orders.user_id,
+      });
+    }
+
+    const { error: verifyError } = await supabase.rpc(
+      "verify_payment_transaction",
+      {
+        p_payment_id: Number(id),
+        p_status: status,
+        p_verified_by: req.user.id,
+        p_rejection_reason: rejection_reason || null,
+        p_qr_code: qrCode,
+      }
+    );
+
+    if (verifyError) {
+      const error = new Error(verifyError.message);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const { data: verifiedPayment, error: verifiedPaymentError } = await supabase
+      .from("payments")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (verifiedPaymentError) throw verifiedPaymentError;
+
+    const { data: verifiedOrder, error: verifiedOrderError } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", verifiedPayment.order_id)
+      .single();
+
+    if (verifiedOrderError) throw verifiedOrderError;
+
+    return successResponse(
+      res,
+      status === "approved" ? "Pembayaran berhasil disetujui" : "Pembayaran ditolak",
+      { payment: verifiedPayment, order: verifiedOrder }
+    );
 
 
     // =========================================

@@ -105,6 +105,33 @@ export const getDashboardData = async () => {
       0
     );
 
+  // Grafik tujuh hari terakhir berdasarkan order yang telah dibayar.
+  const today = new Date();
+  const salesByDate = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today);
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCDate(date.getUTCDate() - (6 - index));
+    return {
+      date: date.toISOString().slice(0, 10),
+      orders: 0,
+      revenue: 0,
+    };
+  });
+
+  const salesMap = new Map(
+    salesByDate.map((sale) => [sale.date, sale])
+  );
+
+  for (const order of paidOrders) {
+    const date = new Date(order.created_at).toISOString().slice(0, 10);
+    const dailySale = salesMap.get(date);
+
+    if (dailySale) {
+      dailySale.orders += 1;
+      dailySale.revenue += Number(order.total);
+    }
+  }
+
   return {
     totalEvents,
     totalArtists,
@@ -112,5 +139,6 @@ export const getDashboardData = async () => {
     ticketsSold,
     ticketsRemaining,
     totalRevenue,
+    salesByDate,
   };
 };

@@ -49,7 +49,7 @@ export const MOCK_ARTISTS: Artist[] = [
   {
     id: 4,
     name: "Tulus",
-    photo: "https://images.unsplash.com/photo-1520523839898-5071280387e0?q=80&w=600&auto=format&fit=crop",
+    photo: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=600&auto=format&fit=crop",
     description: "Penyanyi & penulis lagu terkemuka Indonesia dengan vokal merdu berbalut nuansa jazz dan lirik puitis mendalam.",
     genre: "Pop / Soul / Jazz",
     monthlyListeners: "9.7 Juta",
@@ -88,6 +88,21 @@ export async function fetchArtists(): Promise<Artist[]> {
   }
 }
 
+export async function fetchPopularArtists(limit = 6): Promise<Artist[]> {
+  try {
+    const res = await api.get("/artists/popular", {
+      params: { limit },
+    });
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      return res.data.data;
+    }
+  } catch {
+    // Use the local preview catalog when the API is unavailable.
+  }
+
+  return MOCK_ARTISTS.slice(0, limit);
+}
+
 export async function fetchArtistById(id: number | string): Promise<Artist | null> {
   try {
     const res = await api.get(`/artists/${id}`);
@@ -98,6 +113,11 @@ export async function fetchArtistById(id: number | string): Promise<Artist | nul
     // fallback
   }
 
-  const found = MOCK_ARTISTS.find((a) => String(a.id) === String(id));
+  const normalizedId = String(id).trim().toLowerCase();
+  const found = MOCK_ARTISTS.find(
+    (artist) =>
+      String(artist.id).toLowerCase() === normalizedId ||
+      artist.name.toLowerCase() === normalizedId,
+  );
   return found || MOCK_ARTISTS[0];
 }

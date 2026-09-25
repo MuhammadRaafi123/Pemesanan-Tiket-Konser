@@ -54,21 +54,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             className={`pointer-events-auto flex items-center justify-between gap-3 rounded-xl border p-4 shadow-2xl backdrop-blur-xl transition-all ${
               t.type === "success"
-                ? "border-emerald-500/30 bg-emerald-950/80 text-emerald-200 shadow-emerald-950/40"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800 shadow-emerald-200"
                 : t.type === "error"
-                ? "border-rose-500/30 bg-rose-950/80 text-rose-200 shadow-rose-950/40"
-                : "border-purple-500/30 bg-purple-950/80 text-purple-200 shadow-purple-950/40"
+                ? "border-rose-200 bg-rose-50 text-rose-800 shadow-rose-200"
+                : "border-blue-200 bg-blue-50 text-[#17457f] shadow-blue-200"
             }`}
           >
             <div className="flex items-center gap-3">
               {t.type === "success" && <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />}
               {t.type === "error" && <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />}
-              {t.type === "info" && <Info className="h-5 w-5 text-purple-400 shrink-0" />}
+              {t.type === "info" && <Info className="h-5 w-5 text-[#2563eb] shrink-0" />}
               <p className="text-sm font-medium leading-snug">{t.message}</p>
             </div>
             <button
               onClick={() => removeToast(t.id)}
-              className="rounded-lg p-1 text-white/50 hover:bg-white/10 hover:text-white transition"
+              className="rounded-lg p-1 text-[#8aa4c1] hover:bg-blue-50 hover:text-[#2563eb] transition"
             >
               <X className="h-4 w-4" />
             </button>

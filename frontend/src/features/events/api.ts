@@ -173,7 +173,7 @@ export const MOCK_EVENTS: Event[] = [
     artists: {
       id: 4,
       name: "Tulus",
-      photo: "https://images.unsplash.com/photo-1520523839898-5071280387e0?q=80&w=600&auto=format&fit=crop",
+      photo: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=600&auto=format&fit=crop",
       description: "Penyanyi & penulis lagu terkemuka Indonesia dengan vokal khas berbalut jazz dan soul hangat.",
       genre: "Pop / Soul / Jazz",
     },

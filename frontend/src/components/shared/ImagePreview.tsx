@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2 } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface ImagePreviewProps {
   src: string;
@@ -26,10 +27,10 @@ export function ImagePreview({
     <>
       <div
         onClick={() => setIsOpen(true)}
-        className={`group relative overflow-hidden rounded-2xl cursor-pointer border border-white/10 ${aspectRatio} ${className}`}
+        className={`group relative overflow-hidden rounded-2xl cursor-pointer border border-blue-100 ${aspectRatio} ${className}`}
       >
         <Image
-          src={src || "/globe.svg"}
+          src={resolveMediaUrl(src)}
           alt={alt}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -45,7 +46,7 @@ export function ImagePreview({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <div className="relative aspect-[16/9] w-full max-h-[75vh] overflow-hidden rounded-2xl">
           <Image
-            src={src || "/globe.svg"}
+            src={resolveMediaUrl(src)}
             alt={alt}
             fill
             className="object-contain"

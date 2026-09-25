@@ -8,21 +8,21 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-purple-500/30 bg-purple-950/60 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.2)]",
+          "border-blue-200 bg-blue-50 text-[#1d4ed8]",
         secondary:
-          "border-white/10 bg-white/5 text-white/80 backdrop-blur-md",
+          "border-blue-100 bg-white text-[#17457f] backdrop-blur-md",
         outline:
-          "border-white/20 text-white/90 bg-transparent",
+          "border-blue-200 bg-white text-[#17457f]",
         success:
-          "border-emerald-500/30 bg-emerald-950/60 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]",
+          "border-emerald-200 bg-emerald-50 text-emerald-700",
         warning:
-          "border-amber-500/30 bg-amber-950/60 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]",
+          "border-amber-200 bg-amber-50 text-amber-700",
         destructive:
-          "border-rose-500/30 bg-rose-950/60 text-rose-300 shadow-[0_0_12px_rgba(244,63,94,0.2)]",
-        cyan:
-          "border-cyan-500/30 bg-cyan-950/60 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]",
+          "border-rose-200 bg-rose-50 text-rose-700",
+        info:
+          "border-sky-200 bg-sky-50 text-sky-700",
         gradient:
-          "border-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]",
+          "border-transparent bg-[#2563eb] text-white shadow-[0_8px_22px_-12px_rgba(37,99,235,.55)]",
       },
     },
     defaultVariants: {

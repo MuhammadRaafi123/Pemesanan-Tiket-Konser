@@ -3,15 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import { 
-  ShoppingBag, 
-  CalendarDays, 
   Clock, 
   CreditCard, 
   CheckCircle2, 
-  AlertCircle, 
   XCircle, 
   ArrowRight,
-  Sparkles,
   Ticket
 } from "lucide-react";
 import { Order } from "../types";
@@ -68,18 +64,18 @@ export function OrderCard({ order }: OrderCardProps) {
   return (
     <CardSpotlight className="space-y-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-blue-100 pb-4">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8aa4c1]">
             Nomor Pesanan
           </span>
-          <p className="font-mono text-sm font-bold text-purple-300">
+          <p className="font-mono text-sm font-bold text-[#2563eb]">
             {order.order_code}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-white/50">{formattedDate}</span>
+          <span className="text-xs text-[#8aa4c1]">{formattedDate}</span>
           {getStatusBadge()}
         </div>
       </div>
@@ -88,23 +84,23 @@ export function OrderCard({ order }: OrderCardProps) {
       <div className="space-y-3">
         {order.events && (
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-600/20 text-purple-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-[#2563eb]">
               <Ticket className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="font-bold text-white text-sm">{order.events.title}</h4>
-              <p className="text-xs text-white/50">{order.events.location}</p>
+              <h4 className="font-bold text-[#123b6d] text-sm">{order.events.title}</h4>
+              <p className="text-xs text-[#8aa4c1]">{order.events.location}</p>
             </div>
           </div>
         )}
 
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 space-y-2">
+        <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 space-y-2">
           {order.order_items?.map((item) => (
-            <div key={item.id} className="flex items-center justify-between text-xs text-white/80">
+            <div key={item.id} className="flex items-center justify-between text-xs text-[#17457f]">
               <span>
                 {item.qty}x {item.ticket_categories?.category_name || "Tiket Konser"}
               </span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-[#123b6d]">
                 Rp {item.subtotal.toLocaleString("id-ID")}
               </span>
             </div>
@@ -113,10 +109,10 @@ export function OrderCard({ order }: OrderCardProps) {
       </div>
 
       {/* Footer / Total & Action */}
-      <div className="flex items-center justify-between border-t border-white/10 pt-4">
+      <div className="flex items-center justify-between border-t border-blue-100 pt-4">
         <div>
-          <span className="text-[10px] uppercase font-bold text-white/40">Total Tagihan</span>
-          <p className="text-lg font-black text-purple-300">
+          <span className="text-[10px] uppercase font-bold text-[#8aa4c1]">Total Tagihan</span>
+          <p className="text-lg font-black text-[#2563eb]">
             Rp {order.total.toLocaleString("id-ID")}
           </p>
         </div>
@@ -125,7 +121,7 @@ export function OrderCard({ order }: OrderCardProps) {
           {order.status === "paid" ? (
             <Link href="/tickets">
               <Button variant="glow" size="sm" className="gap-1.5 text-xs">
-                <Ticket className="h-3.5 w-3.5 text-cyan-300" />
+                <Ticket className="h-3.5 w-3.5 text-white" />
                 Buka E-Ticket
               </Button>
             </Link>

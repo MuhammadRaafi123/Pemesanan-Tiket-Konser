@@ -1,62 +1,70 @@
 import api from "@/lib/axios";
-import { UserProfile } from "./types";
+import type { ApiResponse } from "@/types/api";
+import type { User } from "@/features/auth/types";
+import type { UserProfile } from "./types";
 
-export async function fetchProfile(): Promise<UserProfile> {
-  try {
-    const res = await api.get("/auth/profile");
-    if (res.data?.data) {
-      return res.data.data;
-    }
-  } catch {
-    // fallback
+function getStoredUser(): UserProfile {
+  if (typeof window === "undefined") {
+    return {
+      id: 0,
+      name: "Tamu",
+      email: "",
+      role: "customer",
+      tickets_count: 0,
+      orders_count: 0,
+      favorite_genre: "",
+      joined_date: "",
+    };
   }
 
-  // Read stored user if available
-  let storedName = "Muhammad Rafi";
-  let storedEmail = "rafi@concertix.id";
-  if (typeof window !== "undefined") {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const u = JSON.parse(userStr);
-        if (u.name) storedName = u.name;
-        if (u.email) storedEmail = u.email;
-      } catch {}
+  try {
+    const storedUser = window.localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser) as User;
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        role: user.role,
+        tickets_count: 0,
+        orders_count: 0,
+        favorite_genre: "",
+        joined_date: user.created_at || "",
+      };
     }
+  } catch {
+    // Continue with the guest-safe profile below.
   }
 
   return {
-    id: 1,
-    name: storedName,
-    email: storedEmail,
-    phone: "081234567890",
+    id: 0,
+    name: "Tamu",
+    email: "",
     role: "customer",
-    tickets_count: 2,
-    orders_count: 2,
-    favorite_genre: "Alternative Rock & EDM",
-    joined_date: "Januari 2026",
+    tickets_count: 0,
+    orders_count: 0,
+    favorite_genre: "",
+    joined_date: "",
   };
 }
 
-export async function updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {
+export async function fetchProfile(): Promise<UserProfile> {
   try {
-    const res = await api.put("/auth/profile", data);
-    if (res.data?.data) {
-      return res.data.data;
+    const response = await api.get<ApiResponse<UserProfile>>("/auth/profile");
+    if (response.data?.data) {
+      return response.data.data;
     }
   } catch {
-    // fallback
+    // The caller can still render a safe local profile.
   }
 
-  return {
-    id: 1,
-    name: data.name || "Muhammad Rafi",
-    email: data.email || "rafi@concertix.id",
-    phone: data.phone || "081234567890",
-    role: "customer",
-    tickets_count: 2,
-    orders_count: 2,
-    favorite_genre: data.favorite_genre || "Alternative Rock & EDM",
-    joined_date: "Januari 2026",
-  };
+  return getStoredUser();
+}
+
+export async function updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {
+  // The current backend exposes profile reads only. Keep the UI responsive,
+  // but merge the requested fields into the locally available profile.
+  const current = await fetchProfile();
+  return { ...current, ...data };
 }

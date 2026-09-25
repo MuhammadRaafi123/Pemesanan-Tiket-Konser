@@ -32,7 +32,7 @@ export default function SingleOrderPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#08080c] flex flex-col">
+      <div className="light-app min-h-screen bg-[#f4f8ff] flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center pt-24">
           <Loading message="Memuat detail pesanan..." />
@@ -45,7 +45,7 @@ export default function SingleOrderPage() {
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-[#08080c] flex flex-col">
+      <div className="light-app min-h-screen bg-[#f4f8ff] flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center pt-24 px-4">
           <ErrorState
@@ -60,7 +60,7 @@ export default function SingleOrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#08080c] text-white flex flex-col">
+    <div className="light-app min-h-screen bg-[#f4f8ff] text-[#102a43] flex flex-col">
       <Navbar />
 
       <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full space-y-6">

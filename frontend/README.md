@@ -1,5 +1,16 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Concertix surfaces
+
+- `/` — luxury landing page with live event and artist catalog
+- `/home` — authenticated customer home with profile, orders, and event recommendations
+- `/splash` — dedicated splash experience; the app also shows a one-time splash on first visit
+- `/login`, `/register`, `/forgot-password`, `/reset-password` — connected auth flows
+
+The frontend reads the REST API through `NEXT_PUBLIC_API_URL` (see `.env.example`). Keep the backend running on port `5000` for local uploads and catalog data.
+
+The public artist catalog also exposes `GET /api/artists/popular?limit=6` for curated popular Indonesian artists.
+
 ## Getting Started
 
 First, run the development server:
@@ -18,7 +29,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The visual system uses the CSS font tokens and editorial display styles defined in `src/app/globals.css`.
 
 ## Learn More
 

@@ -11,6 +11,7 @@ import type {
 interface AuthState {
   user: User | null;
   token: string | null;
+  hydrated: boolean;
 
   setAuth: (
     user: User,
@@ -33,6 +34,8 @@ export const useAuthStore =
       user: null,
 
       token: null,
+
+      hydrated: false,
 
 
       // ===================================
@@ -57,6 +60,7 @@ export const useAuthStore =
         set({
           user,
           token,
+          hydrated: true,
         });
       },
 
@@ -97,6 +101,7 @@ export const useAuthStore =
         set({
           user: null,
           token: null,
+          hydrated: true,
         });
       },
 
@@ -106,45 +111,35 @@ export const useAuthStore =
       // ===================================
 
       initializeAuth: () => {
+        if (typeof window === "undefined") {
+          set({ hydrated: true });
+          return;
+        }
 
         const token =
-          localStorage.getItem(
+          window.localStorage.getItem(
             "access_token"
           );
 
         const storedUser =
-          localStorage.getItem(
+          window.localStorage.getItem(
             "user"
           );
 
-
-        let user: User | null =
-          null;
-
+        let user: User | null = null;
 
         if (storedUser) {
-
           try {
-
-            user =
-              JSON.parse(
-                storedUser
-              );
-
+            user = JSON.parse(storedUser) as User;
           } catch {
-
-            localStorage.removeItem(
-              "user"
-            );
-
+            window.localStorage.removeItem("user");
           }
-
         }
-
 
         set({
           token,
           user,
+          hydrated: true,
         });
       },
 

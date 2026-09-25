@@ -4,20 +4,20 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "bg-purple-600 text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 hover:shadow-purple-600/40 hover:scale-[1.02]",
+          "bg-[#2563eb] text-white shadow-lg shadow-blue-200 hover:bg-[#1d4ed8] hover:shadow-blue-300 hover:scale-[1.02]",
         glow:
-          "bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-500 text-white shadow-[0_0_25px_rgba(168,85,247,0.4)] hover:shadow-[0_0_35px_rgba(168,85,247,0.6)] hover:scale-[1.03]",
+          "bg-[#2563eb] text-white shadow-lg shadow-blue-200 hover:bg-[#1d4ed8] hover:shadow-blue-300 hover:scale-[1.02]",
         secondary:
-          "bg-white/10 text-white backdrop-blur-md border border-white/10 hover:bg-white/15 hover:border-white/20 hover:scale-[1.02]",
+          "bg-blue-50 text-[#17457f] backdrop-blur-md border border-blue-100 hover:bg-blue-100 hover:border-blue-200 hover:scale-[1.02]",
         outline:
-          "border border-white/15 bg-transparent text-white hover:bg-white/5 hover:border-purple-400/50 hover:text-purple-300",
+          "border border-blue-200 bg-white text-[#17457f] hover:bg-blue-50 hover:border-blue-400 hover:text-[#1d4ed8]",
         ghost:
-          "text-white/70 hover:bg-white/10 hover:text-white",
+          "text-[#6683a3] hover:bg-blue-50 hover:text-[#17457f]",
         destructive:
           "bg-rose-600/90 text-white shadow-lg shadow-rose-600/20 hover:bg-rose-500",
         amber:
@@ -52,7 +52,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         {...props}
       >
-        {isLoading && <Loader2 className="h-4 w-4 shrink-0" />}
+        {isLoading && <Loader2 className="h-4 w-4 shrink-0 animate-spin" />}
         {children}
       </button>
     );

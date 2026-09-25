@@ -1,18 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { 
-  Search, 
-  Sparkles, 
-  Ticket, 
-  Filter, 
-  SlidersHorizontal, 
-  ArrowUpDown, 
-  Flame, 
-  Zap, 
-  Headphones,
-  Music2
+import {
+  Search,
+  Ticket,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -23,28 +16,30 @@ import { Event } from "@/features/events/types";
 import { Badge } from "@/components/ui/badge";
 import { Loading } from "@/components/shared/Loading";
 
-function EventsContent() {
-  const searchParams = useSearchParams();
-  const initialQuery = searchParams.get("q") || "";
+type SortBy = "recommended" | "lowest" | "highest";
 
+type EventsViewProps = {
+  initialQuery: string;
+};
+
+function EventsView({ initialQuery }: EventsViewProps) {
   const [events, setEvents] = useState<Event[]>(MOCK_EVENTS);
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"recommended" | "lowest" | "highest">("recommended");
+  const [sortBy, setSortBy] = useState<SortBy>("recommended");
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetchEvents().then((data) => {
-      setEvents(data);
-      setLoading(false);
-    });
+    fetchEvents()
+      .then((data) => {
+        setEvents(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   }, []);
 
-  useEffect(() => {
-    if (initialQuery) {
-      setSearchQuery(initialQuery);
-    }
-  }, [initialQuery]);
 
   const genres = [
     { id: "all", label: "Semua Genre" },
@@ -59,7 +54,7 @@ function EventsContent() {
       const q = searchQuery.toLowerCase().trim();
       if (q) {
         const titleMatch = e.title.toLowerCase().includes(q);
-        const artistMatch = e.artists?.name.toLowerCase().includes(q);
+        const artistMatch = e.artists?.name?.toLowerCase().includes(q);
         const locMatch = e.location.toLowerCase().includes(q);
         const venueMatch = e.venue?.toLowerCase().includes(q);
         if (!titleMatch && !artistMatch && !locMatch && !venueMatch) return false;
@@ -84,7 +79,7 @@ function EventsContent() {
     });
 
   return (
-    <div className="min-h-screen bg-[#08080c] text-white flex flex-col">
+    <div className="light-app min-h-screen bg-[#f4f8ff] text-[#102a43] flex flex-col">
       <Navbar />
 
       <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
@@ -95,28 +90,28 @@ function EventsContent() {
             <Ticket className="h-3.5 w-3.5" />
             Jadwal Konser Resmi
           </Badge>
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-[#102a43] tracking-tight">
             Eksplorasi Konser Musik
           </h1>
-          <p className="max-w-xl mx-auto text-sm text-white/60">
+          <p className="max-w-xl mx-auto text-sm text-[#6683a3]">
             Temukan jadwal konser musisi lokal dan internasional terlengkap dengan tiket resmi terverifikasi.
           </p>
         </div>
 
         {/* Filter & Controls Bar */}
-        <div className="mb-10 space-y-4 rounded-3xl border border-white/10 bg-[#0f0f1c]/80 p-5 backdrop-blur-2xl shadow-2xl">
+        <div className="mb-10 space-y-4 rounded-3xl border border-blue-100 bg-white p-5 backdrop-blur-2xl shadow-2xl">
           
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
             
             {/* Search input */}
             <div className="sm:col-span-8 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2563eb]" />
               <input
                 type="text"
                 placeholder="Cari nama konser, artis, atau kota..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/35 focus:border-purple-500 focus:outline-none"
+                className="w-full rounded-2xl border border-blue-100 bg-blue-50/50 py-3 pl-11 pr-4 text-sm text-[#102a43] placeholder:text-[#8aa4c1] focus:border-blue-400 focus:outline-none"
               />
             </div>
 
@@ -124,8 +119,8 @@ function EventsContent() {
             <div className="sm:col-span-4 relative">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full rounded-2xl border border-white/10 bg-[#161626] py-3 px-4 text-sm text-white focus:border-purple-500 focus:outline-none cursor-pointer"
+                onChange={(e) => setSortBy(e.target.value as SortBy)}
+                className="w-full rounded-2xl border border-blue-100 bg-white py-3 px-4 text-sm text-[#102a43] focus:border-blue-400 focus:outline-none cursor-pointer"
               >
                 <option value="recommended">⭐ Urutkan: Rekomendasi</option>
                 <option value="lowest">💵 Harga: Termurah</option>
@@ -136,9 +131,9 @@ function EventsContent() {
           </div>
 
           {/* Genre Chips */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
-            <span className="text-xs text-white/40 mr-1 flex items-center gap-1">
-              <SlidersHorizontal className="h-3 w-3 text-purple-400" />
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-blue-100">
+            <span className="text-xs text-[#8aa4c1] mr-1 flex items-center gap-1">
+              <SlidersHorizontal className="h-3 w-3 text-[#2563eb]" />
               Genre:
             </span>
             {genres.map((g) => {
@@ -149,8 +144,8 @@ function EventsContent() {
                   onClick={() => setSelectedGenre(g.id)}
                   className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
                     isSelected
-                      ? "border border-purple-500 bg-purple-600 text-white shadow-md shadow-purple-600/40"
-                      : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                      ? "border border-blue-500 bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "border border-blue-100 bg-white text-[#6683a3] hover:bg-blue-50 hover:text-[#2563eb]"
                   }`}
                 >
                   {g.label}
@@ -162,12 +157,12 @@ function EventsContent() {
         </div>
 
         {/* Results Info */}
-        <div className="mb-6 flex items-center justify-between text-xs text-white/50">
-          <span>Menampilkan <strong className="text-purple-300 font-bold">{filteredEvents.length}</strong> konser</span>
+        <div className="mb-6 flex items-center justify-between text-xs text-[#8aa4c1]">
+          <span>Menampilkan <strong className="text-[#2563eb] font-bold">{filteredEvents.length}</strong> konser</span>
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="text-purple-400 hover:underline"
+              className="text-[#2563eb] hover:underline"
             >
               Reset Pencarian
             </button>
@@ -195,4 +190,11 @@ export default function EventsPage() {
       <EventsContent />
     </Suspense>
   );
+}
+
+function EventsContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") || "";
+
+  return <EventsView key={initialQuery} initialQuery={initialQuery} />;
 }

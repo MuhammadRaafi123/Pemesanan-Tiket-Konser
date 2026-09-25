@@ -4,13 +4,10 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Crown, 
-  Sparkles, 
-  Users, 
   Check, 
   Plus, 
   Minus, 
-  ShoppingBag, 
-  ArrowRight,
+  ShoppingBag,
   Flame,
   AlertCircle
 } from "lucide-react";
@@ -69,10 +66,10 @@ export function EventTicketList({ event }: EventTicketListProps) {
 
   if (categories.length === 0) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
+      <div className="rounded-3xl border border-blue-100 bg-white p-8 text-center">
         <AlertCircle className="mx-auto h-10 w-10 text-amber-400 mb-3" />
-        <h4 className="text-base font-bold text-white">Kategori Tiket Belum Tersedia</h4>
-        <p className="text-xs text-white/50 mt-1">Penyelenggara belum merilis kuota tiket untuk event ini.</p>
+        <h4 className="text-base font-bold text-[#123b6d]">Kategori Tiket Belum Tersedia</h4>
+        <p className="text-xs text-[#8aa4c1] mt-1">Penyelenggara belum merilis kuota tiket untuk event ini.</p>
       </div>
     );
   }
@@ -81,11 +78,11 @@ export function EventTicketList({ event }: EventTicketListProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+          <h3 className="text-xl font-bold text-[#123b6d] flex items-center gap-2">
             <Crown className="h-5 w-5 text-amber-400" />
             Pilih Kategori Tiket
           </h3>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-[#8aa4c1] mt-0.5">
             Pilih kategori tiket yang sesuai dengan preferensi tempat dudukmu.
           </p>
         </div>
@@ -101,15 +98,15 @@ export function EventTicketList({ event }: EventTicketListProps) {
           return (
             <CardSpotlight
               key={cat.id}
-              spotlightColor={idx === 0 ? "rgba(245, 158, 11, 0.2)" : "rgba(139, 92, 246, 0.2)"}
-              className={`border-white/10 ${idx === 0 ? "border-amber-500/30 bg-gradient-to-br from-amber-950/20 to-[#12121e]/90" : ""}`}
+              spotlightColor={idx === 0 ? "rgba(245, 158, 11, 0.2)" : "rgba(37, 99, 235, 0.14)"}
+              className={`border-blue-100 ${idx === 0 ? "border-amber-200 bg-amber-50/50" : ""}`}
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 
                 {/* Category Info */}
                 <div className="space-y-3 flex-1">
                   <div className="flex items-center gap-2.5">
-                    <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                    <h4 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
                       {cat.category_name}
                       {idx === 0 && (
                         <Badge variant="warning" className="text-[10px] gap-1 py-0.5 px-2">
@@ -133,13 +130,13 @@ export function EventTicketList({ event }: EventTicketListProps) {
 
                   {/* Quota Progress Bar */}
                   <div className="max-w-xs space-y-1">
-                    <div className="flex justify-between text-[11px] text-white/50">
+                    <div className="flex justify-between text-[11px] text-[#8aa4c1]">
                       <span>Terjual: {percentage}%</span>
                       <span>Sisa: {cat.remaining} / {cat.quota}</span>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                        className="h-full rounded-full bg-[#2563eb] transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -151,9 +148,9 @@ export function EventTicketList({ event }: EventTicketListProps) {
                       {cat.perks.map((perk, pIdx) => (
                         <span
                           key={pIdx}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/70"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1 text-[11px] text-[#6683a3]"
                         >
-                          <Check className="h-3 w-3 text-cyan-400" />
+                          <Check className="h-3 w-3 text-[#2563eb]" />
                           {perk}
                         </span>
                       ))}
@@ -162,31 +159,31 @@ export function EventTicketList({ event }: EventTicketListProps) {
                 </div>
 
                 {/* Pricing & Booking Controls */}
-                <div className="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end justify-between border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6 gap-4 shrink-0">
+                <div className="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end justify-between border-t md:border-t-0 md:border-l border-blue-100 pt-4 md:pt-0 md:pl-6 gap-4 shrink-0">
                   <div className="text-left md:text-right">
-                    <p className="text-[10px] uppercase font-bold text-white/40">Harga Tiket</p>
-                    <p className="text-xl font-black text-purple-300">
+                    <p className="text-[10px] uppercase font-bold text-[#8aa4c1]">Harga Tiket</p>
+                    <p className="text-xl font-black text-[#2563eb]">
                       Rp {cat.price.toLocaleString("id-ID")}
                     </p>
-                    <p className="text-[10px] text-white/40">*Termasuk pajak & biaya admin</p>
+                    <p className="text-[10px] text-[#8aa4c1]">*Termasuk pajak & biaya admin</p>
                   </div>
 
                   {/* Qty Stepper and Button */}
                   <div className="flex items-center gap-3 w-full sm:w-auto">
                     {!isSoldOut && (
-                      <div className="flex items-center rounded-xl border border-white/15 bg-white/5 p-1">
+                      <div className="flex items-center rounded-xl border-blue-200 bg-white p-1">
                         <button
                           onClick={() => handleQtyChange(cat.id, -1, cat.remaining)}
                           disabled={qty <= 1}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-30 transition"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6683a3] hover:bg-blue-50 hover:text-[#2563eb] disabled:opacity-30 transition"
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
-                        <span className="w-8 text-center text-sm font-bold text-white">{qty}</span>
+                        <span className="w-8 text-center text-sm font-bold text-[#123b6d]">{qty}</span>
                         <button
                           onClick={() => handleQtyChange(cat.id, 1, Math.min(4, cat.remaining))}
                           disabled={qty >= Math.min(4, cat.remaining)}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-30 transition"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#6683a3] hover:bg-blue-50 hover:text-[#2563eb] disabled:opacity-30 transition"
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>

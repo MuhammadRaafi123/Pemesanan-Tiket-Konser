@@ -32,7 +32,7 @@ export function OrderStatus({ status }: OrderStatusProps) {
     case "cancelled":
       return (
         <Badge variant="secondary" className="gap-1.5 py-1 px-3">
-          <XCircle className="h-3.5 w-3.5 text-white/50" />
+          <XCircle className="h-3.5 w-3.5 text-[#8aa4c1]" />
           Dibatalkan
         </Badge>
       );

@@ -2,14 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Ticket, 
-  Sparkles, 
-  QrCode, 
-  CalendarDays, 
-  Plus,
-  ShieldCheck
-} from "lucide-react";
+import { Ticket, QrCode, Plus } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -33,22 +26,22 @@ export default function MyTicketsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#08080c] text-white flex flex-col">
+    <div className="light-app min-h-screen bg-[#f4f8ff] text-[#123b6d] flex flex-col">
       <Navbar />
 
       <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full space-y-10">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-100 pb-6">
           <div>
             <Badge variant="gradient" className="gap-1.5 mb-2">
               <QrCode className="h-3.5 w-3.5" />
               Dompet E-Ticket Digital
             </Badge>
-            <h1 className="text-3xl font-black tracking-tight text-white">
+            <h1 className="text-3xl font-black tracking-tight text-[#123b6d]">
               Tiket Konser Saya
             </h1>
-            <p className="text-xs text-white/50 mt-1">
+            <p className="text-xs text-[#8aa4c1] mt-1">
               Tunjukkan QR Code di bawah ini saat memasuki pintu gate konser idola favoritmu.
             </p>
           </div>

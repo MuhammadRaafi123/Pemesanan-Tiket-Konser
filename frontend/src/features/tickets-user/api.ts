@@ -1,3 +1,4 @@
+import { fetchMyOrders } from "@/features/orders/api";
 import { UserTicket } from "./types";
 import { MOCK_EVENTS } from "@/features/events/api";
 
@@ -31,10 +32,36 @@ export const MOCK_USER_TICKETS: UserTicket[] = [
 ];
 
 export async function fetchMyTickets(): Promise<UserTicket[]> {
-  return MOCK_USER_TICKETS;
+  const orders = await fetchMyOrders();
+
+  return orders
+    .filter((order) => order.status === "paid" && order.events)
+    .map((order) => {
+      const event = order.events!;
+      const category = order.order_items?.[0]?.ticket_categories;
+      const ticketCode = `${order.order_code}-01`;
+
+      return {
+        id: order.id,
+        ticket_code: ticketCode,
+        order_code: order.order_code,
+        event,
+        category: category || {
+          id: order.id,
+          category_name: "Digital ticket",
+          price: order.total,
+          quota: 1,
+          remaining: 0,
+        },
+        holder_name: "Concertix guest",
+        qr_code: order.qr_code || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(ticketCode)}`,
+        status: "active" as const,
+        purchase_date: order.created_at,
+      };
+    });
 }
 
 export async function fetchTicketById(id: number | string): Promise<UserTicket | null> {
-  const found = MOCK_USER_TICKETS.find((t) => String(t.id) === String(id) || t.ticket_code === String(id));
-  return found || MOCK_USER_TICKETS[0];
+  const tickets = await fetchMyTickets();
+  return tickets.find((ticket) => String(ticket.id) === String(id) || ticket.ticket_code === String(id)) || tickets[0] || null;
 }

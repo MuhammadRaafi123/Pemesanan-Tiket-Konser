@@ -1,24 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Mic2, Sparkles, Disc3 } from "lucide-react";
+import { Search, Mic2, Disc3 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ArtistCard } from "@/features/artists/components/ArtistCard";
-import { fetchArtists, MOCK_ARTISTS } from "@/features/artists/api";
+import { fetchPopularArtists } from "@/features/artists/api";
 import { Artist } from "@/features/artists/types";
 import { Badge } from "@/components/ui/badge";
 import { Loading } from "@/components/shared/Loading";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 export default function ArtistsPage() {
-  const [artists, setArtists] = useState<Artist[]>(MOCK_ARTISTS);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchArtists().then((data) => {
+    fetchPopularArtists(20).then((data) => {
       setArtists(data);
       setLoading(false);
     });
@@ -34,7 +34,7 @@ export default function ArtistsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#08080c] text-white flex flex-col">
+    <div className="light-app min-h-screen bg-[#f4f8ff] text-[#102a43] flex flex-col">
       <Navbar />
 
       <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
@@ -45,10 +45,10 @@ export default function ArtistsPage() {
             <Mic2 className="h-3.5 w-3.5" />
             Daftar Musisi & Band
           </Badge>
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-[#102a43] tracking-tight">
             Artis & Musisi Pilihan
           </h1>
-          <p className="max-w-xl mx-auto text-sm text-white/60">
+          <p className="max-w-xl mx-auto text-sm text-[#6683a3]">
             Temukan musisi idola, dengarkan karya terbaik mereka, dan dapatkan tiket konser terdepan.
           </p>
         </div>
@@ -56,13 +56,13 @@ export default function ArtistsPage() {
         {/* Search Bar */}
         <div className="mb-10 mx-auto max-w-xl">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2563eb]" />
             <input
               type="text"
               placeholder="Cari nama artis atau genre musik..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-[#0f0f1c]/80 py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-white/35 focus:border-purple-500 focus:outline-none backdrop-blur-xl shadow-xl"
+              className="w-full rounded-2xl border border-blue-100 bg-white py-3.5 pl-11 pr-4 text-sm text-[#102a43] placeholder:text-[#8aa4c1] focus:border-blue-400 focus:outline-none backdrop-blur-xl shadow-xl"
             />
           </div>
         </div>

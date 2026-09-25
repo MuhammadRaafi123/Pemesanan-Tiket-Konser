@@ -2,21 +2,30 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, Eye, EyeOff, LogIn, Sparkles, AlertCircle } from "lucide-react";
-
+import {
+  AlertCircle,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  LogIn,
+  Mail,
+} from "lucide-react";
 import {
   loginSchema,
   type LoginFormValues,
 } from "@/features/auth/schemas/auth.schema";
 import { loginUser } from "@/features/auth/api";
+import { getApiErrorMessage } from "@/lib/apiError";
 import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginForm() {
+  const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -39,99 +48,103 @@ export default function LoginForm() {
     try {
       const result = await loginUser(values);
       setAuth(result.user, result.token);
-      window.location.href = "/";
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        "Login gagal. Silakan periksa email dan password.";
-      setServerError(message);
+      router.replace("/home");
+    } catch (error: unknown) {
+      setServerError(
+        getApiErrorMessage(
+          error,
+          "Login gagal. Silakan periksa email dan password.",
+        ),
+      );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {/* ERROR */}
-      {serverError && (
-        <div className="flex items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-950/40 p-3.5 text-xs text-rose-300">
-          <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
+      {serverError ? (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{serverError}</span>
         </div>
-      )}
+      ) : null}
 
-      {/* EMAIL */}
-      <div className="space-y-1.5">
-        <Label htmlFor="email" className="text-xs font-bold text-white/70">
-          Email
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          icon={<Mail className="h-4 w-4" />}
-          placeholder="nama@email.com"
-          autoComplete="email"
-          {...register("email")}
-        />
-        {errors.email && (
-          <p className="text-xs text-rose-400">{errors.email.message}</p>
-        )}
-      </div>
-
-      {/* PASSWORD */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password" className="text-xs font-bold text-white/70">
-            Password
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-xs font-semibold tracking-wide text-[#6683a3]">
+            Email
           </Label>
-          <Link
-            href="/forgot-password"
-            className="text-xs font-medium text-purple-400 transition hover:text-purple-300"
-          >
-            Lupa password?
-          </Link>
+          <Input
+            id="email"
+            type="email"
+            icon={<Mail className="h-4 w-4" />}
+            placeholder="you@gmail.com"
+            autoComplete="email"
+            aria-invalid={Boolean(errors.email)}
+            {...register("email")}
+          />
+          {errors.email ? (
+            <p className="text-xs font-medium text-rose-600">{errors.email.message}</p>
+          ) : null}
         </div>
 
-        <Input
-          id="password"
-          type={showPassword ? "text" : "password"}
-          icon={<Lock className="h-4 w-4" />}
-          rightIcon={
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-white/40 hover:text-white transition cursor-pointer"
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="password" className="text-xs font-semibold tracking-wide text-[#6683a3]">
+              Password
+            </Label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-[#2563eb] transition hover:text-[#1d4ed8]"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          }
-          placeholder="Masukkan password"
-          autoComplete="current-password"
-          {...register("password")}
-        />
-        {errors.password && (
-          <p className="text-xs text-rose-400">{errors.password.message}</p>
-        )}
+              Lupa password?
+            </Link>
+          </div>
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            icon={<LockKeyhole className="h-4 w-4" />}
+            rightIcon={(
+              <button
+                type="button"
+                aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                onClick={() => setShowPassword((current) => !current)}
+                className="rounded-lg p-1 text-[#8aa4c1] transition hover:bg-blue-50 hover:text-[#2563eb]"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            )}
+            placeholder="Masukkan password"
+            autoComplete="current-password"
+            aria-invalid={Boolean(errors.password)}
+            {...register("password")}
+          />
+          {errors.password ? (
+            <p className="text-xs font-medium text-rose-600">{errors.password.message}</p>
+          ) : null}
+        </div>
       </div>
 
-      {/* LOGIN BUTTON */}
       <Button
         type="submit"
-        variant="glow"
+        variant="default"
         size="lg"
-        className="w-full gap-2 text-sm"
+        className="h-12 w-full"
         isLoading={isSubmitting}
       >
-        <LogIn className="h-4 w-4" />
-        <span>Masuk ke Akun</span>
+        {!isSubmitting ? <LogIn className="h-4 w-4" /> : null}
+        Masuk ke Concertix
       </Button>
 
-      {/* REGISTER LINK */}
-      <p className="text-center text-xs text-white/50 pt-1">
+      <p className="text-center text-sm text-[#6683a3]">
         Belum punya akun?{" "}
         <Link
           href="/register"
-          className="font-bold text-purple-400 transition hover:text-purple-300 underline underline-offset-4"
+          className="font-semibold text-[#2563eb] transition hover:text-[#1d4ed8]"
         >
-          Daftar Sekarang
+          Buat akun gratis
         </Link>
       </p>
     </form>

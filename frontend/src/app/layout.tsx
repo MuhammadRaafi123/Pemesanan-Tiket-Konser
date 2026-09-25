@@ -10,9 +10,9 @@ import "./globals.css";
 export const metadata:
   Metadata = {
     title:
-      "Ticketing Platform",
+      "Concertix — Curated live experiences",
     description:
-      "Platform pemesanan tiket konser",
+      "Temukan konser, pesan tiket resmi, dan simpan momen live-mu bersama Concertix.",
 };
 
 
@@ -25,6 +25,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
+      data-scroll-behavior="smooth"
     >
       <body>
         <Providers>

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "@/stores/authStore";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -50,6 +51,8 @@ api.interceptors.response.use(
       localStorage.removeItem(
         "user"
       );
+
+      useAuthStore.getState().logout();
     }
 
     return Promise.reject(error);

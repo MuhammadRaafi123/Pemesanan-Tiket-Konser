@@ -85,7 +85,7 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[#08080c] text-white flex flex-col">
+      <div className="light-app min-h-screen bg-[#f4f8ff] text-[#123b6d] flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center pt-28 pb-20 px-4">
           <EmptyState
@@ -103,19 +103,19 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#08080c] text-white flex flex-col">
+    <div className="light-app min-h-screen bg-[#f4f8ff] text-[#123b6d] flex flex-col">
       <Navbar />
 
       <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-100 pb-6">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-1">
-              <Sparkles className="h-4 w-4 text-cyan-400" />
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#2563eb] mb-1">
+              <Sparkles className="h-4 w-4 text-sky-600" />
               Langkah Terakhir Booking
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-white">
+            <h1 className="text-3xl font-black tracking-tight text-[#123b6d]">
               Checkout & Pembayaran Tiket
             </h1>
           </div>
@@ -135,8 +135,8 @@ export default function CheckoutPage() {
             
             {/* Ticket Items List */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Ticket className="h-5 w-5 text-purple-400" />
+              <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
+                <Ticket className="h-5 w-5 text-[#2563eb]" />
                 Daftar Tiket ({totalItems} Tiket)
               </h3>
 
@@ -144,34 +144,34 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <CardSpotlight
                     key={item.ticketCategoryId}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border-white/10"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border-blue-100"
                   >
                     <div className="space-y-1 flex-1">
                       <Badge variant="gradient" className="text-[10px] py-0 px-2">
                         {item.categoryName}
                       </Badge>
-                      <h4 className="font-bold text-white text-base leading-tight">
+                      <h4 className="font-bold text-[#123b6d] text-base leading-tight">
                         {item.eventTitle}
                       </h4>
-                      <p className="text-xs text-white/50">{item.eventLocation}</p>
-                      <p className="text-sm font-black text-purple-300 pt-1">
+                      <p className="text-xs text-[#8aa4c1]">{item.eventLocation}</p>
+                      <p className="text-sm font-black text-[#2563eb] pt-1">
                         Rp {item.price.toLocaleString("id-ID")} / tiket
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-white/10 pt-3 sm:pt-0">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-blue-100 pt-3 sm:pt-0">
                       {/* Stepper */}
-                      <div className="flex items-center rounded-xl border border-white/15 bg-white/5 p-1">
+                      <div className="flex items-center rounded-xl border border-blue-200 bg-blue-50 p-1">
                         <button
                           onClick={() => updateQty(item.ticketCategoryId, item.qty - 1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white transition"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-[#6683a3] hover:bg-blue-50 hover:text-[#2563eb] transition"
                         >
                           <Minus className="h-3 w-3" />
                         </button>
-                        <span className="w-7 text-center text-xs font-bold text-white">{item.qty}</span>
+                        <span className="w-7 text-center text-xs font-bold text-[#123b6d]">{item.qty}</span>
                         <button
                           onClick={() => updateQty(item.ticketCategoryId, item.qty + 1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white transition"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-[#6683a3] hover:bg-blue-50 hover:text-[#2563eb] transition"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
@@ -180,7 +180,7 @@ export default function CheckoutPage() {
                       {/* Remove */}
                       <button
                         onClick={() => removeItem(item.ticketCategoryId)}
-                        className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-white/40 hover:bg-rose-500/20 hover:text-rose-400 transition"
+                        className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-[#8aa4c1] hover:bg-rose-50 hover:text-rose-600 transition"
                         title="Hapus dari pesanan"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -193,17 +193,17 @@ export default function CheckoutPage() {
 
             {/* Customer Contact Details */}
             <CardSpotlight className="space-y-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <User className="h-5 w-5 text-cyan-400" />
+              <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
+                <User className="h-5 w-5 text-sky-600" />
                 Data Pemesan Tiket (Identitas E-Ticket)
               </h3>
-              <p className="text-xs text-white/50">
+              <p className="text-xs text-[#8aa4c1]">
                 Nama dan email ini akan dicantumkan secara resmi pada E-Ticket digital QR Code kamu.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-white/70">Nama Lengkap (Sesuai KTP/Paspor)</label>
+                  <label className="text-xs font-bold text-[#6683a3]">Nama Lengkap (Sesuai KTP/Paspor)</label>
                   <Input
                     icon={<User className="h-4 w-4" />}
                     value={customerName}
@@ -213,7 +213,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-white/70">Email Penerima Tiket</label>
+                  <label className="text-xs font-bold text-[#6683a3]">Email Penerima Tiket</label>
                   <Input
                     type="email"
                     icon={<Mail className="h-4 w-4" />}
@@ -224,7 +224,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-white/70">Nomor WhatsApp / HP</label>
+                  <label className="text-xs font-bold text-[#6683a3]">Nomor WhatsApp / HP</label>
                   <Input
                     type="tel"
                     icon={<Phone className="h-4 w-4" />}
@@ -238,8 +238,8 @@ export default function CheckoutPage() {
 
             {/* Payment Method Selector */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-pink-400" />
+              <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-[#2563eb]" />
                 Pilih Metode Pembayaran
               </h3>
 
@@ -253,26 +253,26 @@ export default function CheckoutPage() {
 
           {/* Right: Sticky Summary Box */}
           <div className="lg:col-span-5 sticky top-28 space-y-6">
-            <CardSpotlight className="space-y-5 border-purple-500/30 bg-[#0e0e1a]/95 shadow-2xl backdrop-blur-2xl">
+            <CardSpotlight className="space-y-5 border-blue-200 bg-white shadow-2xl backdrop-blur-2xl">
               
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <h3 className="text-base font-black text-white flex items-center gap-2">
-                  <ShoppingBag className="h-4 w-4 text-purple-400" />
+              <div className="flex items-center justify-between border-b border-blue-100 pb-4">
+                <h3 className="text-base font-black text-[#123b6d] flex items-center gap-2">
+                  <ShoppingBag className="h-4 w-4 text-[#2563eb]" />
                   Ringkasan Pembayaran
                 </h3>
-                <span className="text-xs text-purple-300 font-semibold">{totalItems} Tiket</span>
+                <span className="text-xs text-[#2563eb] font-semibold">{totalItems} Tiket</span>
               </div>
 
               {/* Price Breakdown */}
-              <div className="space-y-2.5 text-xs text-white/70">
+              <div className="space-y-2.5 text-xs text-[#6683a3]">
                 <div className="flex justify-between">
                   <span>Subtotal Tiket ({totalItems}x)</span>
-                  <span className="font-semibold text-white">Rp {totalPrice.toLocaleString("id-ID")}</span>
+                  <span className="font-semibold text-[#123b6d]">Rp {totalPrice.toLocaleString("id-ID")}</span>
                 </div>
 
                 <div className="flex justify-between">
                   <span>Biaya Layanan & Admin</span>
-                  <span className="font-semibold text-white">Rp {adminFee.toLocaleString("id-ID")}</span>
+                  <span className="font-semibold text-[#123b6d]">Rp {adminFee.toLocaleString("id-ID")}</span>
                 </div>
 
                 <div className="flex justify-between text-emerald-400">
@@ -280,16 +280,16 @@ export default function CheckoutPage() {
                   <span className="font-semibold">GRATIS</span>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-base">
-                  <span className="font-bold text-white">Total Pembayaran</span>
-                  <span className="font-black text-xl text-purple-300">
+                <div className="pt-3 border-t border-blue-100 flex items-center justify-between text-base">
+                  <span className="font-bold text-[#123b6d]">Total Pembayaran</span>
+                  <span className="font-black text-xl text-[#2563eb]">
                     Rp {grandTotal.toLocaleString("id-ID")}
                   </span>
                 </div>
               </div>
 
               {/* Trust Badge */}
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-3 flex items-center gap-2.5 text-xs text-emerald-300">
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 flex items-center gap-2.5 text-xs text-emerald-700">
                 <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-400" />
                 <span>Transaksi diamankan dengan enkripsi SSL 256-bit dan jaminan tiket resmi 100%.</span>
               </div>

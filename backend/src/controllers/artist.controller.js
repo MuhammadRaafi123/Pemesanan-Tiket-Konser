@@ -3,6 +3,18 @@ import {
   successResponse,
   errorResponse,
 } from "../utils/apiResponse.js";
+import {
+  POPULAR_INDONESIAN_ARTISTS,
+} from "../data/popularIndonesianArtists.js";
+
+const normalizeArtistName = (value) =>
+  value.trim().toLowerCase().replace(/\s+/g, " ");
+
+const getPopularLimit = (value) => {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return 6;
+  return Math.min(Math.max(parsed, 1), 20);
+};
 
 
 export const getArtists = async (
@@ -34,6 +46,54 @@ export const getArtists = async (
 };
 
 
+export const getPopularArtists = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const limit = getPopularLimit(req.query.limit);
+    const { data: databaseArtists, error } = await supabase
+      .from("artists")
+      .select("id, name, photo, description");
+
+    if (error) {
+      throw error;
+    }
+
+    const artistsByName = new Map(
+      (databaseArtists || []).map((artist) => [
+        normalizeArtistName(artist.name),
+        artist,
+      ]),
+    );
+
+    const data = POPULAR_INDONESIAN_ARTISTS
+      .map((artist) => {
+        const databaseArtist = artistsByName.get(
+          normalizeArtistName(artist.name),
+        );
+
+        return {
+          ...artist,
+          id: databaseArtist?.id || artist.slug,
+          photo: databaseArtist?.photo || artist.photo,
+          description: databaseArtist?.description || artist.description,
+        };
+      })
+      .slice(0, limit);
+
+    return successResponse(
+      res,
+      "Artist Indonesia populer berhasil diambil",
+      data,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 export const getArtistById = async (
   req,
   res,
@@ -41,12 +101,35 @@ export const getArtistById = async (
 ) => {
   try {
     const { id } = req.params;
+    const normalizedId = String(id).trim();
+
+    if (!/^\d+$/.test(normalizedId)) {
+      const curatedArtist = POPULAR_INDONESIAN_ARTISTS.find(
+        (artist) =>
+          artist.slug === normalizedId.toLowerCase() ||
+          normalizeArtistName(artist.name) === normalizeArtistName(normalizedId),
+      );
+
+      if (curatedArtist) {
+        return successResponse(
+          res,
+          "Detail artist berhasil diambil",
+          curatedArtist,
+        );
+      }
+
+      return errorResponse(
+        res,
+        "Artist tidak ditemukan",
+        404
+      );
+    }
 
     const { data, error } =
       await supabase
         .from("artists")
         .select("*")
-        .eq("id", id)
+        .eq("id", normalizedId)
         .maybeSingle();
 
     if (error) {

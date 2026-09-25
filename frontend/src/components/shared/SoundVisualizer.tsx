@@ -19,8 +19,8 @@ export function SoundVisualizer({
   return (
     <div
       onClick={() => interactive && setIsPlaying(!isPlaying)}
-      className={`inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-950/40 px-3 py-1.5 backdrop-blur-md transition-all duration-300 ${
-        interactive ? "cursor-pointer hover:border-purple-400 hover:bg-purple-900/40 active:scale-95" : ""
+      className={`inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 backdrop-blur-md transition-all duration-300 ${
+        interactive ? "cursor-pointer hover:border-blue-300 hover:bg-blue-100 active:scale-95" : ""
       } ${className}`}
       title={interactive ? (isPlaying ? "Klik untuk pause vibe" : "Klik untuk mainkan vibe") : undefined}
     >
@@ -35,7 +35,7 @@ export function SoundVisualizer({
           return (
             <span
               key={i}
-              className="w-[3px] rounded-full bg-gradient-to-t from-purple-500 via-pink-400 to-cyan-300 transition-all"
+              className="w-[3px] rounded-full bg-[#2563eb] transition-all"
               style={{
                 height: isPlaying ? `${height}px` : "4px",
                 animation: isPlaying ? `soundwave 1.1s ease-in-out infinite` : "none",
@@ -46,16 +46,16 @@ export function SoundVisualizer({
         })}
       </div>
 
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-200">
-        <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
-        <span className="hidden sm:inline tracking-wide uppercase text-[10px] font-bold text-purple-300">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#17457f]">
+        <Sparkles className="h-3.5 w-3.5 text-[#2563eb]" />
+        <span className="hidden sm:inline tracking-wide uppercase text-[10px] font-bold text-[#2563eb]">
           Live Beats
         </span>
         {interactive && (
           isPlaying ? (
-            <Volume2 className="h-3.5 w-3.5 text-purple-400" />
+            <Volume2 className="h-3.5 w-3.5 text-[#2563eb]" />
           ) : (
-            <VolumeX className="h-3.5 w-3.5 text-white/40" />
+            <VolumeX className="h-3.5 w-3.5 text-[#8aa4c1]" />
           )
         )}
       </div>

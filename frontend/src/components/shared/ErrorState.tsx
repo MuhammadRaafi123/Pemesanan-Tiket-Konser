@@ -14,13 +14,13 @@ export function ErrorState({
   onRetry,
 }: ErrorStateProps) {
   return (
-    <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-rose-500/20 bg-rose-950/10 p-8 text-center backdrop-blur-xl">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-400 shadow-[0_0_25px_rgba(244,63,94,0.2)]">
+    <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center backdrop-blur-xl">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-500 shadow-[0_12px_30px_-18px_rgba(244,63,94,.35)]">
         <AlertTriangle className="h-8 w-8" />
       </div>
 
-      <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
-      <p className="mt-2 max-w-sm text-sm text-white/60 leading-relaxed">
+      <h3 className="text-lg font-bold text-[#123b6d] tracking-tight">{title}</h3>
+      <p className="mt-2 max-w-sm text-sm text-[#6683a3] leading-relaxed">
         {message}
       </p>
 

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
+import {
   ShoppingBag, 
   Ticket, 
   Trash2, 
@@ -12,19 +12,13 @@ import {
   ArrowRight, 
   Sparkles, 
   ShieldCheck, 
-  CreditCard, 
-  User, 
-  Mail, 
-  Phone,
   ChevronLeft
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { PaymentMethodSelector } from "@/features/payments/components/PaymentMethodSelector";
 import { CardSpotlight } from "@/components/shared/CardSpotlight";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
@@ -38,18 +32,10 @@ export default function CheckoutPage() {
   const { items, updateQty, removeItem, clearCart, getTotalPrice, getTotalItems } = useCartStore();
   const { success, error } = useToast();
 
-  const [selectedMethod, setSelectedMethod] = useState<string>("QRIS");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Customer info state
-  const [customerName, setCustomerName] = useState(user?.name || "Muhammad Rafi");
-  const [customerEmail, setCustomerEmail] = useState(user?.email || "rafi@concertix.id");
-  const [customerPhone, setCustomerPhone] = useState(user?.phone || "081234567890");
 
   const totalPrice = getTotalPrice();
   const totalItems = getTotalItems();
-  const adminFee = 15000;
-  const grandTotal = totalPrice + (totalItems > 0 ? adminFee : 0);
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
@@ -57,8 +43,9 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!customerName || !customerEmail || !customerPhone) {
-      error("Harap lengkapi informasi data pemesan tiket.");
+    if (!user) {
+      error("Silakan masuk terlebih dahulu untuk memesan tiket.");
+      router.push("/login?next=/checkout");
       return;
     }
 
@@ -191,63 +178,10 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Customer Contact Details */}
-            <CardSpotlight className="space-y-4">
-              <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
-                <User className="h-5 w-5 text-sky-600" />
-                Data Pemesan Tiket (Identitas E-Ticket)
-              </h3>
-              <p className="text-xs text-[#8aa4c1]">
-                Nama dan email ini akan dicantumkan secara resmi pada E-Ticket digital QR Code kamu.
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-[#6683a3]">Nama Lengkap (Sesuai KTP/Paspor)</label>
-                  <Input
-                    icon={<User className="h-4 w-4" />}
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Contoh: Muhammad Rafi"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#6683a3]">Email Penerima Tiket</label>
-                  <Input
-                    type="email"
-                    icon={<Mail className="h-4 w-4" />}
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="nama@email.com"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#6683a3]">Nomor WhatsApp / HP</label>
-                  <Input
-                    type="tel"
-                    icon={<Phone className="h-4 w-4" />}
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    placeholder="081234567890"
-                  />
-                </div>
-              </div>
+            <CardSpotlight className="space-y-3 border-blue-100">
+              <h3 className="font-bold text-[#123b6d]">Akun pemesan</h3>
+              <p className="text-sm text-[#6683a3]">Pesanan ini akan tercatat untuk {user?.name || "akun kamu"} ({user?.email || "akun pelanggan"}). Setelah reservasi berhasil, kamu akan memilih metode transfer dan mengunggah bukti pembayaran.</p>
             </CardSpotlight>
-
-            {/* Payment Method Selector */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-[#2563eb]" />
-                Pilih Metode Pembayaran
-              </h3>
-
-              <PaymentMethodSelector
-                selectedMethod={selectedMethod}
-                onSelect={setSelectedMethod}
-              />
-            </div>
 
           </div>
 
@@ -270,20 +204,10 @@ export default function CheckoutPage() {
                   <span className="font-semibold text-[#123b6d]">Rp {totalPrice.toLocaleString("id-ID")}</span>
                 </div>
 
-                <div className="flex justify-between">
-                  <span>Biaya Layanan & Admin</span>
-                  <span className="font-semibold text-[#123b6d]">Rp {adminFee.toLocaleString("id-ID")}</span>
-                </div>
-
-                <div className="flex justify-between text-emerald-400">
-                  <span>Asuransi Pembeli & Garansi Resmi</span>
-                  <span className="font-semibold">GRATIS</span>
-                </div>
-
                 <div className="pt-3 border-t border-blue-100 flex items-center justify-between text-base">
                   <span className="font-bold text-[#123b6d]">Total Pembayaran</span>
                   <span className="font-black text-xl text-[#2563eb]">
-                    Rp {grandTotal.toLocaleString("id-ID")}
+                    Rp {totalPrice.toLocaleString("id-ID")}
                   </span>
                 </div>
               </div>
@@ -302,7 +226,7 @@ export default function CheckoutPage() {
                 size="lg"
                 className="w-full text-base gap-2"
               >
-                <span>Bayar Sekarang (Rp {grandTotal.toLocaleString("id-ID")})</span>
+                <span>Reservasi & lanjut bayar (Rp {totalPrice.toLocaleString("id-ID")})</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
 

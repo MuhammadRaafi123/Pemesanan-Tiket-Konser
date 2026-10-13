@@ -10,7 +10,10 @@ import {
   ArrowRight,
   Ticket
 } from "lucide-react";
+import { useState } from "react";
 import { Order } from "../types";
+import { cancelOrder } from "../api";
+import { useToast } from "@/components/shared/ToastProvider";
 import { CardSpotlight } from "@/components/shared/CardSpotlight";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +23,9 @@ interface OrderCardProps {
 }
 
 export function OrderCard({ order }: OrderCardProps) {
+  const [status, setStatus] = useState(order.status);
+  const [cancelling, setCancelling] = useState(false);
+  const { success, error } = useToast();
   const formattedDate = new Date(order.created_at).toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
@@ -27,7 +33,7 @@ export function OrderCard({ order }: OrderCardProps) {
   });
 
   const getStatusBadge = () => {
-    switch (order.status) {
+    switch (status) {
       case "paid":
         return (
           <Badge variant="success" className="gap-1 text-xs">
@@ -118,20 +124,35 @@ export function OrderCard({ order }: OrderCardProps) {
         </div>
 
         <div>
-          {order.status === "paid" ? (
+          {status === "paid" ? (
             <Link href="/tickets">
               <Button variant="glow" size="sm" className="gap-1.5 text-xs">
                 <Ticket className="h-3.5 w-3.5 text-white" />
                 Buka E-Ticket
               </Button>
             </Link>
-          ) : order.status === "pending" ? (
-            <Link href={`/payments/${order.id}`}>
-              <Button variant="amber" size="sm" className="gap-1.5 text-xs">
-                <CreditCard className="h-3.5 w-3.5" />
-                Bayar Sekarang
-              </Button>
-            </Link>
+          ) : status === "pending" ? (
+            <div className="flex flex-wrap justify-end gap-2">
+              <Link href={`/payments/${order.id}`}>
+                <Button variant="amber" size="sm" className="gap-1.5 text-xs">
+                  <CreditCard className="h-3.5 w-3.5" />
+                  Bayar Sekarang
+                </Button>
+              </Link>
+              {order.payment?.status !== "pending" && <Button variant="secondary" size="sm" disabled={cancelling} className="gap-1.5 text-xs" onClick={async () => {
+                if (!window.confirm("Batalkan pesanan ini? Reservasi tiket akan dilepas.")) return;
+                setCancelling(true);
+                try {
+                  await cancelOrder(order.id);
+                  setStatus("cancelled");
+                  success("Pesanan dibatalkan dan reservasi tiket dilepas.");
+                } catch {
+                  error("Pesanan tidak dapat dibatalkan. Coba muat ulang riwayat pesanan.");
+                } finally {
+                  setCancelling(false);
+                }
+              }}>{cancelling ? "Membatalkan…" : "Batalkan"}</Button>}
+            </div>
           ) : (
             <Link href={`/orders/${order.id}`}>
               <Button variant="secondary" size="sm" className="gap-1.5 text-xs">

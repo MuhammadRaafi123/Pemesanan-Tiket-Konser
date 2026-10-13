@@ -29,7 +29,7 @@ export default function PaymentPage() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 mins timer
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
     if (orderId) {
@@ -40,13 +40,18 @@ export default function PaymentPage() {
     }
   }, [orderId]);
 
-  // Countdown timer effect
   useEffect(() => {
+    if (!order?.expires_at) return;
+    const parseExpiry = () => new Date(`${order.expires_at!.replace(" ", "T")}+07:00`).getTime();
+    const deadline = parseExpiry();
+    if (!Number.isFinite(deadline)) return;
+    const update = () => setTimeLeft(Math.max(0, Math.floor((deadline - Date.now()) / 1000)));
+    update();
     const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      update();
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [order?.expires_at]);
 
   const formatTimer = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -90,6 +95,14 @@ export default function PaymentPage() {
       </div>
     );
   }
+
+  if (!order) {
+    return <div className="light-app min-h-screen bg-[#f4f8ff] text-[#123b6d] flex flex-col"><Navbar /><main className="flex flex-1 items-center justify-center px-4 pt-24"><div className="max-w-md text-center"><h1 className="text-2xl font-bold">Pesanan tidak ditemukan</h1><p className="mt-3 text-sm text-[#6683a3]">Periksa kembali riwayat pesanan atau buat pesanan baru dari halaman konser.</p><Link href="/orders" className="mt-5 inline-flex rounded-xl bg-[#2563eb] px-4 py-2 text-sm font-semibold text-white">Buka riwayat pesanan</Link></div></main><Footer /><MobileNav /></div>;
+  }
+
+  const orderExpired = timeLeft === 0;
+  const paymentSubmitted = order.payment?.status === "pending";
+  const cannotPay = order.status !== "pending" || orderExpired || paymentSubmitted;
 
   return (
     <div className="light-app min-h-screen bg-[#f4f8ff] text-[#123b6d] flex flex-col">
@@ -149,7 +162,7 @@ export default function PaymentPage() {
                 <Clock className="h-5 w-5 text-amber-400" />
                 <div>
                   <p className="text-[10px] text-[#8aa4c1] uppercase font-bold">Sisa Waktu Bayar</p>
-                  <p className="font-mono text-lg font-black text-amber-700">{formatTimer(timeLeft)}</p>
+                  <p className="font-mono text-lg font-black text-amber-700">{timeLeft === null ? "—" : formatTimer(timeLeft)}</p>
                 </div>
               </div>
             </div>
@@ -159,14 +172,14 @@ export default function PaymentPage() {
               <div className="space-y-1">
                 <span className="text-xs uppercase font-bold text-[#8aa4c1]">Total yang harus ditransfer</span>
                 <p className="text-3xl font-black text-[#2563eb]">
-                  Rp {(order?.total || 3515000).toLocaleString("id-ID")}
+                  Rp {order.total.toLocaleString("id-ID")}
                 </p>
                 <p className="text-xs text-[#8aa4c1]">*Pastikan nominal transfer tepat hingga digit terakhir</p>
               </div>
 
-              <Badge variant="warning" className="gap-1.5 self-start sm:self-auto py-1 px-3">
+                <Badge variant={orderExpired ? "destructive" : order.status === "paid" ? "success" : "warning"} className="gap-1.5 self-start sm:self-auto py-1 px-3">
                 <Clock className="h-3.5 w-3.5" />
-                Status: Menunggu Pembayaran
+                  Status: {orderExpired ? "Waktu habis" : order.status === "paid" ? "Lunas" : paymentSubmitted ? "Menunggu verifikasi" : order.status === "pending" ? "Menunggu pembayaran" : order.status}
               </Badge>
             </CardSpotlight>
 
@@ -190,7 +203,7 @@ export default function PaymentPage() {
                 Unggah Bukti Transfer
               </h3>
               <p className="text-xs text-[#8aa4c1]">
-                Setelah melakukan transfer sesuai nomor rekening di atas, mohon upload foto struk atau screenshot bukti transfermu di bawah ini:
+                Setelah melakukan transfer sesuai metode yang dipilih, unggah bukti pembayaran. Order akan menunggu pemeriksaan admin; tiket dan QR aktif setelah pembayaran disetujui.
               </p>
 
               <PaymentProofUpload onFileSelect={setProofFile} />
@@ -199,6 +212,7 @@ export default function PaymentPage() {
                 <Button
                   onClick={handleSubmitProof}
                   isLoading={isSubmitting}
+                  disabled={cannotPay}
                   variant="glow"
                   size="lg"
                   className="w-full sm:w-auto gap-2"
@@ -207,6 +221,7 @@ export default function PaymentPage() {
                   Kirim Bukti Pembayaran
                 </Button>
               </div>
+              {cannotPay && <p className="text-right text-xs text-rose-600">{orderExpired ? "Batas waktu pembayaran telah berakhir. Buat pesanan baru untuk mencoba kembali." : paymentSubmitted ? "Bukti pembayaran sudah dikirim dan sedang menunggu pemeriksaan admin." : `Pesanan berstatus ${order.status} dan tidak dapat menerima pembayaran lagi.`}</p>}
             </CardSpotlight>
           </>
         )}

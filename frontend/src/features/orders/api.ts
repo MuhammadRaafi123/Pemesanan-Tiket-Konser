@@ -122,8 +122,7 @@ export async function fetchOrderById(id: number | string): Promise<Order | null>
     // Fall through to the local preview data.
   }
 
-  const found = MOCK_ORDERS.find((order) => String(order.id) === String(id) || order.order_code === String(id));
-  return found || MOCK_ORDERS[0];
+  return null;
 }
 
 export async function createOrder(payload: {
@@ -139,4 +138,8 @@ export async function createOrder(payload: {
   }
 
   throw new Error("Order response tidak valid");
+}
+
+export async function cancelOrder(id: number | string): Promise<void> {
+  await api.patch<ApiResponse>(`/orders/${id}/cancel`);
 }

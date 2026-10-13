@@ -6,6 +6,7 @@ export interface TicketCategory {
   quota: number;
   remaining: number;
   perks?: string[];
+  events?: { id: number | string; title: string };
 }
 
 export interface Artist {

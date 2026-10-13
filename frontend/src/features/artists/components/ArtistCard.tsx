@@ -9,6 +9,7 @@ import { CardSpotlight } from "@/components/shared/CardSpotlight";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { resolveMediaUrl } from "@/lib/media";
+import { ScrollReveal } from "@/components/shared/ScrollReveal";
 
 interface ArtistCardProps {
   artist: Artist;
@@ -25,7 +26,7 @@ export function ArtistCard({ artist, index = 0 }: ArtistCardProps) {
   ][index % 5];
 
   return (
-    <div className={`${delayClass}`}>
+    <ScrollReveal delay={(index % 5) * 80} className={delayClass}>
       <CardSpotlight
         spotlightColor="rgba(37, 99, 235, 0.14)"
         className="group relative overflow-hidden border-blue-100 bg-white p-6 text-center hover:border-blue-300 hover:shadow-[0_15px_40px_-18px_rgba(37,99,235,0.35)] transition-all duration-300"
@@ -99,7 +100,7 @@ export function ArtistCard({ artist, index = 0 }: ArtistCardProps) {
           </Link>
         </div>
       </CardSpotlight>
-    </div>
+    </ScrollReveal>
   );
 }
 export default ArtistCard;

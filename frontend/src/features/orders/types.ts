@@ -17,6 +17,7 @@ export interface Order {
   status: "pending" | "paid" | "rejected" | "cancelled";
   qr_code?: string;
   created_at: string;
+  expires_at?: string | null;
   order_items?: OrderItem[];
   events?: Event;
   payment?: {

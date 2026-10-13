@@ -15,6 +15,7 @@ import { fetchEvents, MOCK_EVENTS } from "@/features/events/api";
 import { Event } from "@/features/events/types";
 import { Badge } from "@/components/ui/badge";
 import { Loading } from "@/components/shared/Loading";
+import { ScrollReveal } from "@/components/shared/ScrollReveal";
 
 type SortBy = "recommended" | "lowest" | "highest";
 
@@ -85,7 +86,7 @@ function EventsView({ initialQuery }: EventsViewProps) {
       <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         
         {/* Header Section */}
-        <div className="mb-10 text-center space-y-4">
+        <ScrollReveal className="mb-10 text-center space-y-4">
           <Badge variant="gradient" className="gap-1.5">
             <Ticket className="h-3.5 w-3.5" />
             Jadwal Konser Resmi
@@ -96,10 +97,10 @@ function EventsView({ initialQuery }: EventsViewProps) {
           <p className="max-w-xl mx-auto text-sm text-[#6683a3]">
             Temukan jadwal konser musisi lokal dan internasional terlengkap dengan tiket resmi terverifikasi.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* Filter & Controls Bar */}
-        <div className="mb-10 space-y-4 rounded-3xl border border-blue-100 bg-white p-5 backdrop-blur-2xl shadow-2xl">
+        <ScrollReveal className="mb-10 space-y-4 rounded-3xl border border-blue-100 bg-white p-5 backdrop-blur-2xl shadow-2xl">
           
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
             
@@ -154,7 +155,7 @@ function EventsView({ initialQuery }: EventsViewProps) {
             })}
           </div>
 
-        </div>
+        </ScrollReveal>
 
         {/* Results Info */}
         <div className="mb-6 flex items-center justify-between text-xs text-[#8aa4c1]">

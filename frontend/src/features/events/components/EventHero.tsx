@@ -1,22 +1,24 @@
 "use client";
 
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { 
-  CalendarDays, 
-  MapPin, 
-  Clock, 
-  Sparkles, 
-  Share2, 
-  ShieldCheck, 
+import {
+  CalendarDays,
+  ChevronLeft,
+  Clock,
+  MapPin,
   Mic2,
-  ChevronLeft 
+  Share2,
+  ShieldCheck,
+  Sparkles,
+  Users,
 } from "lucide-react";
-import { Event } from "../types";
-import { Badge } from "@/components/ui/badge";
+import type { Event } from "../types";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Reveal, Stagger } from "@/components/shared/Reveal";
 import { useToast } from "@/components/shared/ToastProvider";
+import { formatEventDate, formatEventTime } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 
 interface EventHeroProps {
@@ -25,18 +27,14 @@ interface EventHeroProps {
 
 export function EventHero({ event }: EventHeroProps) {
   const { success } = useToast();
+  const isOpen = event.status === "open";
 
-  const formattedDate = new Date(event.event_date).toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
-  const formattedTime = new Date(event.event_date).toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }) + " WIB";
+  const specs = [
+    { icon: CalendarDays, label: "Tanggal acara", value: formatEventDate(event.event_date, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) },
+    { icon: Clock, label: "Waktu mulai", value: `${formatEventTime(event.event_date)} WIB` },
+    { icon: MapPin, label: "Lokasi", value: event.venue ? `${event.venue} — ${event.location}` : event.location },
+    ...(event.min_age ? [{ icon: Users, label: "Minimal usia", value: `${event.min_age} tahun` }] : []),
+  ];
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -46,156 +44,118 @@ export function EventHero({ event }: EventHeroProps) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-blue-100 bg-white p-6 text-[#102a43] shadow-[0_24px_70px_-42px_rgba(37,99,235,.35)] sm:p-10 backdrop-blur-2xl">
-      
-      {/* Background Poster Blur Effect */}
-      <div className="absolute inset-0 -z-10 opacity-20 blur-3xl scale-125 pointer-events-none">
-        <Image
-          src={resolveMediaUrl(event.poster || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200&auto=format&fit=crop")}
-          alt={event.title}
-          fill
-          className="object-cover"
-        />
-      </div>
+    <section className="relative overflow-hidden rounded-[32px] border border-border bg-white shadow-[0_1px_2px_rgba(10,27,51,.04),0_30px_80px_-46px_rgba(13,38,84,.4)]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        style={{ backgroundImage: `url(${resolveMediaUrl(event.poster || "/globe.svg")})`, backgroundSize: "cover", backgroundPosition: "center" }}
+      />
+      <div aria-hidden className="pointer-events-none absolute inset-0 dot-grid opacity-60" />
 
-      {/* Grid Pattern overlay */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(rgba(37,99,235,0.08)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-      {/* Navigation & Action Bar */}
-      <div className="flex items-center justify-between gap-4 mb-8">
-        <Link href="/events">
-          <Button variant="secondary" size="sm" className="gap-1.5 text-xs">
-            <ChevronLeft className="h-4 w-4" />
-            Kembali ke Daftar Konser
-          </Button>
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleShare}
-            variant="secondary"
-            size="icon"
-            className="rounded-xl h-9 w-9 text-[#6683a3] hover:text-[#2563eb]"
-            title="Bagikan Konser"
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        
-        {/* Left: Poster Box */}
-        <div className="lg:col-span-5">
-          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-blue-200 shadow-2xl group">
-            <Image
-              src={resolveMediaUrl(event.poster || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800&auto=format&fit=crop")}
-              alt={event.title}
-              fill
-              priority
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-
-            {/* Status Badge */}
-            <div className="absolute top-4 left-4">
-              <Badge variant={event.status === "open" ? "success" : "destructive"} className="gap-1.5 text-xs py-1 px-3">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                {event.status === "open" ? "Tiket Tersedia" : "Penjualan Ditutup"}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Info Box */}
-        <div className="lg:col-span-7 space-y-6">
-          
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="gradient" className="gap-1">
-                <Sparkles className="h-3 w-3" />
-                {event.genre || "World Tour"}
-              </Badge>
-
-              <Badge variant="secondary" className="gap-1">
-                <ShieldCheck className="h-3 w-3 text-[#2563eb]" />
-                Official Verified Event
-              </Badge>
-            </div>
-
-            <h1 className="text-2xl sm:text-4xl font-black text-[#123b6d] tracking-tight leading-tight">
-              {event.title}
-            </h1>
-          </div>
-
-          {/* Artist link pill */}
-          {event.artists && (
-            <Link
-              href={`/artists/${event.artists.id}`}
-              className="inline-flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-2.5 pr-4 backdrop-blur-md hover:border-blue-300 hover:bg-blue-100 transition-all duration-200 group"
+      <div className="relative p-6 sm:p-10">
+        <Reveal className="mb-9 flex items-center justify-between gap-4">
+          <Link href="/events">
+            <Button variant="secondary" size="sm" className="gap-1.5">
+              <ChevronLeft className="h-4 w-4" />
+              Semua konser
+            </Button>
+          </Link>
+          <div className="flex items-center gap-2">
+            <Badge variant={isOpen ? "success" : "secondary"} className="gap-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${isOpen ? "pulse-dot bg-emerald-500 text-emerald-500" : "bg-muted-foreground/50"}`} />
+              {isOpen ? "Tiket tersedia" : "Penjualan ditutup"}
+            </Badge>
+            <Button
+              type="button"
+              onClick={handleShare}
+              variant="secondary"
+              size="icon"
+              className="h-9 w-9 rounded-full"
+              aria-label="Bagikan konser"
             >
-              <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-blue-400/50">
-                <Image
-                  src={resolveMediaUrl(event.artists.photo)}
-                  alt={event.artists.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <p className="text-[10px] font-semibold text-[#2563eb] uppercase tracking-wider">
-                  Bintang Tamu Utama
-                </p>
-                <p className="text-sm font-bold text-[#123b6d] group-hover:text-[#2563eb] transition-colors flex items-center gap-1">
-                  {event.artists.name}
-                  <Mic2 className="h-3.5 w-3.5 text-[#2563eb]" />
-                </p>
-              </div>
-            </Link>
-          )}
-
-          {/* Date, Time & Venue Specs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            
-            <div className="flex items-center gap-3.5 rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-[#2563eb] shrink-0">
-                <CalendarDays className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-[#8aa4c1]">Tanggal Acara</p>
-                <p className="text-xs font-bold text-[#123b6d]">{formattedDate}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3.5 rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 text-[#2563eb] shrink-0">
-                <Clock className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-[#8aa4c1]">Waktu Mulai</p>
-                <p className="text-xs font-bold text-[#123b6d]">{formattedTime}</p>
-              </div>
-            </div>
-
-            <div className="sm:col-span-2 flex items-center gap-3.5 rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-[#2563eb] shrink-0">
-                <MapPin className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-[#8aa4c1]">Lokasi / Venue</p>
-                <p className="text-xs font-bold text-[#123b6d]">
-                  {event.venue ? `${event.venue} — ${event.location}` : event.location}
-                </p>
-              </div>
-            </div>
-
+              <Share2 className="h-4 w-4" />
+            </Button>
           </div>
+        </Reveal>
 
+        <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+          <Reveal variant="scale" className="lg:col-span-5">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] border border-border bg-muted shadow-[0_40px_80px_-40px_rgba(13,38,84,.55)]">
+              <Image
+                src={resolveMediaUrl(event.poster || "/globe.svg")}
+                alt={event.title}
+                fill
+                priority
+                sizes="(max-width: 1024px) 92vw, 40vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/35 to-transparent" />
+              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
+            </div>
+          </Reveal>
+
+          <div className="lg:col-span-7">
+            <Reveal delay={80}>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="gold" className="gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  {event.genre || "World tour"}
+                </Badge>
+                <Badge variant="secondary" className="gap-1">
+                  <ShieldCheck className="h-3 w-3 text-primary" />
+                  Tiket resmi terverifikasi
+                </Badge>
+              </div>
+
+              <h1 className="font-display-xl mt-6 text-[2.1rem] leading-[1.05] text-ink sm:text-5xl">
+                {event.title}
+              </h1>
+            </Reveal>
+
+            {event.artists ? (
+              <Reveal delay={140}>
+                <Link
+                  href={`/artists/${event.artists.id}`}
+                  className="group mt-6 inline-flex items-center gap-3 rounded-full border border-border bg-white py-1.5 pl-1.5 pr-5 transition hover:border-primary/30 hover:shadow-[0_12px_30px_-20px_rgba(27,69,199,.5)]"
+                >
+                  <span className="relative h-9 w-9 overflow-hidden rounded-full border border-border">
+                    <Image
+                      src={resolveMediaUrl(event.artists.photo || "/globe.svg")}
+                      alt={event.artists.name}
+                      fill
+                      sizes="36px"
+                      className="object-cover"
+                    />
+                  </span>
+                  <span>
+                    <span className="meta-label block">Talent utama</span>
+                    <span className="flex items-center gap-1.5 text-sm font-semibold text-ink transition group-hover:text-primary">
+                      {event.artists.name}
+                      <Mic2 className="h-3.5 w-3.5 text-primary" />
+                    </span>
+                  </span>
+                </Link>
+              </Reveal>
+            ) : null}
+
+            <Stagger className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2" step={60}>
+              {specs.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-start gap-3 bg-white p-5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="meta-label block">{label}</span>
+                    <span className="mt-1 block text-sm font-semibold leading-snug text-ink">{value}</span>
+                  </span>
+                </div>
+              ))}
+            </Stagger>
+          </div>
         </div>
-
       </div>
-
-    </div>
+    </section>
   );
 }
+
 export default EventHero;

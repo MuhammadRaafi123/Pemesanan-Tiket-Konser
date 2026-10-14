@@ -1,10 +1,40 @@
-import { Disc3, Sparkles } from "lucide-react";
+import { Disc3 } from "lucide-react";
 
-interface LoadingProps { message?: string; fullScreen?: boolean; }
+interface LoadingProps {
+  message?: string;
+  fullScreen?: boolean;
+}
 
-export function Loading({ message = "Menyiapkan pengalaman konser...", fullScreen = false }: LoadingProps) {
-  const content = <div className="flex flex-col items-center justify-center p-8 text-center" role="status" aria-live="polite"><div className="relative mb-5 flex h-20 w-20 items-center justify-center"><div className="absolute inset-2 rounded-full border border-blue-200" /><div className="absolute inset-0 animate-ping rounded-full bg-blue-100" /><Disc3 className="h-10 w-10 animate-spin text-[#2563eb] [animation-duration:3s]" /><span className="absolute h-2 w-2 rounded-full bg-[#60a5fa]" /></div><p className="text-sm font-medium tracking-wide text-[#476b91]">{message}</p><div className="mt-4 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-[#8aa4c1]"><Sparkles className="h-3 w-3 text-[#2563eb]" />Concertix</div></div>;
-  if (fullScreen) return <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f4f8ff]/95 backdrop-blur-xl">{content}</div>;
+export function Loading({
+  message = "Menyiapkan pengalaman konser...",
+  fullScreen = false,
+}: LoadingProps) {
+  const content = (
+    <div
+      className="flex flex-col items-center justify-center p-8 text-center"
+      role="status"
+      aria-live="polite"
+    >
+      <span className="relative mb-6 flex h-16 w-16 items-center justify-center">
+        <span className="absolute inset-0 rounded-full border border-primary/15" />
+        <span
+          className="absolute inset-0 rounded-full border border-primary/25"
+          style={{ animation: "ripple 2.6s cubic-bezier(0.22,1,0.36,1) infinite" }}
+        />
+        <Disc3
+          className="h-7 w-7 text-primary"
+          style={{ animation: "spin 3.4s linear infinite" }}
+        />
+      </span>
+      <p className="text-sm font-medium text-ink-soft">{message}</p>
+      <p className="meta-label mt-3">Concertix</p>
+    </div>
+  );
+
+  if (fullScreen) {
+    return <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/92 backdrop-blur-xl">{content}</div>;
+  }
+
   return <div className="flex min-h-[300px] w-full items-center justify-center">{content}</div>;
 }
 

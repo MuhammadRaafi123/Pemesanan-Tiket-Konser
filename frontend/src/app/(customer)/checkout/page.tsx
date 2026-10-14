@@ -1,36 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  ShoppingBag, 
-  Ticket, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  ArrowRight, 
-  Sparkles, 
-  ShieldCheck, 
-  CreditCard, 
-  User, 
-  Mail, 
-  Phone,
-  ChevronLeft
+import {
+  ArrowRight,
+  Minus,
+  Plus,
+  ShieldCheck,
+  ShoppingBag,
+  Ticket,
+  Trash2,
+  User,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { PaymentMethodSelector } from "@/features/payments/components/PaymentMethodSelector";
-import { CardSpotlight } from "@/components/shared/CardSpotlight";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { Reveal, Stagger } from "@/components/shared/Reveal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/components/shared/ToastProvider";
 import { createOrder } from "@/features/orders/api";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { formatCurrency } from "@/lib/format";
+import { getApiErrorMessage } from "@/lib/apiError";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -38,18 +33,11 @@ export default function CheckoutPage() {
   const { items, updateQty, removeItem, clearCart, getTotalPrice, getTotalItems } = useCartStore();
   const { success, error } = useToast();
 
-  const [selectedMethod, setSelectedMethod] = useState<string>("QRIS");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Customer info state
-  const [customerName, setCustomerName] = useState(user?.name || "Muhammad Rafi");
-  const [customerEmail, setCustomerEmail] = useState(user?.email || "rafi@concertix.id");
-  const [customerPhone, setCustomerPhone] = useState(user?.phone || "081234567890");
 
   const totalPrice = getTotalPrice();
   const totalItems = getTotalItems();
-  const adminFee = 15000;
-  const grandTotal = totalPrice + (totalItems > 0 ? adminFee : 0);
+  const grandTotal = totalPrice;
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
@@ -57,27 +45,20 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!customerName || !customerEmail || !customerPhone) {
-      error("Harap lengkapi informasi data pemesan tiket.");
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const orderPayload = {
-        items: items.map((i) => ({
-          ticket_category_id: i.ticketCategoryId,
-          qty: i.qty,
+      const order = await createOrder({
+        items: items.map((item) => ({
+          ticket_category_id: item.ticketCategoryId,
+          qty: item.qty,
         })),
-      };
-
-      const order = await createOrder(orderPayload);
+      });
       clearCart();
       success(`Pesanan #${order.order_code} berhasil dibuat!`);
       router.push(`/payments/${order.id}`);
-    } catch {
-      error("Gagal membuat pesanan. Silakan coba lagi.");
+    } catch (requestError: unknown) {
+      error(getApiErrorMessage(requestError, "Gagal membuat pesanan. Silakan coba lagi."));
     } finally {
       setIsSubmitting(false);
     }
@@ -85,14 +66,14 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="light-app min-h-screen bg-[#f4f8ff] text-[#123b6d] flex flex-col">
+      <div className="flex min-h-screen flex-col bg-background text-ink">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center pt-28 pb-20 px-4">
+        <main className="flex flex-1 items-center justify-center px-4 pb-24 pt-32">
           <EmptyState
             icon={ShoppingBag}
-            title="Keranjang Tiket Kosong"
+            title="Keranjang tiket kosong"
             description="Kamu belum memilih tiket konser. Yuk eksplorasi konser musik seru sekarang!"
-            actionLabel="Jelajahi Konser"
+            actionLabel="Jelajahi konser"
             actionHref="/events"
           />
         </main>
@@ -103,214 +84,161 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="light-app min-h-screen bg-[#f4f8ff] text-[#123b6d] flex flex-col">
+    <div className="flex min-h-screen flex-col bg-background text-ink">
       <Navbar />
 
-      <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
-        
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-100 pb-6">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#2563eb] mb-1">
-              <Sparkles className="h-4 w-4 text-sky-600" />
-              Langkah Terakhir Booking
-            </div>
-            <h1 className="text-3xl font-black tracking-tight text-[#123b6d]">
-              Checkout & Pembayaran Tiket
-            </h1>
-          </div>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-5 pb-24 pt-32 sm:px-8 sm:pt-40">
+        <PageHeader
+          eyebrow="Langkah terakhir"
+          title="Checkout & pembayaran"
+          description="Periksa kembali tiket dan data pemesanmu sebelum menyelesaikan pesanan."
+          actions={
+            <Link href="/events">
+              <Button variant="secondary" className="gap-1.5">
+                <ShoppingBag className="h-4 w-4" />
+                Tambah tiket lain
+              </Button>
+            </Link>
+          }
+        />
 
-          <Link href="/events">
-            <Button variant="secondary" size="sm" className="gap-1.5 text-xs">
-              <ChevronLeft className="h-4 w-4" />
-              Tambah Tiket Lain
-            </Button>
-          </Link>
-        </div>
+        <div className="mt-10 grid items-start gap-6 lg:grid-cols-12">
+          <div className="space-y-6 lg:col-span-7">
+            <Reveal>
+              <section className="rounded-[28px] border border-border bg-white p-6 shadow-[0_1px_2px_rgba(10,27,51,.04),0_18px_44px_-30px_rgba(13,38,84,.28)] sm:p-8">
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="flex items-center gap-2.5">
+                    <Ticket className="h-4 w-4 text-primary" />
+                    <span className="font-display text-xl text-ink">Tiket pilihanmu</span>
+                  </h2>
+                  <span className="numeral text-sm text-primary">{totalItems} tiket</span>
+                </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Left: Order Items & Customer Info & Payment Method */}
-          <div className="lg:col-span-7 space-y-8">
-            
-            {/* Ticket Items List */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
-                <Ticket className="h-5 w-5 text-[#2563eb]" />
-                Daftar Tiket ({totalItems} Tiket)
-              </h3>
-
-              <div className="space-y-3">
-                {items.map((item) => (
-                  <CardSpotlight
-                    key={item.ticketCategoryId}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border-blue-100"
-                  >
-                    <div className="space-y-1 flex-1">
-                      <Badge variant="gradient" className="text-[10px] py-0 px-2">
-                        {item.categoryName}
-                      </Badge>
-                      <h4 className="font-bold text-[#123b6d] text-base leading-tight">
-                        {item.eventTitle}
-                      </h4>
-                      <p className="text-xs text-[#8aa4c1]">{item.eventLocation}</p>
-                      <p className="text-sm font-black text-[#2563eb] pt-1">
-                        Rp {item.price.toLocaleString("id-ID")} / tiket
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-blue-100 pt-3 sm:pt-0">
-                      {/* Stepper */}
-                      <div className="flex items-center rounded-xl border border-blue-200 bg-blue-50 p-1">
-                        <button
-                          onClick={() => updateQty(item.ticketCategoryId, item.qty - 1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-[#6683a3] hover:bg-blue-50 hover:text-[#2563eb] transition"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="w-7 text-center text-xs font-bold text-[#123b6d]">{item.qty}</span>
-                        <button
-                          onClick={() => updateQty(item.ticketCategoryId, item.qty + 1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-[#6683a3] hover:bg-blue-50 hover:text-[#2563eb] transition"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
+                <Stagger className="mt-6 space-y-3" step={70}>
+                  {items.map((item) => (
+                    <div
+                      key={item.ticketCategoryId}
+                      className="flex flex-col gap-4 rounded-2xl border border-border bg-muted/40 p-4 transition-colors duration-300 hover:border-primary/20 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="meta-label">{item.categoryName}</p>
+                        <h3 className="font-display mt-1.5 text-lg leading-snug text-ink">{item.eventTitle}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">{item.eventLocation}</p>
+                        <p className="numeral mt-2 text-sm text-primary">
+                          {formatCurrency(item.price)} / tiket
+                        </p>
                       </div>
 
-                      {/* Remove */}
-                      <button
-                        onClick={() => removeItem(item.ticketCategoryId)}
-                        className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-[#8aa4c1] hover:bg-rose-50 hover:text-rose-600 transition"
-                        title="Hapus dari pesanan"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-between gap-3 border-t border-border pt-3 sm:border-t-0 sm:pt-0">
+                        <div className="flex items-center rounded-full border border-border bg-white p-1">
+                          <button
+                            type="button"
+                            onClick={() => updateQty(item.ticketCategoryId, item.qty - 1)}
+                            aria-label="Kurangi jumlah"
+                            className="press flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-primary"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="numeral w-8 text-center text-sm text-ink">{item.qty}</span>
+                          <button
+                            type="button"
+                            onClick={() => updateQty(item.ticketCategoryId, item.qty + 1)}
+                            aria-label="Tambah jumlah"
+                            className="press flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-primary"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.ticketCategoryId)}
+                          aria-label="Hapus dari pesanan"
+                          className="press flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                  </CardSpotlight>
-                ))}
-              </div>
-            </div>
+                  ))}
+                </Stagger>
+              </section>
+            </Reveal>
 
-            {/* Customer Contact Details */}
-            <CardSpotlight className="space-y-4">
-              <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
-                <User className="h-5 w-5 text-sky-600" />
-                Data Pemesan Tiket (Identitas E-Ticket)
-              </h3>
-              <p className="text-xs text-[#8aa4c1]">
-                Nama dan email ini akan dicantumkan secara resmi pada E-Ticket digital QR Code kamu.
-              </p>
+            <Reveal delay={80}>
+              <section className="rounded-[28px] border border-border bg-white p-6 shadow-[0_1px_2px_rgba(10,27,51,.04),0_18px_44px_-30px_rgba(13,38,84,.28)] sm:p-8">
+                <h2 className="flex items-center gap-2.5">
+                  <User className="h-4 w-4 text-primary" />
+                  <span className="font-display text-xl text-ink">Data akun pemesan</span>
+                </h2>
+                <p className="mt-2 text-xs leading-6 text-muted-foreground">
+                  Pesanan dan tiket digital akan terhubung ke akun ini. Pastikan data kontakmu sudah benar.
+                </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-[#6683a3]">Nama Lengkap (Sesuai KTP/Paspor)</label>
-                  <Input
-                    icon={<User className="h-4 w-4" />}
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Contoh: Muhammad Rafi"
-                  />
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {[
+                    { label: "Nama pemesan", value: user?.name },
+                    { label: "Email akun", value: user?.email },
+                    { label: "Nomor telepon", value: user?.phone },
+                  ].map((detail) => (
+                    <div key={detail.label} className="rounded-xl border border-border bg-muted/40 p-4">
+                      <p className="meta-label">{detail.label}</p>
+                      <p className="mt-1.5 truncate text-sm font-semibold text-ink">
+                        {detail.value || "Belum diisi"}
+                      </p>
+                    </div>
+                  ))}
+                  <Link
+                    href="/profile"
+                    className="flex items-center justify-center rounded-xl border border-primary/15 bg-primary/[0.04] px-4 py-3 text-xs font-semibold text-primary transition hover:bg-primary/[0.08]"
+                  >
+                    Perbarui data akun
+                  </Link>
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#6683a3]">Email Penerima Tiket</label>
-                  <Input
-                    type="email"
-                    icon={<Mail className="h-4 w-4" />}
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="nama@email.com"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#6683a3]">Nomor WhatsApp / HP</label>
-                  <Input
-                    type="tel"
-                    icon={<Phone className="h-4 w-4" />}
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    placeholder="081234567890"
-                  />
-                </div>
-              </div>
-            </CardSpotlight>
-
-            {/* Payment Method Selector */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-[#2563eb]" />
-                Pilih Metode Pembayaran
-              </h3>
-
-              <PaymentMethodSelector
-                selectedMethod={selectedMethod}
-                onSelect={setSelectedMethod}
-              />
-            </div>
-
+              </section>
+            </Reveal>
           </div>
 
-          {/* Right: Sticky Summary Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-6">
-            <CardSpotlight className="space-y-5 border-blue-200 bg-white shadow-2xl backdrop-blur-2xl">
-              
-              <div className="flex items-center justify-between border-b border-blue-100 pb-4">
-                <h3 className="text-base font-black text-[#123b6d] flex items-center gap-2">
-                  <ShoppingBag className="h-4 w-4 text-[#2563eb]" />
-                  Ringkasan Pembayaran
-                </h3>
-                <span className="text-xs text-[#2563eb] font-semibold">{totalItems} Tiket</span>
-              </div>
-
-              {/* Price Breakdown */}
-              <div className="space-y-2.5 text-xs text-[#6683a3]">
-                <div className="flex justify-between">
-                  <span>Subtotal Tiket ({totalItems}x)</span>
-                  <span className="font-semibold text-[#123b6d]">Rp {totalPrice.toLocaleString("id-ID")}</span>
+          <Reveal variant="left" delay={100} className="lg:col-span-5">
+            <div className="lg:sticky lg:top-28">
+              <section className="rounded-[28px] border border-border bg-white p-6 shadow-[0_2px_6px_rgba(10,27,51,.05),0_40px_90px_-46px_rgba(13,38,84,.5)] sm:p-8">
+                <div className="flex items-center justify-between border-b border-border pb-5">
+                  <h2 className="flex items-center gap-2.5">
+                    <ShoppingBag className="h-4 w-4 text-primary" />
+                    <span className="font-display text-xl text-ink">Ringkasan</span>
+                  </h2>
+                  <span className="text-xs font-semibold text-primary">{totalItems} tiket</span>
                 </div>
 
-                <div className="flex justify-between">
-                  <span>Biaya Layanan & Admin</span>
-                  <span className="font-semibold text-[#123b6d]">Rp {adminFee.toLocaleString("id-ID")}</span>
+                <dl className="mt-6 space-y-3 text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between gap-4">
+                    <dt>Subtotal tiket</dt>
+                    <dd className="numeral text-ink">{formatCurrency(totalPrice)}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt>Biaya layanan</dt>
+                    <dd className="font-semibold text-emerald-600">Termasuk harga tiket</dd>
+                  </div>
+
+                  <div className="mt-5 flex items-end justify-between gap-4 border-t border-border pt-5">
+                    <dt className="text-sm font-semibold text-ink">Total pembayaran</dt>
+                    <dd className="numeral text-2xl text-ink">{formatCurrency(grandTotal)}</dd>
+                  </div>
+                </dl>
+
+                <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200/70 bg-emerald-50/70 p-4 text-xs leading-6 text-emerald-800">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                  Stok dikonfirmasi saat pesanan dibuat. Tiket digital aktif setelah pembayaran diverifikasi.
                 </div>
 
-                <div className="flex justify-between text-emerald-400">
-                  <span>Asuransi Pembeli & Garansi Resmi</span>
-                  <span className="font-semibold">GRATIS</span>
-                </div>
-
-                <div className="pt-3 border-t border-blue-100 flex items-center justify-between text-base">
-                  <span className="font-bold text-[#123b6d]">Total Pembayaran</span>
-                  <span className="font-black text-xl text-[#2563eb]">
-                    Rp {grandTotal.toLocaleString("id-ID")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Trust Badge */}
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 flex items-center gap-2.5 text-xs text-emerald-700">
-                <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-400" />
-                <span>Transaksi diamankan dengan enkripsi SSL 256-bit dan jaminan tiket resmi 100%.</span>
-              </div>
-
-              {/* Action Button */}
-              <Button
-                onClick={handlePlaceOrder}
-                isLoading={isSubmitting}
-                variant="glow"
-                size="lg"
-                className="w-full text-base gap-2"
-              >
-                <span>Bayar Sekarang (Rp {grandTotal.toLocaleString("id-ID")})</span>
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-
-            </CardSpotlight>
-          </div>
-
+                <Button onClick={handlePlaceOrder} isLoading={isSubmitting} size="lg" className="mt-6 w-full gap-2">
+                  Buat pesanan · {formatCurrency(grandTotal)}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </section>
+            </div>
+          </Reveal>
         </div>
-
       </main>
 
       <Footer />

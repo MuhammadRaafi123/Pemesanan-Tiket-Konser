@@ -1,30 +1,23 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  User,
-  Mail,
-  Phone,
-  Ticket,
-  ShoppingBag,
-  Sparkles,
-  Save,
-  LogOut,
-  Heart
-} from "lucide-react";
+import { Heart, LogOut, Mail, Phone, Save, Sparkles, Ticket, User, WalletCards } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { CardSpotlight } from "@/components/shared/CardSpotlight";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { Reveal, Stagger } from "@/components/shared/Reveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { CountUp } from "@/components/shared/CountUp";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/components/shared/ToastProvider";
 import { fetchProfile, updateProfile } from "@/features/profile/api";
-import { UserProfile } from "@/features/profile/types";
+import type { UserProfile } from "@/features/profile/types";
 import { Loading } from "@/components/shared/Loading";
+import { formatEventDate } from "@/lib/format";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -35,25 +28,35 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Form states
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [favoriteGenre, setFavoriteGenre] = useState("");
 
   useEffect(() => {
-    fetchProfile().then((data) => {
-      setProfile(data);
-      setName(data.name);
-      setEmail(data.email);
-      setPhone(data.phone || "");
-      setFavoriteGenre(data.favorite_genre || "Pop / Rock");
-      setLoading(false);
-    });
+    let active = true;
+
+    fetchProfile()
+      .then((data) => {
+        if (!active) return;
+        setProfile(data);
+        setName(data.name);
+        setEmail(data.email);
+        setPhone(data.phone || "");
+        setFavoriteGenre(data.favorite_genre || "");
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveProfile = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsSaving(true);
 
     try {
@@ -65,9 +68,7 @@ export default function ProfilePage() {
       });
 
       setProfile(updated);
-      if (user) {
-        setUser({ ...user, name, email });
-      }
+      if (user) setUser({ ...user, name, email });
       success("Profil akun berhasil diperbarui!");
     } catch {
       error("Gagal memperbarui profil.");
@@ -78,9 +79,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="light-app min-h-screen bg-[#f4f8ff] flex flex-col">
+      <div className="flex min-h-screen flex-col bg-background text-ink">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center pt-24">
+        <main className="flex flex-1 items-center justify-center px-4 pt-28">
           <Loading message="Memuat profil akun..." />
         </main>
         <Footer />
@@ -89,142 +90,129 @@ export default function ProfilePage() {
     );
   }
 
+  const stats = [
+    { label: "Tiket dimiliki", value: profile?.tickets_count ?? 0, icon: Ticket },
+    { label: "Total pesanan", value: profile?.orders_count ?? 0, icon: WalletCards },
+  ];
+
   return (
-    <div className="light-app min-h-screen bg-[#f4f8ff] text-[#123b6d] flex flex-col">
+    <div className="flex min-h-screen flex-col bg-background text-ink">
       <Navbar />
 
-      <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full space-y-8">
-        
-        {/* Profile Card Header */}
-        <CardSpotlight className="flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8 border-blue-200 bg-white">
-          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-[#2563eb] p-1 shadow-[0_12px_30px_-16px_rgba(37,99,235,.45)]">
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-blue-50 text-3xl font-black text-[#123b6d]">
-              {name ? name.charAt(0).toUpperCase() : "U"}
+      <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-24 pt-32 sm:px-8 sm:pt-40">
+        <PageHeader
+          eyebrow="Akun saya"
+          title={name || "Profil kamu"}
+          description="Kelola data kontak dan preferensi musikmu di satu tempat."
+          actions={
+            <Button
+              variant="secondary"
+              onClick={() => {
+                logout();
+                router.replace("/");
+              }}
+              className="gap-1.5 border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+            >
+              <LogOut className="h-4 w-4" />
+              Keluar
+            </Button>
+          }
+        />
+
+        <Stagger className="mt-8 grid gap-4 sm:grid-cols-3" step={80}>
+          {stats.map(({ label, value, icon: Icon }) => (
+            <div key={label} className="panel rounded-2xl p-6 text-center">
+              <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-accent text-primary">
+                <Icon className="h-5 w-5" />
+              </span>
+              <p className="numeral text-2xl text-ink">
+                <CountUp value={value} />
+              </p>
+              <p className="meta-label mt-2">{label}</p>
             </div>
-          </div>
+          ))}
 
-          <div className="space-y-2 text-center sm:text-left flex-1">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <Badge variant="gradient" className="text-xs">
-                <Sparkles className="h-3 w-3" />
-                VIP Concert Member
-              </Badge>
-              <Badge variant="secondary" className="text-xs">
-                Bergabung {profile?.joined_date || "2026"}
-              </Badge>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-black text-[#123b6d]">{name}</h1>
-            <p className="text-xs text-[#8aa4c1]">{email}</p>
-          </div>
-
-          <Button
-            onClick={() => {
-              logout();
-              router.replace("/");
-            }}
-            variant="outline"
-            size="sm"
-            className="gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50"
-          >
-            <LogOut className="h-4 w-4" />
-            Keluar
-          </Button>
-        </CardSpotlight>
-
-        {/* User Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="rounded-2xl border border-blue-100 bg-white p-5 text-center backdrop-blur-xl">
-            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-[#2563eb]">
-              <Ticket className="h-5 w-5" />
-            </div>
-            <p className="text-2xl font-black text-[#123b6d]">{profile?.tickets_count || 2}</p>
-            <p className="text-xs font-semibold text-[#8aa4c1] uppercase">Tiket Dimiliki</p>
-          </div>
-
-          <div className="rounded-2xl border border-blue-100 bg-white p-5 text-center backdrop-blur-xl">
-            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
-              <ShoppingBag className="h-5 w-5" />
-            </div>
-            <p className="text-2xl font-black text-sky-600">{profile?.orders_count || 2}</p>
-            <p className="text-xs font-semibold text-[#8aa4c1] uppercase">Total Pesanan</p>
-          </div>
-
-          <div className="rounded-2xl border border-blue-100 bg-white p-5 text-center backdrop-blur-xl">
-            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-[#2563eb]">
+          <div className="panel rounded-2xl p-6 text-center">
+            <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#fdf9f1] text-gold">
               <Heart className="h-5 w-5" />
-            </div>
-            <p className="text-lg font-bold text-[#2563eb] truncate">{favoriteGenre || "Pop / Rock"}</p>
-            <p className="text-xs font-semibold text-[#8aa4c1] uppercase">Genre Favorit</p>
-          </div>
-        </div>
-
-        {/* Edit Profile Form */}
-        <CardSpotlight className="space-y-6">
-          <div className="border-b border-blue-100 pb-4">
-            <h3 className="text-lg font-bold text-[#123b6d] flex items-center gap-2">
-              <User className="h-5 w-5 text-[#2563eb]" />
-              Pengaturan Profil Akun
-            </h3>
-            <p className="text-xs text-[#8aa4c1] mt-1">
-              Perbarui data informasi kontak dan preferensi musikmu.
+            </span>
+            <p className="font-display truncate text-lg text-ink">
+              {favoriteGenre || "Belum diatur"}
             </p>
+            <p className="meta-label mt-2">Genre favorit</p>
           </div>
+        </Stagger>
 
-          <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-bold text-[#17457f]">Nama Lengkap</label>
-                <Input
-                  icon={<User className="h-4 w-4" />}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Nama Lengkap"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#17457f]">Alamat Email</label>
-                <Input
-                  type="email"
-                  icon={<Mail className="h-4 w-4" />}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="nama@email.com"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#17457f]">Nomor Telepon</label>
-                <Input
-                  type="tel"
-                  icon={<Phone className="h-4 w-4" />}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="081234567890"
-                />
-              </div>
-
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-bold text-[#17457f]">Genre Musik Favorit</label>
-                <Input
-                  icon={<Sparkles className="h-4 w-4" />}
-                  value={favoriteGenre}
-                  onChange={(e) => setFavoriteGenre(e.target.value)}
-                  placeholder="Contoh: Alternative Rock, EDM, Jazz"
-                />
-              </div>
+        <Reveal delay={90} className="mt-6">
+          <section className="rounded-[28px] border border-border bg-white p-6 shadow-[0_1px_2px_rgba(10,27,51,.04),0_18px_44px_-30px_rgba(13,38,84,.28)] sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
+              <h2 className="flex items-center gap-2.5">
+                <User className="h-4 w-4 text-primary" />
+                <span className="font-display text-xl text-ink">Pengaturan profil</span>
+              </h2>
+              <span className="meta-label">
+                Bergabung {profile?.joined_date ? formatEventDate(profile.joined_date) : "2026"}
+              </span>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-blue-100">
-              <Button type="submit" isLoading={isSaving} variant="glow" size="default" className="gap-2">
-                <Save className="h-4 w-4" />
-                Simpan Perubahan
-              </Button>
-            </div>
-          </form>
-        </CardSpotlight>
+            <form onSubmit={handleSaveProfile} className="mt-7 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="profile-name">Nama lengkap</Label>
+                  <Input
+                    id="profile-name"
+                    icon={<User className="h-4 w-4" />}
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder="Nama lengkap"
+                  />
+                </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="profile-email">Alamat email</Label>
+                  <Input
+                    id="profile-email"
+                    type="email"
+                    icon={<Mail className="h-4 w-4" />}
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="nama@email.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="profile-phone">Nomor telepon</Label>
+                  <Input
+                    id="profile-phone"
+                    type="tel"
+                    icon={<Phone className="h-4 w-4" />}
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    placeholder="081234567890"
+                  />
+                </div>
+
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="profile-genre">Genre musik favorit</Label>
+                  <Input
+                    id="profile-genre"
+                    icon={<Sparkles className="h-4 w-4" />}
+                    value={favoriteGenre}
+                    onChange={(event) => setFavoriteGenre(event.target.value)}
+                    placeholder="Contoh: Alternative rock, EDM, jazz"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end border-t border-border pt-6">
+                <Button type="submit" isLoading={isSaving} className="gap-2">
+                  <Save className="h-4 w-4" />
+                  Simpan perubahan
+                </Button>
+              </div>
+            </form>
+          </section>
+        </Reveal>
       </main>
 
       <Footer />

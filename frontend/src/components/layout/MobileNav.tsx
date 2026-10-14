@@ -10,8 +10,57 @@ export function MobileNav() {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const totalCartItems = useCartStore((state) => state.getTotalItems());
-  const items = [{ label: "Home", href: "/", icon: Sparkles }, { label: "Konser", href: "/events", icon: Ticket }, { label: "Artis", href: "/artists", icon: CalendarDays }, ...(user ? [{ label: "For You", href: "/home", icon: Compass }] : []), { label: "Cart", href: "/checkout", icon: ShoppingBag, badge: totalCartItems > 0 ? totalCartItems : undefined }, { label: user ? "Account" : "Login", href: user ? "/profile" : "/login", icon: user ? User : QrCode }];
-  return <div className="fixed bottom-3 left-0 right-0 z-40 px-4 md:hidden"><nav className="mx-auto flex max-w-lg items-center justify-around rounded-2xl border border-blue-100 bg-white/95 p-2 shadow-[0_18px_50px_-22px_rgba(37,99,235,.35)] backdrop-blur-2xl">{items.map((item) => { const Icon = item.icon; const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)); return <Link key={`${item.label}-${item.href}`} href={item.href} className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 transition ${isActive ? "bg-blue-100 text-[#1d4ed8]" : "text-[#6683a3]"}`}><div className="relative"><Icon className="h-4 w-4" />{item.badge !== undefined && <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2563eb] px-1 text-[8px] font-bold text-white">{item.badge}</span>}</div><span className="truncate text-[9px] font-medium">{item.label}</span></Link>; })}</nav></div>;
+
+  const items = [
+    { label: user ? "Untukmu" : "Home", href: user ? "/home" : "/", icon: user ? Compass : Sparkles },
+    { label: "Konser", href: "/events", icon: Ticket },
+    { label: "Artis", href: "/artists", icon: CalendarDays },
+    ...(user
+      ? [{ label: "Tiket", href: "/tickets", icon: Ticket }]
+      : [{
+          label: "Cart",
+          href: "/checkout",
+          icon: ShoppingBag,
+          badge: totalCartItems > 0 ? totalCartItems : undefined,
+        }]),
+    { label: user ? "Akun" : "Masuk", href: user ? "/profile" : "/login", icon: user ? User : QrCode },
+  ];
+
+  return (
+    <div className="fixed inset-x-0 bottom-3 z-40 px-4 md:hidden">
+      <nav className="glass-dock mx-auto flex max-w-lg items-center justify-around rounded-2xl p-1.5">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={`${item.label}-${item.href}`}
+              href={item.href}
+              className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 transition-colors duration-300 ${
+                isActive ? "text-white" : "text-muted-foreground"
+              }`}
+            >
+              {isActive ? (
+                <span
+                  className="absolute inset-0 -z-10 rounded-xl bg-primary shadow-[0_10px_22px_-12px_rgba(27,69,199,.9)]"
+                  style={{ animation: "page-enter 380ms cubic-bezier(0.22,1,0.36,1) both" }}
+                />
+              ) : null}
+              <span className="relative">
+                <Icon className="h-4 w-4" />
+                {item.badge !== undefined ? (
+                  <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[0.5rem] font-bold text-white">
+                    {item.badge}
+                  </span>
+                ) : null}
+              </span>
+              <span className="truncate text-[0.58rem] font-semibold">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
 }
 
 export default MobileNav;

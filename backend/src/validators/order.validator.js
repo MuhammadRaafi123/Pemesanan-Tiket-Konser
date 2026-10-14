@@ -19,7 +19,8 @@ export const createOrderSchema = z.object({
             .int("Jumlah tiket harus berupa angka")
             .positive(
               "Jumlah tiket harus lebih dari 0"
-            ),
+            )
+            .max(4, "Maksimal 4 tiket untuk setiap kategori"),
         })
       )
       .min(1, "Minimal harus memilih 1 tiket"),

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -8,10 +8,13 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { EventHero } from "@/features/events/components/EventHero";
 import { EventTicketList } from "@/features/events/components/EventTicketList";
 import { EventInfo } from "@/features/events/components/EventInfo";
+import { EventSetlist } from "@/features/events/components/EventSetlist";
 import { fetchEventById } from "@/features/events/api";
-import { Event } from "@/features/events/types";
+import type { Event } from "@/features/events/types";
 import { Loading } from "@/components/shared/Loading";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { Reveal } from "@/components/shared/Reveal";
+import { getApiErrorMessage } from "@/lib/apiError";
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -19,21 +22,68 @@ export default function EventDetailPage() {
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [inventoryRefreshError, setInventoryRefreshError] = useState("");
 
   useEffect(() => {
-    if (id) {
-      fetchEventById(id).then((data) => {
-        setEvent(data);
-        setLoading(false);
+    let active = true;
+    if (!id) return;
+
+    fetchEventById(id)
+      .then((data) => {
+        if (active) setEvent(data);
+      })
+      .catch((requestError: unknown) => {
+        if (active) {
+          setLoadError(getApiErrorMessage(requestError, "Gagal memuat detail konser."));
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
-    }
+
+    return () => {
+      active = false;
+    };
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !event) return;
+    let active = true;
+    let requestInFlight = false;
+
+    const refreshInventory = async () => {
+      if (requestInFlight) return;
+      requestInFlight = true;
+      try {
+        const latestEvent = await fetchEventById(id);
+        if (active && latestEvent) {
+          setEvent(latestEvent);
+          setInventoryRefreshError("");
+        }
+      } catch (requestError: unknown) {
+        if (active) {
+          setInventoryRefreshError(
+            getApiErrorMessage(requestError, "Ketersediaan tiket belum dapat diperbarui.")
+          );
+        }
+      } finally {
+        requestInFlight = false;
+      }
+    };
+
+    const timer = window.setInterval(() => void refreshInventory(), 10000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [event, id]);
 
   if (loading) {
     return (
-      <div className="light-app min-h-screen bg-[#f4f8ff] flex flex-col">
+      <div className="flex min-h-screen flex-col bg-background text-ink">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center pt-24">
+        <main className="flex flex-1 items-center justify-center px-4 pt-28">
           <Loading message="Memuat detail konser..." />
         </main>
         <Footer />
@@ -42,14 +92,14 @@ export default function EventDetailPage() {
     );
   }
 
-  if (!event) {
+  if (loadError || !event) {
     return (
-      <div className="light-app min-h-screen bg-[#f4f8ff] flex flex-col">
+      <div className="flex min-h-screen flex-col bg-background text-ink">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center pt-24 px-4">
+        <main className="flex flex-1 items-center justify-center px-4 pt-28">
           <ErrorState
-            title="Konser Tidak Ditemukan"
-            message="Event yang kamu cari tidak tersedia atau telah berakhir."
+            title={loadError ? "Konser gagal dimuat" : "Konser tidak ditemukan"}
+            message={loadError || "Event yang kamu cari tidak tersedia atau telah berakhir."}
           />
         </main>
         <Footer />
@@ -59,18 +109,23 @@ export default function EventDetailPage() {
   }
 
   return (
-    <div className="light-app min-h-screen bg-[#f4f8ff] text-[#102a43] flex flex-col">
+    <div className="flex min-h-screen flex-col bg-background text-ink">
       <Navbar />
 
-      <main className="flex-1 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-12">
-        {/* Hero Section */}
+      <main className="mx-auto w-full max-w-7xl flex-1 space-y-8 px-5 pb-24 pt-32 sm:px-8 sm:pt-40">
+        {inventoryRefreshError ? (
+          <p role="status" className="rounded-xl border border-amber-300/40 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+            {inventoryRefreshError} Pembelian akan tetap memeriksa stok terbaru di server.
+          </p>
+        ) : null}
         <EventHero event={event} />
-
-        {/* Ticket Selector Section */}
-        <EventTicketList event={event} />
-
-        {/* Venue, Stage Layout & Guidelines */}
-        <EventInfo event={event} />
+        <Reveal delay={60}>
+          <EventTicketList event={event} />
+        </Reveal>
+        <Reveal delay={60}>
+          <EventInfo event={event} />
+        </Reveal>
+        <EventSetlist event={event} />
       </main>
 
       <Footer />

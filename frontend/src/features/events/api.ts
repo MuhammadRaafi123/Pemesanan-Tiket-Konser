@@ -1,285 +1,371 @@
 import api from "@/lib/axios";
-import { Event } from "./types";
+import type { ApiResponse } from "@/types/api";
+import type {
+  Artist,
+  Event,
+  EventLocation,
+  SetlistEntry,
+  TicketCategory,
+} from "./types";
 
-export const MOCK_EVENTS: Event[] = [
-  {
-    id: 1,
-    artist_id: 1,
-    title: "Coldplay: Music of the Spheres World Tour",
-    description: "Pengalaman konser stadium terbesar tahun ini bersama Coldplay membawakan lagu-lagu legendaris 'Yellow', 'Fix You', 'Viva La Vida', serta album terbaru mereka dalam panggung megah berteknologi ramah lingkungan dan kembang api spektakuler.",
-    location: "Jakarta, Indonesia",
-    venue: "Gelora Bung Karno (GBK) Stadium",
-    event_date: "2026-11-15T19:30:00Z",
-    poster: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200&auto=format&fit=crop",
-    status: "open",
-    genre: "Pop / Rock",
-    featured: true,
-    artists: {
-      id: 1,
-      name: "Coldplay",
-      photo: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=600&auto=format&fit=crop",
-      description: "Band rock legendaris asal Inggris pemenang berbagai penghargaan Grammy dengan rekor tur stadion global.",
-      genre: "Alternative Rock / Pop",
-    },
-    ticket_categories: [
-      {
-        id: 101,
-        event_id: 1,
-        category_name: "VIP Infinity Ultimate",
-        price: 3500000,
-        quota: 500,
-        remaining: 42,
-        perks: ["Akses Paling Depan Panggung", "Exclusive Tour Lanyard & Merch", "Dedicated VIP Lounge & Snack", "Priority Fast-track Entrance"],
-      },
-      {
-        id: 102,
-        event_id: 1,
-        category_name: "Festival Standing",
-        price: 1850000,
-        quota: 1500,
-        remaining: 198,
-        perks: ["Area Berdiri Bebas Dekat Soundboard", "Wristband LED Glow", "General Entrance"],
-      },
-      {
-        id: 103,
-        event_id: 1,
-        category_name: "Tribune Tier 1 Seated",
-        price: 1200000,
-        quota: 2000,
-        remaining: 540,
-        perks: ["Numbered Reserved Seat", "Panoramic Stadium View", "Standard Entry Gate"],
-      },
-      {
-        id: 104,
-        event_id: 1,
-        category_name: "Cat 3 Upper Tribune",
-        price: 750000,
-        quota: 2500,
-        remaining: 1100,
-        perks: ["Upper Tier Seat", "Standard Entry Gate"],
-      },
-    ],
-  },
-  {
-    id: 2,
-    artist_id: 2,
-    title: "Sheila on 7: Tunggu Aku Di Kotamu Tour 2026",
-    description: "Konser nostalgia penuh kehangatan dan kebersamaan bersama Sheila on 7! Nyanyikan bersama 'Dan...', 'Sephia', 'Sahabat Sejati', dan puluhan hits abadi yang telah menemani perjalanan hidup jutaan penggemar lintas generasi.",
-    location: "Yogyakarta, Indonesia",
-    venue: "Stadion Mandala Krida",
-    event_date: "2026-10-24T19:00:00Z",
-    poster: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1200&auto=format&fit=crop",
-    status: "open",
-    genre: "Indie / Pop Rock",
-    featured: true,
-    artists: {
-      id: 2,
-      name: "Sheila on 7",
-      photo: "https://images.unsplash.com/photo-1464375117522-1311d6a5b81f?q=80&w=600&auto=format&fit=crop",
-      description: "Grup musik legendaris asal Yogyakarta dengan karya-karya abadi pencetak hits sepanjang masa.",
-      genre: "Indonesian Pop / Rock",
-    },
-    ticket_categories: [
-      {
-        id: 201,
-        event_id: 2,
-        category_name: "VIP Sephia Lounge",
-        price: 1250000,
-        quota: 300,
-        remaining: 15,
-        perks: ["Tempat Duduk Terdepan Eksklusif", "Official T-Shirt & Totebag", "Free Flow Soft Drinks", "Jalur Masuk Khusus"],
-      },
-      {
-        id: 202,
-        event_id: 2,
-        category_name: "Festival Sahabat Sejati",
-        price: 650000,
-        quota: 3000,
-        remaining: 420,
-        perks: ["Area Festival Depan Panggung", "Koleksi Wristband Edisi Khusus"],
-      },
-      {
-        id: 203,
-        event_id: 2,
-        category_name: "Tribune Kita",
-        price: 450000,
-        quota: 2000,
-        remaining: 850,
-        perks: ["Tribun Duduk Bernomor", "Akses Pintu Barat & Timur"],
-      },
-    ],
-  },
-  {
-    id: 3,
-    artist_id: 3,
-    title: "Neon Pulse: Neon Cyber EDM Festival 2026",
-    description: "Festival musik elektronik terbesar di Asia Tenggara menampilkan tata panggung laser hologram 3D, pyrotechnics, dan DJ papan atas dunia yang siap mengguncang malam dengan dentuman bass tiada henti.",
-    location: "Bali, Indonesia",
-    venue: "GWK Cultural Park Bali",
-    event_date: "2026-12-31T18:00:00Z",
-    poster: "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1200&auto=format&fit=crop",
-    status: "open",
-    genre: "EDM / Electronic",
-    featured: true,
-    artists: {
-      id: 3,
-      name: "Martin Garrix & Friends",
-      photo: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=600&auto=format&fit=crop",
-      description: "Produser musik dan DJ nomor wahid dunia dengan jutaan pendengar di seluruh penjuru dunia.",
-      genre: "Electro House / EDM",
-    },
-    ticket_categories: [
-      {
-        id: 301,
-        event_id: 3,
-        category_name: "VVIP Cyber Deck (2-Day Pass)",
-        price: 4500000,
-        quota: 200,
-        remaining: 18,
-        perks: ["Elevated VIP Viewing Platform", "Complimentary Cocktails & Tapas", "Private Bar & Restroom", "VIP Fast Pass"],
-      },
-      {
-        id: 302,
-        event_id: 3,
-        category_name: "General Admission GA (2-Day Pass)",
-        price: 1600000,
-        quota: 4000,
-        remaining: 680,
-        perks: ["Akses 2 Hari Penuh ke Seluruh 3 Panggung Festival", "Laser Show Experience"],
-      },
-      {
-        id: 303,
-        event_id: 3,
-        category_name: "Single Day Pass - Day 2 Countdown",
-        price: 950000,
-        quota: 2500,
-        remaining: 310,
-        perks: ["Akses Hari Ke-2 (New Year Countdown)", "Wristband Glow"],
-      },
-    ],
-  },
-  {
-    id: 4,
-    artist_id: 4,
-    title: "Tulus: Konser Manusia Epilog Nusantara",
-    description: "Sebuah persembahan megah dan intim dari Tulus membawakan aransemen orkestra megah bersama 40 musisi orkestra simfoni nasional. Nikmati lantunan suara merdu dan puisi liris yang menyentuh sanubari.",
-    location: "Bandung, Indonesia",
-    venue: "Sasana Budaya Ganesha (Sabuga)",
-    event_date: "2026-09-30T19:30:00Z",
-    poster: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1200&auto=format&fit=crop",
-    status: "open",
-    genre: "Jazz / Pop",
-    featured: false,
-    artists: {
-      id: 4,
-      name: "Tulus",
-      photo: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=600&auto=format&fit=crop",
-      description: "Penyanyi & penulis lagu terkemuka Indonesia dengan vokal khas berbalut jazz dan soul hangat.",
-      genre: "Pop / Soul / Jazz",
-    },
-    ticket_categories: [
-      {
-        id: 401,
-        event_id: 4,
-        category_name: "Diamond Center Row",
-        price: 1750000,
-        quota: 150,
-        remaining: 8,
-        perks: ["Kursi Paling Depan Tengah", "Exclusive Booklet & CD Bertanda Tangan", "Meet & Greet Photo Pass"],
-      },
-      {
-        id: 402,
-        event_id: 4,
-        category_name: "Gold Orchestra Seated",
-        price: 950000,
-        quota: 600,
-        remaining: 124,
-        perks: ["Numbered Theater Seat", "Akustik Sabuga Terbaik"],
-      },
-      {
-        id: 403,
-        event_id: 4,
-        category_name: "Silver Balcony",
-        price: 550000,
-        quota: 800,
-        remaining: 215,
-        perks: ["Balcony View", "Standard Entry"],
-      },
-    ],
-  },
-  {
-    id: 5,
-    artist_id: 5,
-    title: "Dewa 19 ft. All Stars: Symphony of Legends",
-    description: "Konser perayaan mahakarya Dewa 19 menghadirkan deretan vokalis legendaris: Ari Lasso, Once Mekel, Ello, Virzha, berpadu megahnya iringan Prague Philharmonic Orchestra.",
-    location: "Surabaya, Indonesia",
-    venue: "Grand City Convention Hall",
-    event_date: "2026-10-18T19:30:00Z",
-    poster: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?q=80&w=1200&auto=format&fit=crop",
-    status: "open",
-    genre: "Rock / Symphony",
-    featured: false,
-    artists: {
-      id: 5,
-      name: "Dewa 19",
-      photo: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=600&auto=format&fit=crop",
-      description: "Band legendaris pelopor musik rock Indonesia karya Ahmad Dhani dan kawan-kawan.",
-      genre: "Classic Rock / Pop Rock",
-    },
-    ticket_categories: [
-      {
-        id: 501,
-        event_id: 5,
-        category_name: "Bintang Lima VIP",
-        price: 2200000,
-        quota: 250,
-        remaining: 30,
-        perks: ["Front Row Sofa Seat", "Exclusive Collector Box & Vinyl", "VIP Dinner Access"],
-      },
-      {
-        id: 502,
-        event_id: 5,
-        category_name: "Festival Baladewa",
-        price: 750000,
-        quota: 1500,
-        remaining: 310,
-        perks: ["Standing Area", "Merchandise T-Shirt"],
-      },
-      {
-        id: 503,
-        event_id: 5,
-        category_name: "Tribune Pandawa",
-        price: 500000,
-        quota: 1200,
-        remaining: 420,
-        perks: ["Numbered Seat", "Standard Entry"],
-      },
-    ],
-  },
-];
 
-export async function fetchEvents(): Promise<Event[]> {
-  try {
-    const res = await api.get("/events");
-    if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-      return res.data.data;
-    }
-    return MOCK_EVENTS;
-  } catch {
-    return MOCK_EVENTS;
-  }
+// =========================================
+// SHARED DUMMY API HELPERS
+// =========================================
+
+export type DummyMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+  has_next: boolean;
+  has_prev: boolean;
+};
+
+export type DummyList<T> = {
+  items: T[];
+  meta: DummyMeta;
+};
+
+export type DummyArtist = {
+  id: number | string;
+  slug: string;
+  name: string;
+  genre?: string;
+  photo?: string;
+  description?: string;
+  origin_city?: string;
+  country?: string;
+  popularity_rank?: number;
+  monthly_listeners?: number;
+  socials?: {
+    instagram?: string;
+    spotify?: string;
+    youtube?: string;
+  };
+  event_count?: number;
+  upcoming_event_count?: number;
+};
+
+export type DummyLocation = {
+  id: number | string;
+  slug: string;
+  name: string;
+  short_name?: string;
+  venue_type?: string;
+  address?: string;
+  city: string;
+  province: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  capacity?: number;
+  facilities?: string[];
+  access?: string[];
+  description?: string;
+  photo?: string;
+  event_count?: number;
+  upcoming_event_count?: number;
+};
+
+export type DummyTicketCategory = {
+  id: number | string;
+  event_id?: number | string;
+  name: string;
+  price: number;
+  price_formatted?: string;
+  quota: number;
+  remaining: number;
+  reserved?: number;
+  sold?: number;
+  available?: number;
+  perks?: string[];
+};
+
+export type DummySetlistEntry = {
+  order: number;
+  encore: boolean;
+  note: string | null;
+  song: {
+    id: number | string;
+    slug: string;
+    title: string;
+    album?: string;
+    release_year?: number;
+    genre?: string;
+    duration_seconds: number;
+    duration: string;
+  };
+  artist: {
+    id: number | string;
+    slug: string;
+    name: string;
+    photo?: string;
+  } | null;
+};
+
+export type DummyEvent = {
+  id: number | string;
+  slug: string;
+  title: string;
+  description: string;
+  status: "open" | "closed";
+  featured?: boolean;
+  genre?: string;
+  organizer?: string;
+  event_date: string;
+  start_time?: string;
+  end_time?: string;
+  doors_open?: string;
+  duration_minutes?: number;
+  poster?: string;
+  min_age?: number;
+  dress_code?: string | null;
+  min_price?: number;
+  min_price_formatted?: string;
+  total_quota?: number;
+  total_remaining?: number;
+  setlist_count?: number;
+  artist_names?: string[];
+  artists?: {
+    id: number | string;
+    slug: string;
+    name: string;
+    genre?: string;
+    photo?: string;
+  }[];
+  location?: {
+    id: number | string;
+    slug: string;
+    name: string;
+    city: string;
+    province: string;
+  } | null;
+  location_label?: string | null;
+  highlights?: string[];
+  ticket_categories?: DummyTicketCategory[];
+  setlist?: DummySetlistEntry[];
+  location_detail?: DummyLocation;
+};
+
+
+// =========================================
+// MAPPERS
+// =========================================
+
+export function mapArtist(
+  artist: DummyArtist
+): Artist {
+  return {
+    id: artist.id,
+    slug: artist.slug,
+    name: artist.name,
+    photo: artist.photo,
+    description: artist.description,
+    genre: artist.genre,
+    socials: artist.socials,
+  };
 }
 
-export async function fetchEventById(id: number | string): Promise<Event | null> {
-  try {
-    const res = await api.get(`/events/${id}`);
-    if (res.data?.data) {
-      return res.data.data;
-    }
-  } catch {
-    // fallback
+export function mapLocation(
+  location: DummyLocation
+): EventLocation {
+  return {
+    id: location.id,
+    slug: location.slug,
+    name: location.name,
+    short_name: location.short_name,
+    venue_type: location.venue_type,
+    address: location.address,
+    city: location.city,
+    province: location.province,
+    country: location.country,
+    latitude: location.latitude,
+    longitude: location.longitude,
+    capacity: location.capacity,
+    facilities: location.facilities,
+    access: location.access,
+    description: location.description,
+    photo: location.photo,
+    event_count: location.event_count,
+    upcoming_event_count: location.upcoming_event_count,
+  };
+}
+
+export function mapTicketCategory(
+  category: DummyTicketCategory
+): TicketCategory {
+  return {
+    id: category.id,
+    event_id: category.event_id,
+    category_name: category.name,
+    price: category.price,
+    quota: category.quota,
+    remaining: category.remaining,
+    reserved: category.reserved,
+    available: category.available,
+    price_formatted: category.price_formatted,
+    perks: category.perks,
+  };
+}
+
+export function mapSetlistEntry(
+  entry: DummySetlistEntry
+): SetlistEntry {
+  return {
+    order: entry.order,
+    encore: entry.encore,
+    note: entry.note,
+    song: entry.song,
+    artist: entry.artist
+      ? mapArtist({
+          ...entry.artist,
+          slug: entry.artist.slug,
+        })
+      : null,
+  };
+}
+
+export function mapEvent(event: DummyEvent): Event {
+  const artistsList = (event.artists || []).map(
+    (artist) => mapArtist(artist)
+  );
+
+  return {
+    id: event.id,
+    slug: event.slug,
+    artist_id: artistsList[0]?.id,
+    title: event.title,
+    description: event.description,
+    location:
+      event.location_label ||
+      (event.location
+        ? `${event.location.city}, ${event.location.province}`
+        : ""),
+    venue: event.location?.name,
+    event_date: event.event_date,
+    poster: event.poster,
+    status: event.status,
+    artists: artistsList[0],
+    artists_list: artistsList,
+    artist_names: event.artist_names || artistsList.map(
+      (artist) => artist.name
+    ),
+    ticket_categories: (event.ticket_categories || []).map(
+      mapTicketCategory
+    ),
+    setlist: (event.setlist || []).map(mapSetlistEntry),
+    setlist_count: event.setlist_count ?? event.setlist?.length ?? 0,
+    location_detail: event.location_detail
+      ? mapLocation(event.location_detail)
+      : event.location
+        ? mapLocation({
+            ...event.location,
+            slug: event.location.slug,
+          })
+        : null,
+    highlights: event.highlights,
+    genre: event.genre,
+    featured: event.featured,
+    organizer: event.organizer,
+    start_time: event.start_time,
+    end_time: event.end_time,
+    doors_open: event.doors_open,
+    duration_minutes: event.duration_minutes,
+    min_age: event.min_age,
+    dress_code: event.dress_code,
+    min_price: event.min_price,
+    total_quota: event.total_quota,
+    total_remaining: event.total_remaining,
+  };
+}
+
+
+// =========================================
+// FETCHERS (dummy API)
+// =========================================
+
+export type EventQuery = {
+  search?: string;
+  artist?: string;
+  city?: string;
+  location?: string;
+  status?: "open" | "closed";
+  genre?: string;
+  featured?: boolean;
+  sort?: "asc" | "desc" | "price" | "popular";
+  page?: number;
+  limit?: number;
+};
+
+export async function fetchEvents(
+  query: EventQuery = {}
+): Promise<Event[]> {
+  const response = await api.get<
+    ApiResponse<DummyList<DummyEvent>>
+  >("/dummy/events", { params: query });
+
+  return (
+    response.data?.data?.items?.map(mapEvent) || []
+  );
+}
+
+export async function fetchEventById(
+  id: number | string
+): Promise<Event | null> {
+  const response = await api.get<
+    ApiResponse<DummyEvent>
+  >(`/dummy/events/${id}`);
+
+  if (!response.data?.data) {
+    return null;
   }
 
-  const found = MOCK_EVENTS.find((e) => String(e.id) === String(id));
-  return found || MOCK_EVENTS[0];
+  return mapEvent(response.data.data);
+}
+
+export async function fetchEventSetlist(
+  id: number | string
+): Promise<SetlistEntry[]> {
+  const response = await api.get<
+    ApiResponse<{
+      artists: DummyArtist[];
+      songs: DummySetlistEntry[];
+    }>
+  >(`/dummy/events/${id}/songs`);
+
+  return (
+    response.data?.data?.songs?.map(mapSetlistEntry) ||
+    []
+  );
+}
+
+export async function fetchEventTickets(
+  id: number | string
+): Promise<TicketCategory[]> {
+  const response = await api.get<
+    ApiResponse<{
+      ticket_categories: DummyTicketCategory[];
+    }>
+  >(`/dummy/events/${id}/tickets`);
+
+  return (
+    response.data?.data?.ticket_categories?.map(
+      mapTicketCategory
+    ) || []
+  );
+}
+
+export async function fetchEventLocation(
+  id: number | string
+): Promise<EventLocation | null> {
+  const response = await api.get<
+    ApiResponse<DummyLocation>
+  >(`/dummy/events/${id}/location`);
+
+  if (!response.data?.data) {
+    return null;
+  }
+
+  return mapLocation(response.data.data);
 }

@@ -5,10 +5,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, CheckCircle2, Eye, EyeOff, LockKeyhole, Mail, Phone, UserRound } from "lucide-react";
-import {
-  registerSchema,
-  type RegisterFormValues,
-} from "@/features/auth/schemas/auth.schema";
+import { registerSchema, type RegisterFormValues } from "@/features/auth/schemas/auth.schema";
 import { registerUser } from "@/features/auth/api";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { Button } from "@/components/ui/button";
@@ -27,12 +24,7 @@ export default function RegisterForm() {
     reset,
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: undefined,
-      password: "",
-    },
+    defaultValues: { name: "", email: "", phone: undefined, password: "" },
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
@@ -47,34 +39,32 @@ export default function RegisterForm() {
         phone: values.phone || undefined,
       });
 
-      setSuccessMessage("Akun berhasil dibuat. Sekarang, masuk untuk menemukan live moment berikutnya.");
+      setSuccessMessage("Akun berhasil dibuat. Sekarang masuk untuk menemukan momen live berikutnya.");
       reset();
     } catch (error: unknown) {
-      setServerError(
-        getApiErrorMessage(error, "Registrasi gagal. Silakan coba lagi."),
-      );
+      setServerError(getApiErrorMessage(error, "Registrasi gagal. Silakan coba lagi."));
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {serverError && (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {serverError ? (
         <div role="alert" className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{serverError}</span>
         </div>
-      )}
+      ) : null}
 
-      {successMessage && (
+      {successMessage ? (
         <div role="status" className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{successMessage}</span>
         </div>
-      )}
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="name" className="text-xs font-medium tracking-wide text-[#6683a3]/65">Nama lengkap</Label>
+        <div className="login-field login-field-1 space-y-2 sm:col-span-2">
+          <Label htmlFor="name">Nama lengkap</Label>
           <Input
             id="name"
             icon={<UserRound className="h-4 w-4" />}
@@ -83,11 +73,11 @@ export default function RegisterForm() {
             aria-invalid={Boolean(errors.name)}
             {...register("name")}
           />
-          {errors.name && <p className="text-xs text-rose-300">{errors.name.message}</p>}
+          {errors.name ? <p className="text-xs font-medium text-rose-600">{errors.name.message}</p> : null}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-xs font-medium tracking-wide text-[#6683a3]/65">Email</Label>
+        <div className="login-field login-field-1 space-y-2">
+          <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
@@ -97,11 +87,13 @@ export default function RegisterForm() {
             aria-invalid={Boolean(errors.email)}
             {...register("email")}
           />
-          {errors.email && <p className="text-xs text-rose-300">{errors.email.message}</p>}
+          {errors.email ? <p className="text-xs font-medium text-rose-600">{errors.email.message}</p> : null}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="phone" className="text-xs font-medium tracking-wide text-[#6683a3]/65">Nomor telepon <span className="text-[#6683a3]/25">(opsional)</span></Label>
+        <div className="login-field login-field-2 space-y-2">
+          <Label htmlFor="phone">
+            Nomor telepon <span className="font-normal text-muted-foreground/70">(opsional)</span>
+          </Label>
           <Input
             id="phone"
             type="tel"
@@ -111,47 +103,45 @@ export default function RegisterForm() {
             aria-invalid={Boolean(errors.phone)}
             {...register("phone")}
           />
-          {errors.phone && <p className="text-xs text-rose-300">{errors.phone.message}</p>}
+          {errors.phone ? <p className="text-xs font-medium text-rose-600">{errors.phone.message}</p> : null}
         </div>
 
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="password" className="text-xs font-medium tracking-wide text-[#6683a3]/65">Password</Label>
+        <div className="login-field login-field-2 space-y-2 sm:col-span-2">
+          <Label htmlFor="password">Password</Label>
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
             icon={<LockKeyhole className="h-4 w-4" />}
-            rightIcon={(
+            rightIcon={
               <button
                 type="button"
                 aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
                 onClick={() => setShowPassword((current) => !current)}
-                className="rounded-lg p-1 text-[#6683a3]/35 transition hover:text-[#2563eb]"
+                className="press rounded-full p-1.5 text-muted-foreground transition hover:bg-accent hover:text-primary"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
-            )}
+            }
             placeholder="Minimal 8 karakter"
             autoComplete="new-password"
             aria-invalid={Boolean(errors.password)}
             {...register("password")}
           />
-          {errors.password && <p className="text-xs text-rose-300">{errors.password.message}</p>}
-          <p className="text-[11px] leading-5 text-[#6683a3]/30">Gunakan password yang kuat dan unik untuk akunmu.</p>
+          {errors.password ? <p className="text-xs font-medium text-rose-600">{errors.password.message}</p> : null}
+          <p className="text-[0.68rem] leading-5 text-muted-foreground/80">
+            Gunakan password yang kuat dan unik untuk akunmu.
+          </p>
         </div>
       </div>
 
-      <Button type="submit" variant="glow" size="lg" className="w-full" isLoading={isSubmitting}>
-        {!isSubmitting && <CheckCircle2 className="h-4 w-4" />}
+      <Button type="submit" size="lg" className="w-full" isLoading={isSubmitting}>
+        {!isSubmitting ? <CheckCircle2 className="h-4 w-4" /> : null}
         Buat akun saya
       </Button>
 
-      <p className="text-center text-xs leading-5 text-[#6683a3]/30">
-        Dengan membuat akun, kamu menyetujui pengalaman Concertix yang lebih personal.
-      </p>
-
-      <p className="text-center text-sm text-[#6683a3]/45">
+      <p className="text-center text-sm text-muted-foreground">
         Sudah punya akun?{" "}
-        <Link href="/login" className="font-semibold text-[#2563eb] transition hover:text-[#60a5fa]">
+        <Link href="/login" className="font-semibold text-primary transition hover:text-[#16389f]">
           Masuk di sini
         </Link>
       </p>

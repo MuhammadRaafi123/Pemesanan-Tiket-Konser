@@ -1,6 +1,6 @@
-import React from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/shared/Reveal";
 
 interface ErrorStateProps {
   title?: string;
@@ -9,32 +9,29 @@ interface ErrorStateProps {
 }
 
 export function ErrorState({
-  title = "Terjadi Kesalahan",
+  title = "Terjadi kesalahan",
   message = "Gagal memuat data. Silakan coba lagi beberapa saat lagi.",
   onRetry,
 }: ErrorStateProps) {
   return (
-    <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center backdrop-blur-xl">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-500 shadow-[0_12px_30px_-18px_rgba(244,63,94,.35)]">
-        <AlertTriangle className="h-8 w-8" />
+    <Reveal variant="soft">
+      <div className="flex min-h-[300px] flex-col items-center justify-center rounded-[28px] border border-rose-100 bg-rose-50/40 px-8 py-14 text-center">
+        <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-100 bg-white text-rose-500">
+          <AlertTriangle className="h-6 w-6" />
+        </span>
+
+        <h3 className="font-display text-2xl text-ink">{title}</h3>
+        <p className="mt-3 max-w-sm text-sm leading-7 text-muted-foreground">{message}</p>
+
+        {onRetry ? (
+          <Button onClick={onRetry} variant="secondary" className="mt-7 gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Coba lagi
+          </Button>
+        ) : null}
       </div>
-
-      <h3 className="text-lg font-bold text-[#123b6d] tracking-tight">{title}</h3>
-      <p className="mt-2 max-w-sm text-sm text-[#6683a3] leading-relaxed">
-        {message}
-      </p>
-
-      {onRetry && (
-        <Button
-          onClick={onRetry}
-          variant="outline"
-          className="mt-6 gap-2 border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-300"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Coba Lagi
-        </Button>
-      )}
-    </div>
+    </Reveal>
   );
 }
+
 export default ErrorState;

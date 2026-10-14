@@ -8,6 +8,7 @@ export interface UserTicket {
   category: TicketCategory;
   holder_name: string;
   qr_code: string;
+  quantity: number;
   status: "active" | "used" | "pending";
   seat_number?: string;
   gate?: string;

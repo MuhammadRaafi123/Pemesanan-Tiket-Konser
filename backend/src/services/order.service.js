@@ -56,7 +56,8 @@ export const createOrderService = async (
       events (
         id,
         title,
-        status
+        status,
+        event_date
       )
     `)
     .in(
@@ -98,7 +99,8 @@ export const createOrderService = async (
   ) {
     if (
       !ticket.events ||
-      ticket.events.status !== "open"
+      ticket.events.status !== "open" ||
+      new Date(ticket.events.event_date).getTime() <= Date.now()
     ) {
       const error = new Error(
         `Penjualan event "${ticket.events?.title || "ini"}" sudah ditutup`
@@ -175,8 +177,8 @@ export const createOrderService = async (
         const ticket =
           ticketCategories.find(
             (category) =>
-              category.id ===
-              item.ticket_category_id
+              String(category.id) ===
+              String(item.ticket_category_id)
           );
 
 

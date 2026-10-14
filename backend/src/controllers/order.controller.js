@@ -137,6 +137,12 @@ export const getMyOrders = async (
       .from("orders")
       .select(`
         *,
+        users:users!fk_order_user (
+          id,
+          name,
+          email,
+          phone
+        ),
         order_items (
           id,
           qty,
@@ -150,7 +156,8 @@ export const getMyOrders = async (
               title,
               event_date,
               location,
-              poster
+              poster,
+              status
             )
           )
         ),
@@ -159,7 +166,8 @@ export const getMyOrders = async (
           payment_method,
           proof_image,
           status,
-          verified_at
+          verified_at,
+          rejection_reason
         )
       `)
       .eq(
@@ -229,7 +237,7 @@ export const getOrderById = async (
       .from("orders")
       .select(`
         *,
-        users (
+        users:users!fk_order_user (
           id,
           name,
           email,
@@ -248,7 +256,8 @@ export const getOrderById = async (
               title,
               event_date,
               location,
-              poster
+              poster,
+              status
             )
           )
         ),
@@ -257,7 +266,8 @@ export const getOrderById = async (
           payment_method,
           proof_image,
           status,
-          verified_at
+          verified_at,
+          rejection_reason
         )
       `)
       .eq(
@@ -342,7 +352,7 @@ export const getAllOrders = async (
       .from("orders")
       .select(`
         *,
-        users (
+        users:users!fk_order_user (
           id,
           name,
           email,

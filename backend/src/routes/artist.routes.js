@@ -2,7 +2,6 @@ import express from "express";
 
 import {
   getArtists,
-  getPopularArtists,
   getArtistById,
   createArtist,
   updateArtist,
@@ -37,13 +36,6 @@ const router = express.Router();
 router.get(
   "/",
   getArtists
-);
-
-
-// GET POPULAR INDONESIAN ARTISTS
-router.get(
-  "/popular",
-  getPopularArtists
 );
 
 

@@ -1,20 +1,10 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { 
-  CalendarDays, 
-  MapPin, 
-  Sparkles, 
-  ArrowRight, 
-  Ticket, 
-  Flame
-} from "lucide-react";
-import { Event } from "../types";
-import { CardSpotlight } from "@/components/shared/CardSpotlight";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { CalendarDays, ChevronRight, MapPin, Sparkles, Ticket } from "lucide-react";
+import type { Event } from "../types";
+import { formatCurrency, formatEventDate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 
 interface EventCardProps {
@@ -22,131 +12,111 @@ interface EventCardProps {
   index?: number;
 }
 
-export function EventCard({ event, index = 0 }: EventCardProps) {
-  const formattedDate = new Date(event.event_date).toLocaleDateString("id-ID", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
+export function EventCard({ event }: EventCardProps) {
+  const isOpen = event.status === "open";
   const lowestPrice = event.ticket_categories?.length
-    ? Math.min(...event.ticket_categories.map((tc) => tc.price))
+    ? Math.min(...event.ticket_categories.map((category) => category.price))
     : null;
-
-  const delayClass = [
-    "delay-100",
-    "delay-200",
-    "delay-300",
-    "delay-400",
-    "delay-500",
-  ][index % 5];
+  const poster = resolveMediaUrl(event.poster || "");
 
   return (
-    <div className={`${delayClass} h-full`}>
-      <CardSpotlight
-        spotlightColor="rgba(214, 184, 121, 0.16)"
-        className="group flex h-full flex-col overflow-hidden rounded-[24px] border-blue-100 bg-white p-0 transition-all duration-500 hover:border-[#d6b879]/40 hover:shadow-[0_20px_55px_-25px_rgba(214,184,121,0.3)]"
-      >
-        {/* ================================================= */}
-        {/* POSTER & BADGES */}
-        {/* ================================================= */}
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-blue-50">
-          <Image
-            src={resolveMediaUrl(event.poster || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800&auto=format&fit=crop")}
-            alt={event.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-          />
-
-          {/* Image contrast overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e18] via-[#0e0e18]/30 to-transparent opacity-90" />
-
-          {/* Top Badges */}
-          <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
-            <Badge variant="gradient" className="gap-1 text-[11px] shadow-lg">
-              <Sparkles className="h-3 w-3" />
-              {event.genre || "Live Concert"}
-            </Badge>
-
-            {event.featured && (
-              <Badge variant="warning" className="gap-1 text-[11px] font-bold">
-                <Flame className="h-3 w-3 fill-amber-400 text-amber-400" />
-                Featured
-              </Badge>
-            )}
-          </div>
-
-          {/* Artist Avatar Pill */}
-          {event.artists && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-3 py-1 backdrop-blur-md">
-              <div className="relative h-5 w-5 overflow-hidden rounded-full border border-blue-400">
-                <Image
-                  src={resolveMediaUrl(event.artists.photo)}
-                  alt={event.artists.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <span className="text-xs font-semibold text-white truncate max-w-[140px]">
-                {event.artists.name}
-              </span>
+    <article className="group relative h-full overflow-hidden rounded-2xl border border-[#232733] bg-[#191b23] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ffb703]/30 hover:shadow-2xl hover:shadow-black/50 hover-sheen">
+      <Link href={`/events/${event.id}`} className="flex h-full flex-col">
+        <div className="relative h-52 overflow-hidden bg-[#1e2128]">
+          {poster ? (
+            <Image
+              src={poster}
+              alt={event.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105 zoom-media"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <Ticket className="h-12 w-12 text-[#2a2d36]" />
             </div>
           )}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#191b23] to-transparent" />
+
+          <div className="absolute left-3 top-3">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                isOpen
+                  ? "bg-[#ffb703] text-[#10131a]"
+                  : "border border-white/15 bg-[#0b0e15]/85 text-[#c4c5cc]"
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${isOpen ? "bg-[#10131a]" : "bg-[#8a8d98]"}`} />
+              {isOpen ? "Tiket tersedia" : "Penjualan ditutup"}
+            </span>
+          </div>
+          {event.featured ? (
+            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded border border-[#ffb703]/30 bg-[#0b0e15]/85 px-2.5 py-1 text-[10px] font-semibold text-[#ffdea9] backdrop-blur">
+              <Sparkles className="h-3 w-3 text-[#ffb703]" />
+              Unggulan
+            </span>
+          ) : null}
+
+          <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-2 text-[11px]">
+            <span className="flex min-w-0 items-center gap-1.5 rounded bg-[#272a32]/90 px-2.5 py-1 text-[#e1e2ec]">
+              <CalendarDays className="h-3 w-3 shrink-0 text-[#ffb703]" />
+              <span className="truncate">
+                {formatEventDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}
+              </span>
+            </span>
+            <span className="max-w-[55%] truncate rounded bg-[#272a32]/90 px-2.5 py-1 text-[#e1e2ec]">
+              {event.location}
+            </span>
+          </div>
         </div>
 
-        {/* ================================================= */}
-        {/* CONTENT & DETAILS */}
-        {/* ================================================= */}
-        <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
-          
-          <div className="space-y-3">
-            {/* Title */}
-            <h3 className="text-lg font-bold tracking-tight text-[#123b6d] line-clamp-2 group-hover:text-[#2563eb] transition-colors duration-200">
+        <div className="relative z-10 -my-2 flex items-center justify-between px-3">
+          <span className="h-4 w-4 rounded-full bg-[#0b0e15] ring-2 ring-[#232733]" />
+          <span className="h-0 flex-1 border-t-2 border-dashed border-[#2a2d36]" />
+          <span className="h-4 w-4 rounded-full bg-[#0b0e15] ring-2 ring-[#232733]" />
+        </div>
+
+        <div className="flex flex-1 flex-col gap-2.5 p-4 pt-1.5">
+          <div>
+            <p className="truncate text-[10px] uppercase tracking-wider text-[#d5baff]">
+              {event.artist_names?.join(", ") || event.artists?.name || "Live Experience"}
+            </p>
+            <h3 className="mt-0.5 truncate text-lg font-bold text-[#e1e2ec] transition-colors group-hover:text-[#ffb703]">
               {event.title}
             </h3>
-
-            {/* Date & Location */}
-            <div className="space-y-1.5 text-xs text-[#6683a3]">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-[#2563eb] shrink-0" />
-                <span>{formattedDate}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-[#2563eb] shrink-0" />
-                <span className="truncate">{event.venue ? `${event.venue}, ${event.location}` : event.location}</span>
-              </div>
-            </div>
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-[#8a8d98]">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-[#ffb703]" />
+              <span className="truncate">{event.venue || event.location}</span>
+            </p>
           </div>
-
-          {/* Bottom Price & Action */}
-          <div className="mt-6 pt-4 border-t border-blue-100 flex items-center justify-between gap-3">
+          {event.ticket_categories && event.ticket_categories.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {event.ticket_categories.slice(0, 3).map((category) => (
+                <span
+                  key={category.id}
+                  className="rounded border border-[#2a2d36] bg-[#1e2128] px-2 py-0.5 text-[10px] text-[#8a8d98]"
+                >
+                  {category.category_name}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-[#2a2d36] pt-3">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#8aa4c1]">
-                Mulai Dari
-              </p>
-              <p className="text-base font-black text-[#2563eb]">
-                {lowestPrice ? `Mulai ${lowestPrice.toLocaleString("id-ID")}` : "Lihat harga"}
+              <span className="text-[10px] text-[#8a8d98]">Mulai</span>
+              <p className="text-lg font-bold text-[#ffb703]">
+                {lowestPrice !== null ? formatCurrency(lowestPrice) : "Lihat harga"}
               </p>
             </div>
-
-            <Link href={`/events/${event.id}`}>
-              <Button
-                variant="glow"
-                size="sm"
-                className="gap-1.5 group/btn"
-              >
-                <Ticket className="h-3.5 w-3.5 text-white" />
-                <span>Pesan</span>
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
-              </Button>
-            </Link>
+            <span className="press inline-flex items-center gap-1.5 rounded-lg bg-[#ffb703] px-4 py-2 text-xs font-bold text-[#10131a] transition-colors group-hover:bg-[#ffdea9]">
+              Beli Tiket
+              <ChevronRight className="h-3.5 w-3.5" />
+            </span>
           </div>
-
         </div>
-      </CardSpotlight>
-    </div>
+      </Link>
+    </article>
   );
 }
+
 export default EventCard;

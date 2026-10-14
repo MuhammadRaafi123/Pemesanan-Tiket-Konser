@@ -17,11 +17,19 @@ export interface Order {
   status: "pending" | "paid" | "rejected" | "cancelled";
   qr_code?: string;
   created_at: string;
+  expires_at?: string;
+  users?: {
+    id: number | string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
   order_items?: OrderItem[];
   events?: Event;
   payment?: {
     payment_method: string;
     proof_image?: string;
     status: string;
+    rejection_reason?: string;
   };
 }

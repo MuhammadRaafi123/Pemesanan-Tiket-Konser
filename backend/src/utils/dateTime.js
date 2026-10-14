@@ -1,9 +1,9 @@
-    export const formatToWIB = (date) => {
+export const formatToWIB = (date) => {
   if (!date) {
     return null;
   }
 
-  return new Intl.DateTimeFormat(
+  const formatted = new Intl.DateTimeFormat(
     "sv-SE",
     {
       timeZone: "Asia/Jakarta",
@@ -16,4 +16,6 @@
       hourCycle: "h23",
     }
   ).format(new Date(date));
+
+  return `${formatted.replace(" ", "T")}+07:00`;
 };

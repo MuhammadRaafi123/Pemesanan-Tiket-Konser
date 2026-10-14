@@ -14,15 +14,15 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
 
   return (
     <AuthShell
-      eyebrow="Secure your account"
+      eyebrow="Amankan akunmu"
       title="Buat password baru."
       description="Selesaikan satu langkah terakhir dan kembali ke akunmu dengan keamanan yang lebih baik."
       sideTitle="A fresh start, safely."
-      sideDescription="Your new password will immediately protect access to your Concertix account and digital tickets."
+      sideDescription="Password barumu akan langsung melindungi akses ke akun Concertix dan tiket digitalmu."
       sideFeatures={[
-        { icon: KeyRound, title: "Verified token", description: "Only an official link can be used." },
-        { icon: ShieldCheck, title: "Encrypted password", description: "Your new details are stored securely." },
-        { icon: CheckCircle2, title: "Ready to sign in", description: "No extra steps after this." },
+        { icon: KeyRound, title: "Token terverifikasi", description: "Hanya tautan resmi yang bisa digunakan." },
+        { icon: ShieldCheck, title: "Password terenkripsi", description: "Detail barumu disimpan dengan aman." },
+        { icon: CheckCircle2, title: "Siap masuk lagi", description: "Tidak ada langkah tambahan setelah ini." },
       ]}
     >
       <ResetPasswordForm token={resetToken} />

@@ -1,20 +1,22 @@
 "use client";
 
-import React from "react";
-import { Event } from "../types";
+import { Search } from "lucide-react";
+import type { Event } from "../types";
 import { EventCard } from "./EventCard";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { Search } from "lucide-react";
+import { Stagger } from "@/components/shared/Reveal";
 
 interface EventGridProps {
   events: Event[];
+  variant?: "light" | "dark";
   emptyTitle?: string;
   emptyDescription?: string;
 }
 
 export function EventGrid({
   events,
-  emptyTitle = "Tidak Ada Konser Ditemukan",
+  variant = "light",
+  emptyTitle = "Belum ada konser",
   emptyDescription = "Coba ubah kata kunci pencarian atau filter genre kamu.",
 }: EventGridProps) {
   if (!events || events.length === 0) {
@@ -23,18 +25,21 @@ export function EventGrid({
         icon={Search}
         title={emptyTitle}
         description={emptyDescription}
-        actionLabel="Lihat Semua Konser"
-        actionHref="/events"
+        variant={variant}
       />
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-      {events.map((event, index) => (
-        <EventCard key={event.id} event={event} index={index} />
+    <Stagger
+      className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+      step={80}
+    >
+      {events.map((event) => (
+        <EventCard key={event.id} event={event} />
       ))}
-    </div>
+    </Stagger>
   );
 }
+
 export default EventGrid;

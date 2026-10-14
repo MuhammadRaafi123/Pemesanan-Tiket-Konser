@@ -1,25 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
-import { 
-  QrCode, 
-  Building2, 
-  Wallet, 
-  Copy, 
-  Check, 
-  Sparkles,
-  ShieldCheck 
-} from "lucide-react";
+import { Building2, Check, Copy, QrCode, ShieldCheck, Wallet } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Reveal } from "@/components/shared/Reveal";
 import { useToast } from "@/components/shared/ToastProvider";
 
-export interface PaymentMethod {
+interface PaymentMethod {
   id: string;
   name: string;
   type: "qris" | "va" | "ewallet";
   accountNumber?: string;
   accountName?: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   instructions: string[];
 }
 
@@ -28,190 +22,197 @@ interface PaymentMethodSelectorProps {
   onSelect: (method: string) => void;
 }
 
-export function PaymentMethodSelector({
-  selectedMethod,
-  onSelect,
-}: PaymentMethodSelectorProps) {
+const METHODS: PaymentMethod[] = [
+  {
+    id: "QRIS",
+    name: "QRIS instan",
+    type: "qris",
+    icon: <QrCode className="h-4 w-4" />,
+    instructions: [
+      "Buka aplikasi mobile banking atau e-wallet pilihanmu (BCA, Mandiri, GoPay, OVO, ShopeePay, DANA).",
+      "Pindai kode QRIS yang tampil di layar.",
+      "Periksa nominal pembayaran lalu selesaikan transaksi.",
+      "Simpan tangkapan layar sebagai bukti pembayaran.",
+    ],
+  },
+  {
+    id: "BCA_VA",
+    name: "BCA virtual account",
+    type: "va",
+    accountNumber: "8801928391823901",
+    accountName: "CONCERTIX INDONESIA",
+    icon: <Building2 className="h-4 w-4" />,
+    instructions: [
+      "Buka BCA Mobile, KlikBCA, atau ATM BCA.",
+      "Pilih menu Transfer lalu Virtual Account.",
+      "Masukkan nomor virtual account di atas.",
+      "Konfirmasi tagihan dan selesaikan pembayaran.",
+    ],
+  },
+  {
+    id: "MANDIRI_VA",
+    name: "Mandiri virtual account",
+    type: "va",
+    accountNumber: "8932819283019283",
+    accountName: "CONCERTIX INDONESIA",
+    icon: <Building2 className="h-4 w-4" />,
+    instructions: [
+      "Buka aplikasi Livin' by Mandiri.",
+      "Pilih menu Bayar lalu Multipayment.",
+      "Masukkan kode perusahaan atau virtual account di atas.",
+      "Selesaikan transaksi dan simpan resi transfer.",
+    ],
+  },
+  {
+    id: "GOPAY_OVO",
+    name: "GoPay / OVO / DANA",
+    type: "ewallet",
+    accountNumber: "081298765432",
+    accountName: "CONCERTIX INDONESIA",
+    icon: <Wallet className="h-4 w-4" />,
+    instructions: [
+      "Buka aplikasi e-wallet pilihanmu.",
+      "Lakukan transfer ke nomor telepon tujuan di atas.",
+      "Sertakan catatan nomor pesanan pada catatan transfer.",
+      "Unggah tangkapan layar bukti transfer.",
+    ],
+  },
+];
+
+const TYPE_LABEL: Record<PaymentMethod["type"], string> = {
+  qris: "QRIS",
+  va: "Virtual account",
+  ewallet: "E-wallet",
+};
+
+export function PaymentMethodSelector({ selectedMethod, onSelect }: PaymentMethodSelectorProps) {
   const { success } = useToast();
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
 
-  const methods: PaymentMethod[] = [
-    {
-      id: "QRIS",
-      name: "QRIS Instan (Semua Bank & E-Wallet)",
-      type: "qris",
-      icon: <QrCode className="h-5 w-5 text-[#2563eb]" />,
-      instructions: [
-        "Buka aplikasi mobile banking atau e-wallet pilihanmu (BCA, Mandiri, GoPay, OVO, ShopeePay, DANA).",
-        "Pindai QRIS code yang tampil di layar.",
-        "Periksa nominal pembayaran dan selesaikan transaksi.",
-        "Simpan tangkapan layar (screenshot) bukti pembayaran.",
-      ],
-    },
-    {
-      id: "BCA_VA",
-      name: "BCA Virtual Account",
-      type: "va",
-      accountNumber: "8801928391823901",
-      accountName: "CONCERTIX INDONESIA",
-      icon: <Building2 className="h-5 w-5 text-[#2563eb]" />,
-      instructions: [
-        "Buka BCA Mobile / KlikBCA / ATM BCA.",
-        "Pilih menu Transfer > Virtual Account.",
-        "Masukkan nomor Virtual Account di atas.",
-        "Konfirmasi tagihan dan selesaikan pembayaran.",
-      ],
-    },
-    {
-      id: "MANDIRI_VA",
-      name: "Mandiri Virtual Account",
-      type: "va",
-      accountNumber: "8932819283019283",
-      accountName: "CONCERTIX INDONESIA",
-      icon: <Building2 className="h-5 w-5 text-amber-400" />,
-      instructions: [
-        "Buka aplikasi Livin' by Mandiri.",
-        "Pilih menu Bayar > Multipayment.",
-        "Masukkan kode perusahaan / Virtual Account di atas.",
-        "Selesaikan transaksi dan simpan resi bukti transfer.",
-      ],
-    },
-    {
-      id: "GOPAY_OVO",
-      name: "GoPay / OVO / DANA Direct",
-      type: "ewallet",
-      accountNumber: "081298765432",
-      accountName: "CONCERTIX INDONESIA",
-      icon: <Wallet className="h-5 w-5 text-sky-600" />,
-      instructions: [
-        "Buka aplikasi E-Wallet pilihanmu.",
-        "Lakukan transfer ke nomor telepon tujuan di atas.",
-        "Sertakan catatan nomor pesanan.",
-        "Upload tangkapan layar bukti transfer.",
-      ],
-    },
-  ];
+  const activeMethod = METHODS.find((method) => method.id === selectedMethod) || METHODS[0];
 
-  const handleCopy = (acc: string) => {
+  const handleCopy = (account: string) => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(acc);
-      setCopiedAccount(acc);
+      navigator.clipboard.writeText(account);
+      setCopiedAccount(account);
       success("Nomor rekening / VA berhasil disalin!");
-      setTimeout(() => setCopiedAccount(null), 3000);
+      window.setTimeout(() => setCopiedAccount(null), 3000);
     }
   };
 
-  const activeMethod = methods.find((m) => m.id === selectedMethod) || methods[0];
-
   return (
-    <div className="space-y-6">
-      
-      {/* Methods List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {methods.map((method) => {
+    <div className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {METHODS.map((method) => {
           const isSelected = selectedMethod === method.id;
-
           return (
-            <div
+            <button
               key={method.id}
+              type="button"
               onClick={() => onSelect(method.id)}
-              className={`cursor-pointer rounded-2xl border p-4 transition-all duration-300 flex items-center justify-between ${
+              aria-pressed={isSelected}
+              className={`flex items-center justify-between gap-3 rounded-2xl border p-4 text-left transition-all duration-400 ${
                 isSelected
-                  ? "border-blue-500 bg-blue-50 shadow-[0_10px_24px_-16px_rgba(37,99,235,.45)]"
-                  : "border-blue-100 bg-white hover:border-blue-300 hover:bg-blue-50"
+                  ? "border-primary/45 bg-accent/60 shadow-[0_14px_30px_-22px_rgba(27,69,199,.7)]"
+                  : "border-border bg-white hover:border-primary/25 hover:bg-muted/50"
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 border border-blue-100">
+              <span className="flex items-center gap-3">
+                <span
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors duration-300 ${
+                    isSelected ? "border-primary/25 bg-white text-primary" : "border-border bg-muted/60 text-muted-foreground"
+                  }`}
+                >
                   {method.icon}
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-[#123b6d] leading-tight">{method.name}</p>
-                  <p className="text-[10px] text-[#8aa4c1] uppercase mt-0.5">{method.type.toUpperCase()}</p>
-                </div>
-              </div>
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold text-ink">{method.name}</span>
+                  <span className="mt-0.5 block text-[0.65rem] uppercase tracking-[0.12em] text-muted-foreground">
+                    {TYPE_LABEL[method.type]}
+                  </span>
+                </span>
+              </span>
 
-              <div
-                className={`flex h-5 w-5 items-center justify-center rounded-full border transition-all ${
-                  isSelected
-                    ? "border-blue-500 bg-blue-600 text-white shadow-md"
-                    : "border-blue-200"
+              <span
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
+                  isSelected ? "border-primary bg-primary text-white" : "border-border"
                 }`}
               >
-                {isSelected && <Check className="h-3 w-3" />}
-              </div>
-            </div>
+                {isSelected ? <Check className="h-3 w-3" /> : null}
+              </span>
+            </button>
           );
         })}
       </div>
 
-      {/* Selected Method Details Box */}
-      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-blue-100 pb-4">
-          <div className="flex items-center gap-2 text-sm font-bold text-[#123b6d]">
-            <Sparkles className="h-4 w-4 text-[#2563eb]" />
-            Detail Instruksi: {activeMethod.name}
-          </div>
-          <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Enkripsi Aman
-          </span>
+      <Reveal className="rounded-2xl border border-border bg-muted/50 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+          <h3 className="font-display text-lg text-ink">Instruksi: {activeMethod.name}</h3>
+          <Badge variant="secondary" className="gap-1.5">
+            <ShieldCheck className="h-3 w-3 text-emerald-600" />
+            Transaksi terenkripsi
+          </Badge>
         </div>
 
-        {/* QR Code display if QRIS */}
-        {activeMethod.type === "qris" && (
-          <div className="flex flex-col items-center justify-center text-center p-4 bg-white rounded-xl border border-blue-100">
-            <div className="relative h-48 w-48 bg-white p-2 rounded-xl shadow-lg border border-blue-400">
+        {activeMethod.type === "qris" ? (
+          <div className="mt-6 flex flex-col items-center text-center">
+            <div className="relative h-48 w-48 rounded-2xl border border-border bg-white p-3 shadow-[0_20px_50px_-32px_rgba(13,38,84,.7)]">
               <Image
                 src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=00020101021126570014ID.LINKAJA.WWW011893600911002160000002030005104000053033605802ID5919CONCERTIX+INDONESIA6007JAKARTA62070703A016304620C"
-                alt="QRIS Payment"
+                alt="QRIS pembayaran"
                 fill
-                className="object-contain p-2"
+                sizes="192px"
+                className="object-contain p-1"
               />
+              <span className="scan-line top-1/2" />
             </div>
-            <p className="text-xs text-[#2563eb] font-semibold mt-3">Scan dengan aplikasi bank / e-wallet apa saja</p>
+            <p className="mt-4 text-sm font-semibold text-ink">Pindai dengan aplikasi apa saja</p>
+            <p className="mt-1 text-xs text-muted-foreground">BCA, Mandiri, BRI, GoPay, OVO, DANA, ShopeePay</p>
           </div>
-        )}
+        ) : null}
 
-        {/* Account Number Box if VA / E-Wallet */}
-        {activeMethod.accountNumber && (
-          <div className="flex items-center justify-between rounded-xl border border-blue-100 bg-white p-4">
-            <div>
-              <p className="text-[10px] text-[#8aa4c1] uppercase font-semibold">Nomor Rekening / Virtual Account</p>
-              <p className="font-mono text-lg font-black text-[#2563eb]">{activeMethod.accountNumber}</p>
-              <p className="text-[11px] text-[#6683a3]">a.n {activeMethod.accountName}</p>
+        {activeMethod.accountNumber ? (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-white p-5">
+            <div className="min-w-0">
+              <p className="meta-label">Nomor rekening / virtual account</p>
+              <p className="mt-1.5 font-mono text-lg font-semibold tracking-[0.06em] text-ink">
+                {activeMethod.accountNumber}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">a.n {activeMethod.accountName}</p>
             </div>
             <button
+              type="button"
               onClick={() => handleCopy(activeMethod.accountNumber!)}
-              className="flex items-center gap-1.5 rounded-xl border border-blue-400 bg-blue-600 px-3.5 py-2 text-xs font-bold text-[#17457f] hover:bg-blue-700 transition"
+              className="press inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-accent/60 px-4 py-2 text-xs font-semibold text-primary transition hover:border-primary/40 hover:bg-accent"
             >
               {copiedAccount === activeMethod.accountNumber ? (
                 <>
-                  <Check className="h-4 w-4 text-emerald-400" />
+                  <Check className="h-3.5 w-3.5" />
                   Tersalin
                 </>
               ) : (
                 <>
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-3.5 w-3.5" />
                   Salin
                 </>
               )}
             </button>
           </div>
-        )}
+        ) : null}
 
-        {/* Steps */}
-        <div className="space-y-2 pt-2">
-          <p className="text-xs font-bold text-[#17457f]">Langkah Pembayaran:</p>
-          <ol className="list-decimal list-inside space-y-1 text-xs text-[#6683a3]">
-            {activeMethod.instructions.map((step, idx) => (
-              <li key={idx} className="leading-relaxed">{step}</li>
-            ))}
-          </ol>
-        </div>
-      </div>
-
+        <ol className="mt-6 space-y-2.5">
+          {activeMethod.instructions.map((step, index) => (
+            <li key={index} className="flex gap-3 text-sm leading-6 text-muted-foreground">
+              <span className="numeral flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border text-[0.65rem] text-ink">
+                {index + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+      </Reveal>
     </div>
   );
 }
+
 export default PaymentMethodSelector;

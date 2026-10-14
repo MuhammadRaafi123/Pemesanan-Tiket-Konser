@@ -6,9 +6,10 @@ import { Resend } from "resend";
 import supabase from "../config/supabase.js";
 
 
-const resend = new Resend(
-  process.env.RESEND_API_KEY
-);
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey
+  ? new Resend(resendApiKey)
+  : null;
 
 
 // =====================================================
@@ -203,6 +204,14 @@ export const getUserById =
 
 export const forgotPasswordUser =
   async (email) => {
+
+    if (!resend) {
+      const error = new Error(
+        "Fitur email belum dikonfigurasi. Isi RESEND_API_KEY di file .env."
+      );
+      error.statusCode = 503;
+      throw error;
+    }
 
     const {
       data: user,

@@ -374,6 +374,7 @@ export const getAllOrders = async (
         payments (
           id,
           payment_method,
+          proof_image,
           status,
           verified_at
         )

@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 import axios from "axios";
 import type { ApiResponse } from "@/types/api";
-import { Order, OrderItem } from "./types";
+import type { Order, OrderItem } from "./types";
 import type { Event, TicketCategory } from "@/features/events/types";
 
 type BackendEventSummary = {
@@ -87,4 +87,8 @@ export async function createOrder(payload: {
   }
 
   throw new Error("Order response tidak valid");
+}
+
+export async function cancelOrder(id: number | string): Promise<void> {
+  await api.patch<ApiResponse>(`/orders/${id}/cancel`);
 }

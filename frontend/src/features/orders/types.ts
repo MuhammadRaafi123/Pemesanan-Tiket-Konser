@@ -1,4 +1,4 @@
-import { Event, TicketCategory } from "@/features/events/types";
+import type { Event, TicketCategory } from "@/features/events/types";
 
 export interface OrderItem {
   id: number | string;
@@ -17,7 +17,7 @@ export interface Order {
   status: "pending" | "paid" | "rejected" | "cancelled";
   qr_code?: string;
   created_at: string;
-  expires_at?: string;
+  expires_at?: string | null;
   users?: {
     id: number | string;
     name: string;

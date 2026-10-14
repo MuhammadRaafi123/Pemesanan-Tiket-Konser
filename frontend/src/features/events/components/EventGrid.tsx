@@ -4,7 +4,6 @@ import { Search } from "lucide-react";
 import type { Event } from "../types";
 import { EventCard } from "./EventCard";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { Stagger } from "@/components/shared/Reveal";
 
 interface EventGridProps {
   events: Event[];
@@ -31,14 +30,11 @@ export function EventGrid({
   }
 
   return (
-    <Stagger
-      className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      step={80}
-    >
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {events.map((event) => (
         <EventCard key={event.id} event={event} />
       ))}
-    </Stagger>
+    </div>
   );
 }
 

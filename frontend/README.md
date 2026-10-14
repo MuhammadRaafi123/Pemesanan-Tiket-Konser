@@ -6,6 +6,9 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 - `/home` — authenticated customer home with profile, orders, and event recommendations
 - `/splash` — dedicated splash experience; the app also shows a one-time splash on first visit
 - `/login`, `/register`, `/forgot-password`, `/reset-password` — connected auth flows
+- `/checkout` → `/payments/:orderId` — customer order reservation, payment proof upload, and expiry-aware payment status
+- `/orders` and `/tickets` — customer order history and issued e-tickets
+- `/admin` — sales dashboard, online payment verification, and offline box-office sales
 
 The frontend reads the REST API through `NEXT_PUBLIC_API_URL` (see `.env.example`). Keep the backend running on port `5000` for local uploads and catalog data.
 

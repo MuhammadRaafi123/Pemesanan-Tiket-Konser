@@ -9,6 +9,7 @@ export interface TicketCategory {
   reserved?: number;
   available?: number;
   price_formatted?: string;
+  events?: { id: number | string; title: string };
 }
 
 export interface Artist {

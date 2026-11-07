@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Check, Crown, Minus, Plus, ShoppingBag, Ticket } from "lucide-react";
+import { AlertCircle, Check, Crown, Minus, Plus, ShoppingBag, Ticket, Zap } from "lucide-react";
 import type { Event, TicketCategory } from "../types";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/shared/Reveal";
 import { useCartStore } from "@/stores/cartStore";
 import { useToast } from "@/components/shared/ToastProvider";
@@ -60,18 +58,18 @@ export function EventTicketList({ event }: EventTicketListProps) {
       qty,
     );
 
-    success(`${qty}x ${cat.category_name} berhasil ditambahkan ke keranjang!`);
+    success(`${qty}x tiket ${cat.category_name} berhasil ditambahkan ke pesanan!`);
     router.push("/checkout");
   };
 
   if (categories.length === 0) {
     return (
       <Reveal>
-        <div className="rounded-[28px] border border-dashed border-primary/20 bg-white px-8 py-14 text-center">
-          <AlertCircle className="mx-auto mb-4 h-8 w-8 text-amber-500" />
-          <h3 className="font-display text-2xl text-ink">Kategori tiket belum tersedia</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Penyelenggara belum merilis kuota tiket untuk event ini.
+        <div className="rounded-[28px] border border-dashed border-[#ffb703]/30 bg-[#14161f] px-8 py-14 text-center shadow-xl">
+          <AlertCircle className="mx-auto mb-4 h-10 w-10 text-amber-400" />
+          <h3 className="text-xl font-bold text-white">Kategori Tiket Belum Tersedia</h3>
+          <p className="mt-2 text-xs text-[#8a8d98]">
+            Penyelenggara belum merilis kuota tiket untuk event konser ini. Silakan pantau kembali.
           </p>
         </div>
       </Reveal>
@@ -80,21 +78,23 @@ export function EventTicketList({ event }: EventTicketListProps) {
 
   return (
     <section className="space-y-6">
-      <Reveal className="flex flex-wrap items-end justify-between gap-4">
+      <Reveal className="flex flex-wrap items-end justify-between gap-4 border-b border-[#232733]/80 pb-6">
         <div>
-          <p className="eyebrow">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#ffb703]/30 bg-[#ffb703]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#ffb703]">
             <Ticket className="h-3.5 w-3.5" />
-            Tiket
-          </p>
-          <h2 className="font-display mt-3 text-3xl text-ink">Pilih kategori tiket</h2>
+            <span>Pilihan Tempat & Kursi</span>
+          </div>
+          <h2 className="mt-2.5 text-2xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
+            Pilih Kategori Tiket Konser
+          </h2>
         </div>
-        <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-          Pilih kategori yang sesuai dengan preferensi tempat dudukmu. Maksimal {MAX_PER_ORDER} tiket per
-          kategori.
+        <p className="max-w-md text-xs leading-relaxed text-[#9da1b0] sm:text-sm">
+          Pilih kategori yang sesuai dengan preferensi tempat dudukmu. Maksimal{" "}
+          <strong className="text-[#ffdea9]">{MAX_PER_ORDER} tiket</strong> per transaksi akun.
         </p>
       </Reveal>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {categories.map((cat, index) => {
           const qty = quantities[cat.id] || 1;
           const available = cat.available ?? cat.remaining;
@@ -110,57 +110,75 @@ export function EventTicketList({ event }: EventTicketListProps) {
           return (
             <Reveal
               key={cat.id}
-              delay={index * 70}
-              className={`group relative overflow-hidden rounded-[26px] border bg-white p-6 transition-all duration-500 sm:p-7 ${
+              delay={index * 60}
+              className={`group relative overflow-hidden rounded-3xl border bg-[#14161f] p-6 transition-all duration-300 sm:p-7 shadow-xl ${
                 isBest
-                  ? "border-gold-soft/45 shadow-[0_24px_60px_-40px_rgba(168,132,63,.55)]"
-                  : "border-border shadow-[0_1px_2px_rgba(10,27,51,.04),0_18px_44px_-30px_rgba(13,38,84,.3)]"
-              } ${isSoldOut ? "opacity-70" : ""}`}
+                  ? "border-[#ffb703]/50 shadow-[0_0_30px_rgba(255,183,3,0.1)] hover:border-[#ffb703]"
+                  : "border-[#262a38] hover:border-[#ffb703]/40 hover:shadow-2xl hover:shadow-black/60"
+              } ${isSoldOut ? "opacity-60" : ""}`}
             >
-              {isBest ? <span aria-hidden className="absolute inset-x-0 top-0 h-px hairline-gold" /> : null}
+              {isBest ? (
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ffb703] via-[#ffdea9] to-[#ffb703]" />
+              ) : null}
 
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                {/* Left: Category info & perks */}
                 <div className="min-w-0 flex-1 space-y-4">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h3 className="font-display text-xl text-ink">{cat.category_name}</h3>
+                    <h3 className="text-xl font-black text-white sm:text-2xl">{cat.category_name}</h3>
                     {isBest ? (
-                      <Badge variant="gold" className="gap-1">
-                        <Crown className="h-3 w-3" />
-                        Pandangan terbaik
-                      </Badge>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#ffb703]/40 bg-[#ffb703]/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#ffdea9]">
+                        <Crown className="h-3.5 w-3.5 text-[#ffb703]" />
+                        Pandangan Terbaik
+                      </span>
                     ) : null}
                     {isSoldOut ? (
-                      <Badge variant="secondary">{isEventClosed ? "Penjualan ditutup" : "Habis"}</Badge>
+                      <span className="rounded-full border border-white/10 bg-[#1d1f27] px-3 py-1 text-[10px] font-bold text-[#8a8d98]">
+                        {isEventClosed ? "Penjualan Ditutup" : "Habis Terjual"}
+                      </span>
                     ) : isLowStock ? (
-                      <Badge variant="warning">Tersisa {available}</Badge>
-                    ) : null}
+                      <span className="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/15 px-3 py-1 text-[10px] font-bold text-rose-300 animate-pulse">
+                        <Zap className="h-3 w-3" />
+                        Tersisa {available} Tiket!
+                      </span>
+                    ) : (
+                      <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold text-emerald-300">
+                        Tersedia
+                      </span>
+                    )}
                   </div>
 
-                  <div className="max-w-sm space-y-2">
-                    <div className="flex items-center justify-between text-[0.68rem] text-muted-foreground">
-                      <span>Terjual {soldPercentage}%</span>
+                  {/* Quota Progress */}
+                  <div className="max-w-md space-y-2">
+                    <div className="flex items-center justify-between text-xs text-[#8a8d98]">
                       <span>
-                        Tersisa {available} / {cat.quota}
+                        Terjual <strong className="text-white">{soldPercentage}%</strong>
+                      </span>
+                      <span>
+                        Sisa kuota: <strong className="text-[#ffdea9]">{available}</strong> / {cat.quota}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-[#1b1e28]">
                       <div
-                        className={`h-full rounded-full transition-[width] duration-[1200ms] ease-out ${
-                          isSoldOut ? "bg-muted-foreground/40" : "bg-gradient-to-r from-primary to-[#3f6fe0]"
+                        className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                          isSoldOut
+                            ? "bg-[#32353d]"
+                            : "bg-gradient-to-r from-[#ffb703] to-[#ff9f00] shadow-[0_0_12px_rgba(255,183,3,0.3)]"
                         }`}
-                        style={{ width: `${Math.max(soldPercentage, 2)}%` }}
+                        style={{ width: `${Math.max(soldPercentage, 3)}%` }}
                       />
                     </div>
                   </div>
 
+                  {/* Perks list */}
                   {cat.perks && cat.perks.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 pt-1">
                       {cat.perks.map((perk) => (
                         <span
                           key={perk}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-2.5 py-1 text-[0.68rem] text-muted-foreground transition-colors hover:border-primary/25 hover:text-primary"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-[#2a2d36] bg-[#1a1d27] px-3 py-1 text-xs font-semibold text-[#e1e2ec] transition hover:border-[#ffb703]/30"
                         >
-                          <Check className="h-3 w-3 text-primary" />
+                          <Check className="h-3.5 w-3.5 text-[#ffb703]" />
                           {perk}
                         </span>
                       ))}
@@ -168,48 +186,56 @@ export function EventTicketList({ event }: EventTicketListProps) {
                   ) : null}
                 </div>
 
-                <div className="flex shrink-0 flex-col gap-5 border-t border-border pt-5 lg:w-64 lg:items-end lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
+                {/* Right: Price & Stepper Button */}
+                <div className="flex shrink-0 flex-col gap-4 border-t border-[#232733] pt-5 lg:w-72 lg:items-end lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
                   <div className="lg:text-right">
-                    <p className="meta-label">Harga tiket</p>
-                    <p className="numeral mt-1 text-2xl text-ink">{formatCurrency(cat.price)}</p>
-                    <p className="mt-1 text-[0.65rem] text-muted-foreground">Termasuk pajak & biaya layanan</p>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#8a8d98]">
+                      Harga Per Tiket
+                    </span>
+                    <p className="text-2xl sm:text-3xl font-black text-[#ffb703] drop-shadow-[0_2px_8px_rgba(255,183,3,0.25)]">
+                      {formatCurrency(cat.price)}
+                    </p>
+                    <p className="mt-1 text-[11px] text-[#7a7d88]">Sudah termasuk pajak & fee layanan</p>
                   </div>
 
                   <div className="flex w-full items-center gap-3 lg:justify-end">
                     {!isSoldOut ? (
-                      <div className="flex items-center rounded-full border border-border bg-muted/60 p-1">
+                      <div className="flex items-center rounded-xl border border-[#2a2d36] bg-[#1a1d27] p-1 shadow-inner">
                         <button
                           type="button"
                           onClick={() => handleQtyChange(cat.id, -1, maxQty)}
                           disabled={qty <= 1}
-                          aria-label="Kurangi jumlah"
-                          className="press flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-white hover:text-primary disabled:opacity-30"
+                          aria-label="Kurangi jumlah tiket"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#8a8d98] transition hover:bg-[#232733] hover:text-white disabled:opacity-30"
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
-                        <span className="numeral w-8 text-center text-sm text-ink">{qty}</span>
+                        <span className="w-8 text-center text-sm font-bold text-white">{qty}</span>
                         <button
                           type="button"
                           onClick={() => handleQtyChange(cat.id, 1, maxQty)}
                           disabled={qty >= maxQty}
-                          aria-label="Tambah jumlah"
-                          className="press flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-white hover:text-primary disabled:opacity-30"
+                          aria-label="Tambah jumlah tiket"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#8a8d98] transition hover:bg-[#232733] hover:text-white disabled:opacity-30"
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ) : null}
 
-                    <Button
+                    <button
                       type="button"
                       onClick={() => handleBuyTicket(cat)}
                       disabled={isSoldOut}
-                      variant={isBest ? "default" : "secondary"}
-                      className="flex-1 gap-2 lg:flex-none"
+                      className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-black transition-all lg:flex-none ${
+                        isSoldOut
+                          ? "cursor-not-allowed border border-[#2a2d36] bg-[#1a1d27] text-[#555866]"
+                          : "bg-[#ffb703] text-[#10131a] shadow-lg shadow-[#ffb703]/25 hover:bg-[#ffdea9] hover:shadow-[#ffb703]/40 press"
+                      }`}
                     >
                       <ShoppingBag className="h-4 w-4" />
-                      {isSoldOut ? "Habis" : "Beli"}
-                    </Button>
+                      <span>{isSoldOut ? "Habis Terjual" : "Pesan Tiket"}</span>
+                    </button>
                   </div>
                 </div>
               </div>

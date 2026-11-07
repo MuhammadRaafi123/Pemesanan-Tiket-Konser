@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, LoaderCircle, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
@@ -49,8 +49,7 @@ export default function AdminCatalogPage() {
   const [ticketPrice, setTicketPrice] = useState("");
   const [ticketQuota, setTicketQuota] = useState("");
 
-  async function loadCatalog() {
-    setLoading(true);
+  const loadCatalog = useCallback(async () => {
     try {
       const [artistResponse, eventResponse, ticketResponse] = await Promise.all([
         api.get<ApiResponse<Artist[]>>("/artists"),
@@ -65,7 +64,7 @@ export default function AdminCatalogPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [error]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -73,10 +72,11 @@ export default function AdminCatalogPage() {
       router.replace("/home");
       return;
     }
-    void loadCatalog();
-  // loadCatalog is stable for the lifetime of this page.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, user, router]);
+    const timer = setTimeout(() => {
+      void loadCatalog();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [hydrated, user, router, loadCatalog]);
 
   const mutate = async (action: () => Promise<unknown>, message: string): Promise<boolean> => {
     setSaving(true);

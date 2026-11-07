@@ -6,25 +6,20 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
+  BadgeCheck,
   CalendarDays,
   ChevronRight,
   CreditCard,
   Eye,
-  Heart,
   MapPin,
   QrCode,
   Search,
   Shield,
-  Sparkles,
   Star,
   Ticket,
   Users,
-  Zap,
   Play,
   Music,
-  Mic2,
-  Headphones,
-  Radio,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -149,6 +144,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("Semua");
+  const [selectedCity, setSelectedCity] = useState("Semua Kota");
   const [countdown, setCountdown] = useState({ d: "02", h: "14", m: "25", s: "33" });
 
   useEffect(() => {
@@ -173,7 +169,8 @@ export default function LandingPage() {
   const filteredEvents = events.filter((e) => {
     const matchSearch = !searchQuery || e.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchGenre = selectedGenre === "Semua" || (e.genre || "").toLowerCase().includes(selectedGenre.toLowerCase());
-    return matchSearch && matchGenre;
+    const matchCity = selectedCity === "Semua Kota" || (e.location || "").toLowerCase().includes(selectedCity.toLowerCase());
+    return matchSearch && matchGenre && matchCity;
   });
 
   const featuredEvent = events.find((e) => e.featured) || events[0];
@@ -202,16 +199,7 @@ export default function LandingPage() {
             <div className="grid items-center gap-12 lg:grid-cols-12">
               {/* Left: Copy */}
               <div className="space-y-6 lg:col-span-7">
-                <Reveal>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-[#ffb703]/20 bg-[#ffb703]/[0.08] px-4 py-2 backdrop-blur-sm">
-                    <span className="relative flex h-2 w-2 pulse-dot">
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#ffb703]" />
-                    </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#ffb703]">
-                      Tiket Konser Resmi Indonesia
-                    </span>
-                  </div>
-                </Reveal>
+
 
                 <Reveal delay={80}>
                   <h1 className="text-[clamp(2.2rem,5vw,4rem)] font-extrabold leading-[1.04] tracking-tight">
@@ -373,31 +361,39 @@ export default function LandingPage() {
                   <div className="flex items-center gap-2.5 rounded-xl border border-[#232733] bg-[#1d1f27] px-4 py-3 transition-all focus-within:border-[#d5baff]/50 focus-within:ring-2 focus-within:ring-[#d5baff]/10 lg:col-span-3">
                     <MapPin className="h-4 w-4 shrink-0 text-[#d5baff]" />
                     <div className="w-full">
-                      <label className="block text-[10px] uppercase tracking-wider text-[#514532]">Kota</label>
-                      <select className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none">
-                        <option>Semua Kota</option>
-                        <option>Jakarta</option>
-                        <option>Bandung</option>
-                        <option>Surabaya</option>
-                        <option>Bali</option>
+                      <label className="block text-[10px] uppercase tracking-wider text-[#9b8ec4]">Kota</label>
+                      <select
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                        className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none"
+                      >
+                        <option value="Semua Kota" className="bg-[#1d1f27] text-[#e1e2ec]">Semua Kota</option>
+                        <option value="Jakarta" className="bg-[#1d1f27] text-[#e1e2ec]">Jakarta</option>
+                        <option value="Bandung" className="bg-[#1d1f27] text-[#e1e2ec]">Bandung</option>
+                        <option value="Surabaya" className="bg-[#1d1f27] text-[#e1e2ec]">Surabaya</option>
+                        <option value="Bali" className="bg-[#1d1f27] text-[#e1e2ec]">Bali</option>
+                        <option value="Yogyakarta" className="bg-[#1d1f27] text-[#e1e2ec]">Yogyakarta</option>
+                        <option value="Semarang" className="bg-[#1d1f27] text-[#e1e2ec]">Semarang</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2.5 rounded-xl border border-[#232733] bg-[#1d1f27] px-4 py-3 transition-all focus-within:border-[#ffb703]/50 focus-within:ring-2 focus-within:ring-[#ffb703]/10 lg:col-span-2">
-                    <Sparkles className="h-4 w-4 shrink-0 text-[#ffdea9]" />
+                    <Music className="h-4 w-4 shrink-0 text-[#ffb703]" />
                     <div className="w-full">
-                      <label className="block text-[10px] uppercase tracking-wider text-[#514532]">Genre</label>
+                      <label className="block text-[10px] uppercase tracking-wider text-[#a8843f]">Genre</label>
                       <select
                         value={selectedGenre}
                         onChange={(e) => setSelectedGenre(e.target.value)}
                         className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none"
                       >
-                        <option>Semua</option>
-                        <option>Pop</option>
-                        <option>Rock</option>
-                        <option>K-Pop</option>
-                        <option>Jazz</option>
+                        <option value="Semua" className="bg-[#1d1f27] text-[#e1e2ec]">Semua</option>
+                        <option value="Pop" className="bg-[#1d1f27] text-[#e1e2ec]">Pop</option>
+                        <option value="Rock" className="bg-[#1d1f27] text-[#e1e2ec]">Rock</option>
+                        <option value="K-Pop" className="bg-[#1d1f27] text-[#e1e2ec]">K-Pop</option>
+                        <option value="Festival" className="bg-[#1d1f27] text-[#e1e2ec]">Festival</option>
+                        <option value="EDM" className="bg-[#1d1f27] text-[#e1e2ec]">EDM</option>
+                        <option value="Jazz" className="bg-[#1d1f27] text-[#e1e2ec]">Jazz</option>
                       </select>
                     </div>
                   </div>
@@ -429,7 +425,7 @@ export default function LandingPage() {
         </section>
 
         {/* ==================== UPCOMING CONCERTS ==================== */}
-        <section className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 relative">
+        <section id="upcoming-concerts" className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 relative">
           {/* Background accent */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute top-0 right-0 h-[300px] w-[300px] rounded-full bg-[#ffb703]/[0.02] blur-[100px]" />
@@ -469,7 +465,7 @@ export default function LandingPage() {
               </div>
               <p className="text-sm text-[#8a8d98]">Tidak ada konser yang cocok dengan filter.</p>
               <button
-                onClick={() => { setSearchQuery(""); setSelectedGenre("Semua"); }}
+                onClick={() => { setSearchQuery(""); setSelectedGenre("Semua"); setSelectedCity("Semua Kota"); }}
                 className="mt-4 text-xs font-semibold text-[#ffb703] hover:text-[#ffdea9] transition-colors"
               >
                 Reset Filter
@@ -481,57 +477,210 @@ export default function LandingPage() {
         {/* ==================== GENRE EXPLORE ==================== */}
         <section className="w-full border-y border-[#1e2128] bg-[#0e1118] px-5 py-20 sm:px-8">
           <div className="mx-auto max-w-7xl">
-            <Reveal className="mb-10">
-              <p className="text-[11px] uppercase tracking-widest text-[#d5baff]">Jelajahi</p>
-              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#e1e2ec] sm:text-4xl">
-                Pilih Berdasarkan Genre
-              </h2>
+            <Reveal className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <p className="text-[11px] uppercase tracking-widest text-[#d5baff]">Jelajahi</p>
+                <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#e1e2ec] sm:text-4xl">
+                  Pilih Berdasarkan Genre
+                </h2>
+              </div>
+              {selectedGenre !== "Semua" && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedGenre("Semua")}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#ffb703] hover:text-[#ffdea9] transition-colors"
+                >
+                  Reset pilihan ({selectedGenre}) &times;
+                </button>
+              )}
             </Reveal>
 
             <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" step={60}>
               {[
-                { label: "K-Pop", icon: Heart, count: "8 Konser", color: "#d5baff" },
-                { label: "Rock & Indie", icon: Zap, count: "14 Konser", color: "#ffb703" },
-                { label: "Festival", icon: Sparkles, count: "6 Event", color: "#ffd9c0" },
-                { label: "EDM", icon: Star, count: "11 Event", color: "#d5baff" },
-                { label: "Jazz", icon: Eye, count: "5 Jadwal", color: "#ffdea9" },
-              ].map(({ label, icon: Icon, count, color }: { label: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; count: string; color: string }) => (
-                <Link
-                  key={label}
-                  href="/events"
-                  className="group relative flex items-center gap-3 rounded-xl border border-[#232733] bg-[#191b23] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#ffb703]/25 hover:shadow-xl hover:shadow-black/40 overflow-hidden hover-sheen"
-                >
-                  {/* Hover glow effect */}
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: `radial-gradient(circle at 50% 50%, ${color}10, transparent 70%)` }}
-                  />
-                  {/* Soundwave animation */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 flex items-end justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {[...Array(8)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="w-1 rounded-t-full origin-bottom"
-                        style={{
-                          backgroundColor: color,
-                          height: '100%',
-                          animation: `soundwave 1.2s ease-in-out ${i * 0.1}s infinite`,
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <span
-                    className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: `${color}15` }}
+                { label: "K-Pop", icon: Music, count: "8 Konser", color: "#ec4899", query: "K-Pop" },
+                { label: "Rock & Indie", icon: Music, count: "14 Konser", color: "#f97316", query: "Rock" },
+                { label: "Festival", icon: Music, count: "6 Event", color: "#10b981", query: "Festival" },
+                { label: "EDM", icon: Music, count: "11 Event", color: "#8b5cf6", query: "EDM" },
+                { label: "Jazz", icon: Music, count: "5 Jadwal", color: "#f59e0b", query: "Jazz" },
+              ].map(({ label, icon: Icon, count, color, query }) => {
+                const isSelected =
+                  selectedGenre.toLowerCase() === query.toLowerCase() ||
+                  selectedGenre.toLowerCase() === label.toLowerCase();
+
+                return (
+                  <button
+                    type="button"
+                    key={label}
+                    onClick={() => {
+                      setSelectedGenre((prev) => (prev.toLowerCase() === query.toLowerCase() ? "Semua" : query));
+                      const upcomingSec = document.getElementById("upcoming-concerts");
+                      if (upcomingSec) {
+                        upcomingSec.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className={`group relative flex items-center gap-3 rounded-xl border p-4 text-left transition-all duration-300 overflow-hidden cursor-pointer active:scale-95 active:brightness-125 ${
+                      isSelected
+                        ? "shadow-2xl ring-2 -translate-y-1"
+                        : "bg-[#191b23] hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40 hover-sheen"
+                    }`}
+                    style={{
+                      borderColor: isSelected ? color : `${color}40`,
+                      backgroundColor: isSelected ? `${color}25` : "#191b23",
+                      boxShadow: isSelected
+                        ? `0 0 30px ${color}50, inset 0 0 18px ${color}22`
+                        : undefined,
+                      outlineColor: color,
+                    }}
                   >
-                    <Icon className="h-5 w-5" style={{ color }} />
-                  </span>
-                  <div className="relative">
-                    <h3 className="text-sm font-semibold text-[#e1e2ec] group-hover:text-white transition-colors">{label}</h3>
-                    <p className="text-[11px] text-[#8a8d98]">{count}</p>
-                  </div>
-                </Link>
-              ))}
+                    {/* Hover & Active glow effect */}
+                    <div 
+                      className={`absolute inset-0 transition-opacity duration-300 ${
+                        isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      }`}
+                      style={{ background: `radial-gradient(circle at 50% 50%, ${color}25, transparent 70%)` }}
+                    />
+                    {/* Soundwave animation */}
+                    <div className={`absolute bottom-0 left-0 right-0 h-1.5 flex items-end justify-center gap-0.5 transition-opacity duration-300 ${
+                      isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`}>
+                      {[...Array(8)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-1 rounded-t-full origin-bottom"
+                          style={{
+                            backgroundColor: color,
+                            height: '100%',
+                            animation: `soundwave 1.2s ease-in-out ${i * 0.1}s infinite`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <span
+                      className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-transform duration-300 group-hover:scale-110 group-active:scale-90"
+                      style={{
+                        backgroundColor: isSelected ? `${color}45` : `${color}22`,
+                        borderColor: isSelected ? color : `${color}55`,
+                        boxShadow: `0 0 16px ${color}${isSelected ? "60" : "25"}`,
+                      }}
+                    >
+                      <Icon className="h-5 w-5" style={{ color }} />
+                    </span>
+                    <div className="relative flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <h3 className={`text-sm truncate transition-colors ${
+                          isSelected ? "text-white font-bold" : "text-[#e1e2ec] font-semibold group-hover:text-white"
+                        }`}>
+                          {label}
+                        </h3>
+                        {isSelected && (
+                          <span className="h-2 w-2 shrink-0 rounded-full animate-ping" style={{ backgroundColor: color }} />
+                        )}
+                      </div>
+                      <p className="text-[11px] font-medium" style={{ color }}>{count}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </Stagger>
+          </div>
+        </section>
+
+        {/* ==================== CITY EXPLORE ==================== */}
+        <section className="w-full border-b border-[#1e2128] bg-[#0b0e15] px-5 py-20 sm:px-8">
+          <div className="mx-auto max-w-7xl">
+            <Reveal className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <p className="text-[11px] uppercase tracking-widest text-[#5eead4]">Lokasi</p>
+                <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#e1e2ec] sm:text-4xl">
+                  Pilih Berdasarkan Kota
+                </h2>
+              </div>
+              {selectedCity !== "Semua Kota" && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedCity("Semua Kota")}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#ffb703] hover:text-[#ffdea9] transition-colors"
+                >
+                  Reset pilihan ({selectedCity}) &times;
+                </button>
+              )}
+            </Reveal>
+
+            <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" step={60}>
+              {[
+                { label: "Jakarta", icon: MapPin, count: "12 Konser", color: "#06b6d4" },
+                { label: "Bandung", icon: MapPin, count: "8 Konser", color: "#8b5cf6" },
+                { label: "Surabaya", icon: MapPin, count: "6 Konser", color: "#f97316" },
+                { label: "Bali", icon: MapPin, count: "9 Event", color: "#10b981" },
+                { label: "Yogyakarta", icon: MapPin, count: "5 Konser", color: "#ec4899" },
+                { label: "Semarang", icon: MapPin, count: "4 Konser", color: "#f59e0b" },
+              ].map(({ label, icon: Icon, count, color }) => {
+                const isSelected = selectedCity === label;
+
+                return (
+                  <button
+                    type="button"
+                    key={label}
+                    onClick={() => {
+                      setSelectedCity((prev) => (prev === label ? "Semua Kota" : label));
+                      const upcomingSec = document.getElementById("upcoming-concerts");
+                      if (upcomingSec) {
+                        upcomingSec.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className={`group relative flex items-center gap-3 rounded-xl border p-4 text-left transition-all duration-300 overflow-hidden cursor-pointer active:scale-95 active:brightness-125 ${
+                      isSelected
+                        ? "shadow-2xl ring-2 -translate-y-1"
+                        : "bg-[#191b23] hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40 hover-sheen"
+                    }`}
+                    style={{
+                      borderColor: isSelected ? color : `${color}40`,
+                      backgroundColor: isSelected ? `${color}25` : "#191b23",
+                      boxShadow: isSelected
+                        ? `0 0 30px ${color}50, inset 0 0 18px ${color}22`
+                        : undefined,
+                      outlineColor: color,
+                    }}
+                  >
+                    {/* Hover & Active glow effect */}
+                    <div 
+                      className={`absolute inset-0 transition-opacity duration-300 ${
+                        isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      }`}
+                      style={{ background: `radial-gradient(circle at 50% 50%, ${color}25, transparent 70%)` }}
+                    />
+                    {/* Location pulse animation */}
+                    <div className={`absolute bottom-0 left-0 right-0 h-1 transition-opacity duration-300 ${
+                      isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`}
+                      style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}
+                    />
+                    <span
+                      className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-transform duration-300 group-hover:scale-110 group-active:scale-90"
+                      style={{
+                        backgroundColor: isSelected ? `${color}45` : `${color}22`,
+                        borderColor: isSelected ? color : `${color}55`,
+                        boxShadow: `0 0 16px ${color}${isSelected ? "60" : "25"}`,
+                      }}
+                    >
+                      <Icon className="h-5 w-5" style={{ color }} />
+                    </span>
+                    <div className="relative flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <h3 className={`text-sm truncate transition-colors ${
+                          isSelected ? "text-white font-bold" : "text-[#e1e2ec] font-semibold group-hover:text-white"
+                        }`}>
+                          {label}
+                        </h3>
+                        {isSelected && (
+                          <span className="h-2 w-2 shrink-0 rounded-full animate-ping" style={{ backgroundColor: color }} />
+                        )}
+                      </div>
+                      <p className="text-[11px] font-medium" style={{ color }}>{count}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </Stagger>
           </div>
         </section>
@@ -877,7 +1026,7 @@ export default function LandingPage() {
                   <h3 className="relative font-semibold text-[#e1e2ec]">{title}</h3>
                   <p className="relative mt-2 text-[13px] leading-relaxed text-[#8a8d98]">{desc}</p>
                   <span className="relative mt-4 inline-flex items-center gap-1.5 text-[11px] font-semibold" style={{ color }}>
-                    <Sparkles className="h-3 w-3" />
+                    <BadgeCheck className="h-3 w-3" />
                     {tag}
                   </span>
                 </div>

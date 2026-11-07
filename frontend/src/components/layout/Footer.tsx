@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Camera, Music2, Send, Play, Mail, MapPin, MessageCircle, Ticket, CreditCard, Shield, Sparkles } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Camera, Music2, Send, Play, Mail, MapPin, MessageCircle, Ticket, CreditCard, Shield } from "lucide-react";
 import { BrandMark } from "@/components/layout/BrandMark";
 import { Marquee } from "@/components/shared/Marquee";
 import { useAuthStore } from "@/stores/authStore";
@@ -190,7 +190,7 @@ export function Footer() {
             <span>PCI Compliant</span>
           </div>
           <div className="flex items-center gap-2 text-[11px] text-[#5a5d66]">
-            <Sparkles className="h-4 w-4 text-[#d5baff]" />
+            <BadgeCheck className="h-4 w-4 text-emerald-400" />
             <span>Verified Tickets</span>
           </div>
         </div>

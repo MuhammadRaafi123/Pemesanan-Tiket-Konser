@@ -406,17 +406,6 @@ html.js-ready .stagger > *:nth-child(12) { --i: 11; }
   position: relative;
   overflow: hidden;
 }
-.hover-sheen::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, 0.55) 48%, transparent 62%);
-  transform: translateX(-120%);
-  transition: transform 900ms var(--ease-out-soft);
-}
-.hover-sheen:hover::after {
-  transform: translateX(120%);
-}
 
 .press {
   transition: transform 220ms var(--ease-out-soft);

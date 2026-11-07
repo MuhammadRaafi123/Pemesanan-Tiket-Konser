@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, ChevronLeft, Radio, Share2, Sparkles } from "lucide-react";
+import { CalendarDays, ChevronLeft, Music, Radio, Share2 } from "lucide-react";
 import type { Artist } from "../types";
 import { EventCard } from "@/features/events/components/EventCard";
 import { Stagger, Reveal } from "@/components/shared/Reveal";
@@ -70,7 +70,7 @@ export function ArtistInfo({ artist }: ArtistInfoProps) {
             <div className="min-w-0 flex-1 text-center md:text-left">
               <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
                 <span className="inline-flex items-center gap-1 rounded-full border border-[#ffb703]/25 bg-[#ffb703]/[0.08] px-3 py-1 text-xs font-semibold text-[#ffdea9]">
-                  <Sparkles className="h-3 w-3" />
+                  <Music className="h-3 w-3" />
                   {artist.genre || "Musisi"}
                 </span>
                 {artist.monthlyListeners ? (

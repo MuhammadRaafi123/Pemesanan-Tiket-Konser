@@ -7,10 +7,10 @@ import {
   ArrowRight,
   CalendarDays,
   Compass,
+  Home,
   LogIn,
   Search,
   ShoppingBag,
-  Sparkles,
   Ticket,
   UserPlus,
   X,
@@ -48,7 +48,7 @@ export function Navbar() {
   }, [searchOpen]);
 
   const navLinks = [
-    { label: user ? "Untukmu" : "Beranda", href: user ? "/home" : "/", icon: user ? Compass : Sparkles },
+    { label: user ? "Untukmu" : "Beranda", href: user ? "/home" : "/", icon: user ? Compass : Home },
     { label: "Konser", href: "/events", icon: Ticket },
     { label: "Artis", href: "/artists", icon: CalendarDays },
     ...(user

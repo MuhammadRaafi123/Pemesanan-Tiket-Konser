@@ -3,12 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { OrderCard } from "@/features/orders/components/OrderCard";
-import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/shared/Loading";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Reveal } from "@/components/shared/Reveal";
@@ -34,7 +33,9 @@ export default function SingleOrderPage() {
       })
       .catch((requestError: unknown) => {
         if (active) {
-          setLoadError(getApiErrorMessage(requestError, "Gagal memuat detail pesanan."));
+          setLoadError(
+            getApiErrorMessage(requestError, "Gagal memuat detail pesanan.")
+          );
         }
       })
       .finally(() => {
@@ -48,10 +49,13 @@ export default function SingleOrderPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col bg-background text-ink">
+      <div className="flex min-h-screen flex-col bg-[#0b0e15] text-[#e1e2ec]">
         <Navbar />
         <main className="flex flex-1 items-center justify-center px-4 pt-28">
-          <Loading message="Memuat detail pesanan..." />
+          <div className="flex items-center gap-3 rounded-2xl border border-[#232733] bg-[#141720] px-5 py-4 text-sm font-medium text-white shadow-2xl">
+            <Loader2 className="h-5 w-5 animate-spin text-[#ffb703]" />
+            Memuat detail pesanan...
+          </div>
         </main>
         <Footer />
         <MobileNav />
@@ -61,13 +65,23 @@ export default function SingleOrderPage() {
 
   if (loadError || !order) {
     return (
-      <div className="flex min-h-screen flex-col bg-background text-ink">
+      <div className="flex min-h-screen flex-col bg-[#0b0e15] text-[#e1e2ec]">
         <Navbar />
         <main className="flex flex-1 items-center justify-center px-4 pt-28">
-          <ErrorState
-            title={loadError ? "Pesanan gagal dimuat" : "Pesanan tidak ditemukan"}
-            message={loadError || "Data nomor pesanan tidak valid atau telah dihapus."}
-          />
+          <div className="max-w-md rounded-[28px] border border-[#232733] bg-[#141720] p-8 text-center shadow-2xl">
+            <h1 className="text-2xl font-bold text-white">
+              {loadError ? "Pesanan gagal dimuat" : "Pesanan tidak ditemukan"}
+            </h1>
+            <p className="mt-3 text-sm text-[#8a8d9b]">
+              {loadError || "Data nomor pesanan tidak valid atau telah dihapus."}
+            </p>
+            <Link
+              href="/orders"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#ffb703] px-5 py-3 text-sm font-semibold text-[#10131a] transition hover:bg-[#ffdea9]"
+            >
+              Kembali ke daftar pesanan
+            </Link>
+          </div>
         </main>
         <Footer />
         <MobileNav />
@@ -76,20 +90,29 @@ export default function SingleOrderPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-ink">
+    <div className="flex min-h-screen flex-col bg-[#0b0e15] text-[#e1e2ec] selection:bg-[#ffb703]/30 selection:text-white">
       <Navbar />
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-5 pb-24 pt-32 sm:px-8 sm:pt-40">
-        <Reveal className="mb-8">
-          <Link href="/orders">
-            <Button variant="secondary" className="gap-1.5">
-              <ChevronLeft className="h-4 w-4" />
-              Kembali ke daftar pesanan
-            </Button>
+      <main className="relative mx-auto w-full max-w-4xl flex-1 px-5 pb-24 pt-32 sm:px-8 sm:pt-40">
+        {/* ── ambient background ── */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-32 top-40 h-60 w-60 rounded-full bg-[#ffb703]/[0.04] blur-[100px]" />
+          <div className="absolute -right-32 top-80 h-48 w-48 rounded-full bg-[#6801d1]/[0.05] blur-[80px]" />
+        </div>
+
+        <Reveal className="relative mb-8">
+          <Link
+            href="/orders"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#2a2d36] bg-[#191b23] px-4 py-2.5 text-sm font-semibold text-[#e1e2ec] transition hover:border-[#ffb703]/30 hover:text-[#ffb703]"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Kembali ke daftar pesanan
           </Link>
         </Reveal>
 
-        <OrderCard order={order} />
+        <div className="relative">
+          <OrderCard order={order} />
+        </div>
       </main>
 
       <Footer />

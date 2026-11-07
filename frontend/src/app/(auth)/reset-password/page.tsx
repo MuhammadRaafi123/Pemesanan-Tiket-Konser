@@ -18,7 +18,7 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
       title="Buat password baru."
       description="Selesaikan satu langkah terakhir dan kembali ke akunmu dengan keamanan yang lebih baik."
       sideTitle="A fresh start, safely."
-      sideDescription="Password barumu akan langsung melindungi akses ke akun Concertix dan tiket digitalmu."
+      sideDescription="Password barumu akan langsung melindungi akses ke akun Tixora dan tiket digitalmu."
       sideFeatures={[
         { icon: KeyRound, title: "Token terverifikasi", description: "Hanya tautan resmi yang bisa digunakan." },
         { icon: ShieldCheck, title: "Password terenkripsi", description: "Detail barumu disimpan dengan aman." },

@@ -166,8 +166,7 @@ export const getMyOrders = async (
           payment_method,
           proof_image,
           status,
-          verified_at,
-          rejection_reason
+          verified_at
         )
       `)
       .eq(
@@ -266,8 +265,7 @@ export const getOrderById = async (
           payment_method,
           proof_image,
           status,
-          verified_at,
-          rejection_reason
+          verified_at
         )
       `)
       .eq(

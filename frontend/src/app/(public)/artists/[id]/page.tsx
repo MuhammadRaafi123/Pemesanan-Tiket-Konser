@@ -45,7 +45,7 @@ export default function ArtistDetailPage() {
         <main className="flex flex-1 flex-col items-center justify-center px-4 pt-28 text-center">
           <Disc3 className="mb-5 h-8 w-8 animate-spin text-[#ffb703]" />
           <p className="text-sm font-medium text-[#e1e2ec]">Memuat profil artis...</p>
-          <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-[#7a7d88]">Concertix</p>
+          <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-[#7a7d88]">Tixora</p>
         </main>
         <Footer />
         <MobileNav />

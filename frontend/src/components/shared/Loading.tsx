@@ -27,7 +27,7 @@ export function Loading({
         />
       </span>
       <p className="text-sm font-medium text-ink-soft">{message}</p>
-      <p className="meta-label mt-3">Concertix</p>
+      <p className="meta-label mt-3"></p>
     </div>
   );
 

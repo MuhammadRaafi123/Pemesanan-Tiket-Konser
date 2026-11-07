@@ -11,9 +11,6 @@ import {
 } from "@/features/auth/schemas/auth.schema";
 import { resetPassword } from "@/features/auth/api";
 import { getApiErrorMessage } from "@/lib/apiError";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface ResetPasswordFormProps {
   token: string | null;
@@ -49,18 +46,28 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     }
   };
 
+  const inputWrap = (hasError: boolean) =>
+    `flex items-center gap-3 rounded-xl border bg-[#1d1f27] px-4 py-3 transition-all duration-200 focus-within:ring-2 ${
+      hasError
+        ? "border-red-500/40 focus-within:border-red-500/60 focus-within:ring-red-500/10"
+        : "border-[#232733] focus-within:border-[#ffb703]/50 focus-within:ring-[#ffb703]/10"
+    }`;
+
   if (!token) {
     return (
       <div className="text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 text-rose-500">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 text-red-400">
           <KeyRound className="h-7 w-7" />
         </span>
-        <h2 className="font-display mt-6 text-2xl text-ink">Link tidak valid</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <h2 className="mt-6 text-2xl font-extrabold text-white">Link tidak valid</h2>
+        <p className="mt-2 text-sm leading-6 text-[#6b6e7a]">
           Token reset password tidak ditemukan atau sudah tidak berlaku.
         </p>
-        <Link href="/forgot-password" className="mt-7 inline-block">
-          <Button>Minta link baru</Button>
+        <Link
+          href="/forgot-password"
+          className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ffb703] px-6 text-sm font-bold text-[#10131a] shadow-lg shadow-[#ffb703]/20 transition-all hover:bg-[#ffdea9] hover:-translate-y-0.5"
+        >
+          Minta link baru
         </Link>
       </div>
     );
@@ -69,77 +76,106 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {serverError ? (
-        <div role="alert" className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-400"
+        >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{serverError}</span>
         </div>
       ) : null}
 
       {successMessage ? (
-        <div role="status" className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm leading-6 text-emerald-400"
+        >
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{successMessage}</span>
         </div>
       ) : null}
 
       {successMessage ? (
-        <Link href="/login" className="block">
-          <Button size="lg" className="w-full">
-            Masuk sekarang
-          </Button>
+        <Link
+          href="/login"
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#ffb703] px-6 text-sm font-bold text-[#10131a] shadow-lg shadow-[#ffb703]/20 transition-all hover:bg-[#ffdea9] hover:-translate-y-0.5"
+        >
+          Masuk sekarang
         </Link>
       ) : (
         <>
-          <div className="login-field login-field-1 space-y-2">
-            <Label htmlFor="newPassword">Password baru</Label>
-            <Input
-              id="newPassword"
-              type={showPassword ? "text" : "password"}
-              icon={<LockKeyhole className="h-4 w-4" />}
-              rightIcon={
-                <button
-                  type="button"
-                  aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-                  onClick={() => setShowPassword((current) => !current)}
-                  className="press rounded-full p-1.5 text-muted-foreground transition hover:bg-accent hover:text-primary"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              }
-              placeholder="Minimal 8 karakter"
-              autoComplete="new-password"
-              aria-invalid={Boolean(errors.newPassword)}
-              {...register("newPassword")}
-            />
+          {/* New password */}
+          <div className="space-y-2">
+            <label htmlFor="newPassword" className="block text-sm font-semibold text-[#e1e2ec]">
+              Password baru
+            </label>
+            <div className={inputWrap(Boolean(errors.newPassword))}>
+              <LockKeyhole className="h-4 w-4 shrink-0 text-[#4a4d58]" />
+              <input
+                id="newPassword"
+                type={showPassword ? "text" : "password"}
+                placeholder="Minimal 8 karakter"
+                autoComplete="new-password"
+                aria-invalid={Boolean(errors.newPassword)}
+                className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none placeholder:text-[#3a3d46]"
+                {...register("newPassword")}
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                onClick={() => setShowPassword((current) => !current)}
+                className="rounded-full p-1 text-[#4a4d58] transition hover:text-[#ffb703]"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.newPassword ? (
-              <p className="text-xs font-medium text-rose-600">{errors.newPassword.message}</p>
+              <p className="text-xs font-medium text-red-400">{errors.newPassword.message}</p>
             ) : null}
           </div>
 
-          <div className="login-field login-field-2 space-y-2">
-            <Label htmlFor="confirmPassword">Konfirmasi password</Label>
-            <Input
-              id="confirmPassword"
-              type={showPassword ? "text" : "password"}
-              icon={<ShieldCheck className="h-4 w-4" />}
-              placeholder="Ulangi password baru"
-              autoComplete="new-password"
-              aria-invalid={Boolean(errors.confirmPassword)}
-              {...register("confirmPassword")}
-            />
+          {/* Confirm password */}
+          <div className="space-y-2">
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[#e1e2ec]">
+              Konfirmasi password
+            </label>
+            <div className={inputWrap(Boolean(errors.confirmPassword))}>
+              <ShieldCheck className="h-4 w-4 shrink-0 text-[#4a4d58]" />
+              <input
+                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                placeholder="Ulangi password baru"
+                autoComplete="new-password"
+                aria-invalid={Boolean(errors.confirmPassword)}
+                className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none placeholder:text-[#3a3d46]"
+                {...register("confirmPassword")}
+              />
+            </div>
             {errors.confirmPassword ? (
-              <p className="text-xs font-medium text-rose-600">{errors.confirmPassword.message}</p>
+              <p className="text-xs font-medium text-red-400">{errors.confirmPassword.message}</p>
             ) : null}
           </div>
 
-          <Button type="submit" size="lg" className="w-full" isLoading={isSubmitting}>
-            {!isSubmitting ? <KeyRound className="h-4 w-4" /> : null}
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-[#ffb703] px-6 text-sm font-bold text-[#10131a] shadow-lg shadow-[#ffb703]/20 transition-all hover:bg-[#ffdea9] hover:shadow-[#ffb703]/40 hover:-translate-y-0.5 disabled:opacity-60 disabled:pointer-events-none active:scale-[0.98]"
+          >
+            {isSubmitting ? (
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-25" />
+                <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <KeyRound className="h-4 w-4" />
+            )}
             Simpan password baru
-          </Button>
+          </button>
 
           <Link
             href="/login"
-            className="block text-center text-xs font-semibold text-primary transition hover:text-[#16389f]"
+            className="block text-center text-xs font-semibold text-[#ffb703] transition hover:text-[#ffdea9]"
           >
             Kembali ke login
           </Link>

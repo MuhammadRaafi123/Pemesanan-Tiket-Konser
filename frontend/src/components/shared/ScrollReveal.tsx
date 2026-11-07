@@ -17,8 +17,8 @@ export function ScrollReveal({ children, className = "", delay = 0 }: ScrollReve
     if (!element) return;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
-      setVisible(true);
-      return;
+      const timer = window.setTimeout(() => setVisible(true), 0);
+      return () => window.clearTimeout(timer);
     }
 
     const observer = new IntersectionObserver(([entry]) => {

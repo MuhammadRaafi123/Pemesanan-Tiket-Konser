@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Volume2, VolumeX, Sparkles } from "lucide-react";
+import { Volume2, VolumeX, Music2 } from "lucide-react";
 
 interface SoundVisualizerProps {
   interactive?: boolean;
@@ -47,7 +47,7 @@ export function SoundVisualizer({
       </div>
 
       <div className="flex items-center gap-1.5 text-xs font-semibold text-[#17457f]">
-        <Sparkles className="h-3.5 w-3.5 text-[#2563eb]" />
+        <Music2 className="h-3.5 w-3.5 text-[#2563eb]" />
         <span className="hidden sm:inline tracking-wide uppercase text-[10px] font-bold text-[#2563eb]">
           Live Beats
         </span>

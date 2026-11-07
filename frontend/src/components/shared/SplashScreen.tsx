@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Disc3 } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface SplashScreenProps {
@@ -11,34 +11,51 @@ interface SplashScreenProps {
   onComplete?: () => void;
 }
 
-const SPLASH_STORAGE_KEY = "concertix-splash-seen";
+const SPLASH_STORAGE_KEY = "tixora-splash-seen";
 
 export function SplashScreen({
-  duration = 1700,
+  duration = 1900,
   showOnce = true,
   className,
   onComplete,
 }: SplashScreenProps) {
   const [visible, setVisible] = useState(true);
+  const [fading, setFading] = useState(false);
 
   useEffect(() => {
     let hasSeen = false;
     if (showOnce && typeof window !== "undefined") {
       try {
-        hasSeen = window.sessionStorage.getItem(SPLASH_STORAGE_KEY) === "true";
+        hasSeen =
+          window.sessionStorage.getItem(SPLASH_STORAGE_KEY) === "true" ||
+          window.sessionStorage.getItem("concertix-splash-seen") === "true";
         if (!hasSeen) window.sessionStorage.setItem(SPLASH_STORAGE_KEY, "true");
       } catch {
         hasSeen = false;
       }
     }
 
-    const finish = () => {
+    if (hasSeen) {
+      const skipTimer = window.setTimeout(() => {
+        setVisible(false);
+        onComplete?.();
+      }, 0);
+      return () => window.clearTimeout(skipTimer);
+    }
+
+    const fadeTimer = window.setTimeout(() => {
+      setFading(true);
+    }, Math.max(0, duration - 350));
+
+    const finishTimer = window.setTimeout(() => {
       setVisible(false);
       onComplete?.();
-    };
+    }, duration);
 
-    const timer = window.setTimeout(finish, hasSeen ? 40 : duration);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(finishTimer);
+    };
   }, [duration, onComplete, showOnce]);
 
   if (!visible) return null;
@@ -46,34 +63,45 @@ export function SplashScreen({
   return (
     <div
       className={cn(
-        "splash-screen fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-background text-ink",
+        "splash-screen fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#0b0e15] text-[#e1e2ec] transition-opacity duration-300 ease-out",
+        fading ? "opacity-0 pointer-events-none" : "opacity-100",
         className,
       )}
       role="status"
       aria-live="polite"
-      aria-label="Memuat Concertix"
+      aria-label="Memuat Tixora"
     >
-      <div className="splash-grid pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[100px]" />
+      {/* Background ambient lighting */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,183,3,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,183,3,0.02)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ffb703]/[0.09] blur-[120px]" />
+      <div className="pointer-events-none absolute right-1/4 top-1/3 h-48 w-48 rounded-full bg-[#6801d1]/[0.10] blur-[90px]" />
 
       <div className="relative flex flex-col items-center px-6 text-center">
-        <div className="splash-mark relative mb-9 flex h-20 w-20 items-center justify-center rounded-[26px] border border-primary/20 bg-primary text-white shadow-[0_24px_60px_-24px_rgba(27,69,199,.75)]">
-          <Disc3 className="h-9 w-9" />
-          <span className="absolute h-2 w-2 rounded-full bg-white/80" />
+        {/* Foto / Logo Tixora */}
+        <div className="relative mb-6 flex items-center justify-center">
+          <div className="absolute -inset-6 rounded-full bg-[#ffb703]/15 blur-2xl animate-pulse" />
+          <Image
+            src="/tixora.png"
+            alt="Tixora"
+            width={260}
+            height={158}
+            priority
+            className="relative h-auto w-52 sm:w-60 md:w-64 object-contain drop-shadow-[0_12px_36px_rgba(255,183,3,0.28)]"
+          />
         </div>
 
-        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.42em] text-primary">
-          Concertix
-        </p>
-        <h1 className="font-display-xl mt-4 text-3xl text-ink sm:text-[2.6rem]">
+        <h1 className="sr-only">Tixora</h1>
+
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.4em] text-[#ffb703]">
           Your next moment awaits.
-        </h1>
-        <p className="mt-4 max-w-xs text-xs leading-6 text-muted-foreground">
+        </p>
+        <p className="mt-3 max-w-xs text-xs leading-6 text-[#8a8d98]">
           Menyiapkan pengalaman konser terbaik untukmu.
         </p>
 
-        <div className="mt-10 h-px w-52 overflow-hidden bg-primary/10">
-          <div className="splash-progress h-full w-full origin-left bg-gradient-to-r from-primary to-gold-soft" />
+        {/* Loading progress bar */}
+        <div className="mt-8 h-1 w-52 overflow-hidden rounded-full bg-[#1e2128] border border-[#2a2d36]/60">
+          <div className="splash-progress h-full w-full origin-left rounded-full bg-gradient-to-r from-[#ffb703] via-[#ffdea9] to-[#ffb703]" />
         </div>
       </div>
     </div>

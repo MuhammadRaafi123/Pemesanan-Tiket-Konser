@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Compass, QrCode, ShoppingBag, Sparkles, Ticket, User } from "lucide-react";
+import { CalendarDays, Compass, Home, QrCode, ShoppingBag, Ticket, User } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useCartStore } from "@/stores/cartStore";
 
@@ -12,7 +12,7 @@ export function MobileNav() {
   const totalCartItems = useCartStore((state) => state.getTotalItems());
 
   const items = [
-    { label: user ? "Untukmu" : "Home", href: user ? "/home" : "/", icon: user ? Compass : Sparkles },
+    { label: user ? "Untukmu" : "Home", href: user ? "/home" : "/", icon: user ? Compass : Home },
     { label: "Konser", href: "/events", icon: Ticket },
     { label: "Artis", href: "/artists", icon: CalendarDays },
     ...(user

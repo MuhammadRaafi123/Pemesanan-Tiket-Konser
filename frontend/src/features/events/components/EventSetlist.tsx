@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clock3, ListMusic, Music4 } from "lucide-react";
+import { Clock3, Disc3, ListMusic, Music4 } from "lucide-react";
 import type { Event, SetlistEntry } from "../types";
 import { fetchEventSetlist } from "../api";
-import { Badge } from "@/components/ui/badge";
-import { Loading } from "@/components/shared/Loading";
 import { Reveal } from "@/components/shared/Reveal";
 
 interface EventSetlistProps {
@@ -38,60 +36,74 @@ export function EventSetlist({ event }: EventSetlistProps) {
 
   return (
     <Reveal>
-      <section className="rounded-[28px] border border-border bg-white p-7 shadow-[0_1px_2px_rgba(10,27,51,.04),0_18px_44px_-30px_rgba(13,38,84,.28)] sm:p-9">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      <section className="rounded-3xl border border-[#262a38] bg-[#14161f] p-7 sm:p-9 shadow-xl">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#232733]/80 pb-6">
           <div>
-            <p className="eyebrow">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d5baff]/30 bg-[#d5baff]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#d5baff]">
               <ListMusic className="h-3.5 w-3.5" />
-              Setlist
-            </p>
-            <h2 className="font-display mt-4 text-3xl text-ink">Lagu yang dibawakan</h2>
+              <span>Bocoran Setlist Konser</span>
+            </div>
+            <h2 className="mt-2.5 text-2xl font-black tracking-tight text-white sm:text-3xl">
+              Lagu Yang Akan Dibawakan
+            </h2>
           </div>
-          <Badge variant="secondary">{songs.length} lagu</Badge>
+          <span className="rounded-xl border border-[#2a2d36] bg-[#1a1d27] px-3.5 py-1.5 text-xs font-bold text-[#ffdea9]">
+            {songs.length} Lagu Dikonfirmasi
+          </span>
         </div>
 
         {loading ? (
-          <Loading message="Memuat daftar lagu..." />
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Disc3 className="h-8 w-8 text-[#ffb703] animate-spin mb-3" />
+            <p className="text-xs text-[#8a8d98]">Memuat daftar setlist lagu...</p>
+          </div>
         ) : songs.length === 0 ? (
-          <p className="mt-6 text-sm leading-7 text-muted-foreground">
-            Daftar lagu belum tersedia untuk konser ini.
+          <p className="mt-6 text-xs sm:text-sm text-[#8a8d98]">
+            Daftar lagu resmi belum dirilis oleh promotor untuk tanggal konser ini.
           </p>
         ) : (
-          <ol className="mt-7 space-y-1.5">
+          <ol className="mt-7 space-y-2.5">
             {songs.map((entry) => (
               <li
                 key={`${entry.song.id}-${entry.order}`}
-                className="group flex flex-wrap items-center gap-4 rounded-2xl border border-transparent px-4 py-3 transition-all duration-300 hover:border-border hover:bg-muted/50"
+                className="group flex flex-wrap items-center gap-4 rounded-2xl border border-[#232733] bg-[#1a1d27]/70 p-3.5 px-4 transition-all duration-300 hover:border-[#ffb703]/35 hover:bg-[#1f2230]"
               >
-                <span className="numeral flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-xs text-muted-foreground transition group-hover:border-primary/25 group-hover:text-primary">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#ffb703]/25 bg-[#ffb703]/10 font-mono text-xs font-black text-[#ffb703]">
                   {String(entry.order).padStart(2, "0")}
                 </span>
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-ink">{entry.song.title}</p>
-                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                  <p className="truncate text-sm font-bold text-white transition group-hover:text-[#ffb703] sm:text-base">
+                    {entry.song.title}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-[#8a8d98]">
                     {entry.artist ? (
                       <Link
                         href={`/artists/${entry.artist.id}`}
-                        className="font-medium text-primary transition hover:text-[#16389f]"
+                        className="font-semibold text-[#d5baff] transition hover:underline"
                       >
                         {entry.artist.name}
                       </Link>
                     ) : (
-                      "Artis tidak diketahui"
+                      "Artis Utama"
                     )}
-                    {entry.song.album ? ` · ${entry.song.album}` : ""}
+                    {entry.song.album ? ` · Album: ${entry.song.album}` : ""}
                     {entry.note ? ` · ${entry.note}` : ""}
                   </p>
                 </div>
 
-                {entry.encore ? <Badge variant="gold">Encore</Badge> : null}
+                {entry.encore ? (
+                  <span className="rounded-full border border-[#ffb703]/40 bg-[#ffb703]/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#ffdea9] shadow-sm">
+                    Encore Stage
+                  </span>
+                ) : null}
 
-                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Music4 className="h-3.5 w-3.5" />
-                  <Clock3 className="h-3.5 w-3.5" />
-                  {entry.song.duration}
-                </span>
+                {entry.song.duration && (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#8a8d98]">
+                    <Clock3 className="h-3.5 w-3.5 text-[#ffb703]" />
+                    <span>{entry.song.duration}</span>
+                  </span>
+                )}
               </li>
             ))}
           </ol>

@@ -5,17 +5,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   ChevronDown,
+  Compass,
   LayoutDashboard,
   LogOut,
   ShoppingBag,
-  Sparkles,
   Ticket,
   User,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 
 const MENU_LINKS = [
-  { label: "For you", href: "/home", icon: Sparkles },
+  { label: "For you", href: "/home", icon: Compass },
   { label: "Profil", href: "/profile", icon: User },
   { label: "Tiket saya", href: "/tickets", icon: Ticket },
   { label: "Pesanan", href: "/orders", icon: ShoppingBag },

@@ -5,12 +5,11 @@ import { cn } from "@/lib/utils";
 interface BrandMarkProps {
   href?: string;
   compact?: boolean;
-  /** `true` renders the wordmark in ink, `false` in white (for dark panels). */
   light?: boolean;
   className?: string;
 }
 
-export function BrandMark({ href = "/", compact = false, light = true, className }: BrandMarkProps) {
+export function BrandMark({ href = "/", compact = false, className }: BrandMarkProps) {
   return (
     <Link
       href={href}

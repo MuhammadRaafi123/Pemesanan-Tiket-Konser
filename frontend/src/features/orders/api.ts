@@ -20,7 +20,7 @@ type BackendOrderItem = Omit<OrderItem, "ticket_categories"> & {
 
 type BackendOrder = Omit<Order, "events" | "payment" | "order_items" | "users"> & {
   order_items?: BackendOrderItem[];
-  payments?: Order["payment"][];
+  payments?: Order["payment"][] | Order["payment"];
   users?: Order["users"];
 };
 
@@ -42,6 +42,10 @@ function normalizeOrder(rawOrder: BackendOrder): Order {
       }
     : undefined;
 
+  const paymentData = Array.isArray(rawOrder.payments)
+    ? rawOrder.payments[0]
+    : (rawOrder.payments || undefined);
+
   return {
     ...rawOrder,
     order_items: rawOrder.order_items?.map((item) => ({
@@ -49,7 +53,7 @@ function normalizeOrder(rawOrder: BackendOrder): Order {
       ticket_categories: item.ticket_categories || undefined,
     })),
     events: event,
-    payment: rawOrder.payments?.[0],
+    payment: paymentData,
     users: rawOrder.users,
   };
 }

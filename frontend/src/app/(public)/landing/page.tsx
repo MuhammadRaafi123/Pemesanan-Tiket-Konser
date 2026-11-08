@@ -187,8 +187,7 @@ export default function LandingPage() {
             <div className="absolute -top-40 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-[#ffb703]/[0.06] blur-[120px] animate-[drift-a_18s_ease-in-out_infinite_alternate]" />
             <div className="absolute right-0 top-20 h-[300px] w-[300px] rounded-full bg-[#6801d1]/[0.08] blur-[100px] animate-[drift-b_22s_ease-in-out_infinite_alternate]" />
             <div className="absolute bottom-0 left-0 h-[200px] w-[400px] rounded-full bg-[#ffb703]/[0.03] blur-[80px] animate-[drift-a_20s_ease-in-out_infinite_alternate-reverse]" />
-            {/* Animated grid */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,183,3,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,183,3,0.02)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+          
             {/* Floating particles */}
             <div className="absolute top-1/4 left-1/4 h-2 w-2 rounded-full bg-[#ffb703]/30 animate-[float-slow_7s_ease-in-out_infinite]" />
             <div className="absolute top-1/3 right-1/3 h-1.5 w-1.5 rounded-full bg-[#d5baff]/30 animate-[float-slow_9s_ease-in-out_infinite_1s]" />
@@ -1007,19 +1006,6 @@ export default function LandingPage() {
                     style={{ background: `radial-gradient(circle at 50% 0%, ${color}08, transparent 70%)` }}
                   />
                   {/* Bar rise animation */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 flex items-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {[...Array(12)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 rounded-t-full origin-bottom"
-                        style={{
-                          backgroundColor: color,
-                          height: '100%',
-                          animation: `bar-rise 1.5s ease-in-out ${i * 0.08}s infinite alternate`,
-                        }}
-                      />
-                    ))}
-                  </div>
                   <span className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-xl transition-transform group-hover:scale-110" style={{ backgroundColor: `${color}12` }}>
                     <Icon className="h-5 w-5" style={{ color }} />
                   </span>
@@ -1087,8 +1073,7 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-[#191b23] via-[#1d1f27] to-[#191b23]" />
               <div className="absolute -right-20 -top-20 h-[300px] w-[300px] rounded-full bg-[#ffb703]/10 blur-[80px] transition-all duration-500 group-hover:bg-[#ffb703]/15 animate-[drift-a_15s_ease-in-out_infinite_alternate]" />
               <div className="absolute -bottom-20 -left-20 h-[300px] w-[300px] rounded-full bg-[#6801d1]/10 blur-[80px] transition-all duration-500 group-hover:bg-[#6801d1]/15 animate-[drift-b_18s_ease-in-out_infinite_alternate]" />
-              {/* Grid pattern */}
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,183,3,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,183,3,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+
               {/* Floating particles */}
               <div className="absolute top-1/4 right-1/4 h-2 w-2 rounded-full bg-[#ffb703]/20 animate-[float-slow_8s_ease-in-out_infinite]" />
               <div className="absolute bottom-1/3 left-1/3 h-1.5 w-1.5 rounded-full bg-[#d5baff]/20 animate-[float-slow_10s_ease-in-out_infinite_1s]" />

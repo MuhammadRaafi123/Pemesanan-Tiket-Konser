@@ -1,4 +1,3 @@
-import { Compass, ShieldCheck, Ticket, WalletCards } from "lucide-react";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { GuestOnly } from "@/components/auth/GuestOnly";
 import LoginForm from "@/features/auth/components/LoginForm";
@@ -10,15 +9,6 @@ export default function LoginPage() {
         eyebrow="Selamat datang kembali"
         title="Masuk ke akunmu"
         description="Masuk untuk menemukan konser dan menyimpan tiket digitalmu."
-        sideTitle="Momen live terbaik dimulai di sini."
-        sideDescription="Bergabung dengan ribuan penonton yang menemukan musik, artis, dan cerita baru bersama di panggung."
-        sideFeatures={[
-          { icon: Ticket, title: "Akses lebih awal", description: "Temukan event pilihan sebelum kehabisan kuota." },
-          { icon: Compass, title: "Rekomendasi personal", description: "Kurasi yang terasa relevan dengan dirimu." },
-          { icon: WalletCards, title: "Semua tiketmu", description: "E-ticket QR tersimpan rapi dalam satu dompet." },
-          { icon: ShieldCheck, title: "Transaksi aman", description: "Data akunmu terlindungi enkripsi end-to-end." },
-        ]}
-        heroImage="/login.jpg"
       >
         <LoginForm />
       </AuthShell>

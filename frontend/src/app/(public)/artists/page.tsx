@@ -136,17 +136,10 @@ export default function ArtistsPage() {
             <div className="absolute -top-40 left-1/3 h-[500px] w-[750px] -translate-x-1/4 rounded-full bg-[#ffb703]/[0.06] blur-[140px]" />
             <div className="absolute right-0 top-20 h-[360px] w-[400px] rounded-full bg-[#6801d1]/[0.08] blur-[120px]" />
             <div className="absolute bottom-0 left-10 h-[250px] w-[350px] rounded-full bg-[#ec4899]/[0.04] blur-[100px]" />
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,183,3,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,183,3,0.02)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_80%)]" />
           </div>
 
           <div className="relative mx-auto max-w-7xl">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#ffb703]/25 bg-[#ffb703]/10 px-4 py-2">
-                <Mic2 className="h-4 w-4 text-[#ffb703]" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffb703]">
-                  {isSignedIn ? `Ruang Musisi — Halo, ${user?.name.split(" ")[0]}` : "Katalog Musisi & Artis Tixora"}
-                </span>
-              </div>
 
               {/* Title */}
               <h1 className="mt-6 text-[clamp(2.4rem,5.5vw,4.5rem)] font-extrabold leading-[1.05] tracking-tight text-white">

@@ -1,9 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, LoaderCircle, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import { LoaderCircle, Pencil, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
 import api from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
 import type { Event, TicketCategory } from "@/features/events/types";
@@ -19,10 +17,9 @@ const field = "h-10 w-full rounded-xl border border-white/10 bg-[#11110f] px-3 t
 const inputFile = "block w-full text-xs text-white/50 file:mr-3 file:rounded-lg file:border-0 file:bg-[#c9a85e]/15 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#dfc786]";
 
 export default function AdminCatalogPage() {
-  const router = useRouter();
+  const { success, error } = useToast();
   const user = useAuthStore((state) => state.user);
   const hydrated = useAuthStore((state) => state.hydrated);
-  const { success, error } = useToast();
   const [artists, setArtists] = useState<Artist[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [tickets, setTickets] = useState<CatalogTicket[]>([]);
@@ -68,15 +65,10 @@ export default function AdminCatalogPage() {
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!user || user.role !== "admin") {
-      router.replace("/home");
-      return;
-    }
-    const timer = setTimeout(() => {
-      void loadCatalog();
-    }, 0);
+    if (!user || user.role !== "admin") return;
+    const timer = setTimeout(() => { void loadCatalog(); }, 0);
     return () => clearTimeout(timer);
-  }, [hydrated, user, router, loadCatalog]);
+  }, [hydrated, user, loadCatalog]);
 
   const mutate = async (action: () => Promise<unknown>, message: string): Promise<boolean> => {
     setSaving(true);
@@ -141,10 +133,17 @@ export default function AdminCatalogPage() {
     setEventStatus(event.status); setEventPoster(null);
   };
 
-  if (!hydrated || loading) return <main className="flex min-h-screen items-center justify-center bg-[#0b0b09] text-[#dfc786]"><LoaderCircle className="h-8 w-8 animate-spin" /></main>;
+  if (!hydrated || loading) return <div className="flex min-h-[60vh] items-center justify-center"><LoaderCircle className="h-8 w-8 animate-spin text-[#c9a85e]" /></div>;
 
-  return <main className="min-h-screen bg-[#0b0b09] px-5 py-7 text-[#f5f0e5] sm:px-8 lg:px-12 lg:py-10"><div className="mx-auto max-w-7xl">
-    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6"><div><Link href="/admin" className="inline-flex items-center gap-2 text-xs text-[#dfc786]"><ArrowLeft className="h-3.5 w-3.5" />Kembali ke dashboard</Link><h1 className="mt-3 font-serif text-3xl sm:text-4xl">Kelola katalog</h1><p className="mt-2 text-sm text-white/45">Atur event, artis, dan kategori tiket yang ditampilkan ke pelanggan.</p></div><button onClick={() => void loadCatalog()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs text-white/60"><RefreshCw className="h-3.5 w-3.5" />Muat ulang</button></header>
+  return <main className="min-h-screen bg-[#0b0b09] px-5 py-8 text-[#f5f0e5] sm:px-8"><div className="mx-auto max-w-7xl">
+    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[rgba(201,168,94,0.12)] pb-6">
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#c9a85e]/70">Admin · Katalog</p>
+        <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#f5f0e5] sm:text-3xl">Kelola Katalog</h1>
+        <p className="mt-1 text-sm text-[#5a5448]">Atur event, artis, dan kategori tiket yang ditampilkan ke pelanggan.</p>
+      </div>
+      <button onClick={() => void loadCatalog()} className="inline-flex h-9 items-center gap-2 rounded-xl border border-[rgba(201,168,94,0.2)] bg-[#c9a85e]/10 px-3 text-xs font-medium text-[#c9a85e] transition hover:bg-[#c9a85e]/20"><RefreshCw className="h-3.5 w-3.5" />Muat ulang</button>
+    </header>
 
     <div className="mt-7 grid items-start gap-6 xl:grid-cols-3">
       <section className={panel}><h2 className="font-serif text-xl">{artistEdit ? "Edit artis" : "Tambah artis"}</h2><form onSubmit={submitArtist} className="mt-4 space-y-3"><input required minLength={2} value={artistName} onChange={(e) => setArtistName(e.target.value)} placeholder="Nama artis" className={field} /><textarea value={artistDescription} onChange={(e) => setArtistDescription(e.target.value)} placeholder="Deskripsi singkat" className={`${field} h-24 resize-y py-3`} /><input type="file" accept="image/*" onChange={(e) => setArtistPhoto(e.target.files?.[0] || null)} className={inputFile} /><button disabled={saving} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#c9a85e] text-xs font-semibold text-[#17140d] disabled:opacity-50">{artistEdit ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{artistEdit ? "Simpan artis" : "Tambah artis"}</button>{artistEdit && <button type="button" onClick={() => { setArtistEdit(null); setArtistName(""); setArtistDescription(""); setArtistPhoto(null); }} className="w-full text-xs text-white/45">Batalkan edit</button>}</form><div className="mt-6 max-h-80 space-y-2 overflow-y-auto border-t border-white/10 pt-4">{artists.map((artist) => <div key={artist.id} className="flex items-center justify-between gap-2 rounded-xl bg-black/20 px-3 py-2"><span className="truncate text-xs">{artist.name}</span><div className="flex shrink-0 gap-1"><button aria-label={`Edit ${artist.name}`} onClick={() => { setArtistEdit(artist); setArtistName(artist.name); setArtistDescription(artist.description || ""); setArtistPhoto(null); }} className="rounded-lg p-2 text-white/45 hover:text-[#dfc786]"><Pencil className="h-3.5 w-3.5" /></button><button aria-label={`Hapus ${artist.name}`} onClick={() => remove("artists", artist.id, artist.name)} className="rounded-lg p-2 text-white/45 hover:text-rose-300"><Trash2 className="h-3.5 w-3.5" /></button></div></div>)}</div></section>

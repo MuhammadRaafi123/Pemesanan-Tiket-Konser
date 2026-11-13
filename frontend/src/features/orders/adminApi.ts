@@ -5,7 +5,18 @@ import type { Order } from "./types";
 
 export interface AdminOrder extends Order {
   users?: { id: number | string; name: string; email: string; phone?: string };
-  payments?: { id: number | string; status: string; payment_method: string; proof_image?: string; verified_at?: string }[];
+  order_items?: (NonNullable<Order["order_items"]>[number] & {
+    ticket_categories?: TicketCategory & {
+      events?: { id: number | string; title: string };
+    };
+  })[];
+  payments?: {
+    id: number | string;
+    status: string;
+    payment_method: string;
+    proof_image?: string;
+    verified_at?: string;
+  }[];
 }
 
 export async function fetchAdminOrders(): Promise<AdminOrder[]> {

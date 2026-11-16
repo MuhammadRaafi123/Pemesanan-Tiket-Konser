@@ -54,7 +54,7 @@ export function AuthShell({
       <div className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between px-5 py-5 sm:px-10">
         <Link href="/" aria-label="Tixora">
           <Image
-            src="/tixora.png"
+            src="/tixora1.png"
             alt="Tixora"
             width={120}
             height={60}

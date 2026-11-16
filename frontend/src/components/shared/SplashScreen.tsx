@@ -79,14 +79,13 @@ export function SplashScreen({
       <div className="relative flex flex-col items-center px-6 text-center">
         {/* Foto / Logo Tixora */}
         <div className="relative mb-6 flex items-center justify-center">
-          <div className="absolute -inset-6 rounded-full bg-[#ffb703]/15 blur-2xl animate-pulse" />
           <Image
-            src="/tixora.png"
+            src="/tixora1.png"
             alt="Tixora"
             width={260}
             height={158}
             priority
-            className="relative h-auto w-52 sm:w-60 md:w-64 object-contain drop-shadow-[0_12px_36px_rgba(255,183,3,0.28)]"
+            className="relative h-auto w-52 sm:w-60 md:w-64 object-contain"
           />
         </div>
 

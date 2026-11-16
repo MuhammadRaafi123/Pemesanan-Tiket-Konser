@@ -111,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         >
           {!collapsed && (
             <Link href="/admin" className="flex items-center gap-2">
-              <Image src="/tixora.png" alt="Tixora" width={96} height={48} className="h-7 w-auto" />
+              <Image src="/tixora1.png" alt="Tixora" width={96} height={48} className="h-7 w-auto" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a85e]/60">
                 Admin
               </span>
@@ -119,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
           {collapsed && (
             <Link href="/admin">
-              <Image src="/tixora.png" alt="Tixora" width={32} height={32} className="h-6 w-auto" />
+              <Image src="/tixora1.png" alt="Tixora" width={32} height={32} className="h-6 w-auto" />
             </Link>
           )}
           <button
@@ -177,7 +177,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Image src="/tixora.png" alt="Tixora" width={80} height={40} className="h-6 w-auto" />
+          <Image src="/tixora1.png" alt="Tixora" width={80} height={40} className="h-6 w-auto" />
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a85e]/60">Admin</span>
         </header>
 

@@ -189,6 +189,10 @@ body {
   text-wrap: balance;
 }
 
+.font-sora {
+  font-family: var(--font-sora), var(--font-jakarta), sans-serif;
+}
+
 /* Numerals that must feel engraved: prices, codes, stats */
 .numeral {
   font-family: var(--font-fraunces), Georgia, serif;
@@ -937,5 +941,57 @@ body { background: #0b0b09; color: #f5f0e5; }
     filter: none;
     transition: none;
     will-change: auto;
+  }
+}
+
+.landing-page {
+  color-scheme: light;
+}
+
+.landing-page [class~="bg-white"],
+.landing-page [class~="bg-white/70"],
+.landing-page [class~="bg-white/75"],
+.landing-page [class~="bg-white/80"],
+.landing-page [class~="bg-white/85"],
+.landing-page [class~="bg-white/90"],
+.landing-page [class~="bg-white/92"] {
+  background-color: #fffdf2 !important;
+}
+
+
+/* ==================================================================
+   Register Page — Futuristic / Luxury
+   ================================================================== */
+.register-bg-drift {
+  animation: register-bg-drift 28s ease-in-out infinite alternate;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes register-bg-drift {
+  from {
+    transform: scale(1.05) translate3d(-0.5%, -0.5%, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(0.5%, 0.5%, 0);
+  }
+}
+
+@keyframes register-particle-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+    opacity: var(--particle-opacity, 0.2);
+  }
+  25% {
+    transform: translate3d(8px, -16px, 0);
+    opacity: calc(var(--particle-opacity, 0.2) * 1.8);
+  }
+  50% {
+    transform: translate3d(-6px, -28px, 0);
+    opacity: var(--particle-opacity, 0.2);
+  }
+  75% {
+    transform: translate3d(10px, -14px, 0);
+    opacity: calc(var(--particle-opacity, 0.2) * 0.6);
   }
 }

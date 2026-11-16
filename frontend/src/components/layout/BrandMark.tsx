@@ -13,17 +13,17 @@ export function BrandMark({ href = "/", compact = false, className }: BrandMarkP
   return (
     <Link
       href={href}
-      className={cn("group inline-flex items-center", className)}
+      className={cn("group inline-flex items-center gap-2.5 transition-transform duration-300 hover:scale-[1.02]", className)}
       aria-label="Tixora"
     >
       <Image
-        src="/tixora.png"
+        src="/tixora1.png"
         alt="Tixora"
-        width={compact ? 100 : 140}
-        height={compact ? 50 : 70}
+        width={compact ? 120 : 160}
+        height={compact ? 40 : 54}
         className={cn(
-          "h-auto w-auto object-contain transition-transform duration-500 group-hover:scale-[1.04]",
-          compact ? "h-[28px] w-[56px]" : "h-[36px] w-[72px]",
+          "h-auto w-auto object-contain transition-all duration-300 group-hover:brightness-110",
+          compact ? "h-[30px] max-w-[110px]" : "h-[40px] max-w-[150px]",
         )}
         priority
       />

@@ -8,6 +8,7 @@ import { useCartStore } from "@/stores/cartStore";
 
 export function MobileNav() {
   const pathname = usePathname();
+  const isLanding = pathname === "/";
   const { user } = useAuthStore();
   const totalCartItems = useCartStore((state) => state.getTotalItems());
 
@@ -42,14 +43,14 @@ export function MobileNav() {
             >
               {isActive ? (
                 <span
-                  className="absolute inset-0 -z-10 rounded-xl bg-primary shadow-[0_10px_22px_-12px_rgba(27,69,199,.9)]"
+                  className="absolute inset-0 -z-10 rounded-xl bg-[#6264b5] shadow-[0_10px_22px_-12px_rgba(98,100,181,.7)]"
                   style={{ animation: "page-enter 380ms cubic-bezier(0.22,1,0.36,1) both" }}
                 />
               ) : null}
               <span className="relative">
                 <Icon className="h-4 w-4" />
                 {item.badge !== undefined ? (
-                  <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[0.5rem] font-bold text-white">
+                  <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6264b5] px-1 text-[0.5rem] font-bold text-[#fffdf2]">
                     {item.badge}
                   </span>
                 ) : null}

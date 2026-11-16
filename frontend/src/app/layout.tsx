@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Fraunces, Plus_Jakarta_Sans, Sora } from "next/font/google";
 
 import Providers from "./providers";
 
@@ -16,6 +16,12 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   display: "swap",
   axes: ["SOFT", "WONK"],
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -36,7 +42,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f4f7fd",
+  themeColor: "#fffdf2",
 };
 
 export default function RootLayout({
@@ -45,7 +51,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" data-scroll-behavior="smooth" className={`${jakarta.variable} ${fraunces.variable}`}>
+    <html
+      lang="id"
+      data-scroll-behavior="smooth"
+      className={`${jakarta.variable} ${fraunces.variable} ${sora.variable}`}
+    >
       <body>
         <Providers>{children}</Providers>
       </body>

@@ -1016,6 +1016,29 @@ body { background: #0b0b09; color: #f5f0e5; }
   will-change: transform;
 }
 
+.home-header-drift {
+  animation: home-header-drift 18s ease-in-out infinite alternate;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes home-header-drift {
+  from {
+    transform: scale(1.08) translate3d(-1.2%, -0.7%, 0);
+  }
+  to {
+    transform: scale(1.2) translate3d(1.2%, 0.7%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-header-drift {
+    animation: none;
+    transform: scale(1.08);
+    will-change: auto;
+  }
+}
+
 @keyframes register-bg-drift {
   from {
     transform: scale(1.05) translate3d(-0.5%, -0.5%, 0);

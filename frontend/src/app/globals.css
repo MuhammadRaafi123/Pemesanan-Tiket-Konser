@@ -551,13 +551,14 @@ html.js-ready .stagger > *:nth-child(12) { --i: 11; }
     opacity: 0.55;
   }
 }
-@keyframes splash-float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-4deg);
+@keyframes splash-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
   }
-  50% {
-    transform: translateY(-9px) rotate(4deg);
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 @keyframes splash-progress {
@@ -644,11 +645,58 @@ html.js-ready .stagger > *:nth-child(12) { --i: 11; }
   }
 }
 
-.splash-mark {
-  animation: splash-float 3.2s ease-in-out infinite;
+.splash-screen {
+  perspective: 1400px;
+}
+.splash-shutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  width: 50%;
+  backface-visibility: hidden;
+  transition: transform 1100ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+.splash-shutter-left {
+  left: 0;
+  transform-origin: right center;
+  background: radial-gradient(ellipse at 100% 42%, rgba(124, 58, 237, 0.2), transparent 55%), #0b0815;
+}
+.splash-shutter-right {
+  right: 0;
+  transform-origin: left center;
+  background: radial-gradient(ellipse at 0% 42%, rgba(124, 58, 237, 0.2), transparent 55%), #0b0815;
+}
+.splash-screen-opening .splash-shutter-left {
+  transform: rotateY(-100deg);
+}
+.splash-screen-opening .splash-shutter-right {
+  transform: rotateY(100deg);
+}
+.splash-exit-content {
+  transition: opacity 650ms ease, transform 1100ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+.splash-screen-opening .splash-exit-content {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.splash-content {
+  animation: splash-content-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .splash-progress {
-  animation: splash-progress 2.1s var(--ease-out-soft) forwards;
+  animation: splash-progress var(--ease-out-soft) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-content {
+    animation: none;
+  }
+  .splash-shutter,
+  .splash-exit-content {
+    transition-duration: 1ms !important;
+  }
+  .splash-progress {
+    animation-duration: 1ms !important;
+  }
 }
 
 /* Login / auth ambient motion */
@@ -995,3 +1043,4 @@ body { background: #0b0b09; color: #f5f0e5; }
     opacity: calc(var(--particle-opacity, 0.2) * 0.6);
   }
 }
+

@@ -9,6 +9,8 @@ export default function LoginPage() {
         eyebrow="Selamat datang kembali"
         title="Masuk ke akunmu"
         description="Masuk untuk menemukan konser dan menyimpan tiket digitalmu."
+        heroImage="/reset-password.png"
+        heroImageAlt="Panggung konser Tixora"
       >
         <LoginForm />
       </AuthShell>

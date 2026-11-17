@@ -53,23 +53,23 @@ export default function LoginForm() {
       ) : null}
 
       {/* Email field */}
-      <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm font-semibold text-[#e1e2ec]">
+      <div className="login-field login-field-1 space-y-2">
+        <label htmlFor="email" className="block text-sm font-semibold text-[#fffdf2]">
           Email
         </label>
-        <div className={`flex items-center gap-3 rounded-xl border bg-[#1d1f27] px-4 py-3 transition-all duration-200 focus-within:ring-2 ${
+        <div className={`flex items-center gap-3 rounded-2xl border bg-white/[0.05] px-4 py-3.5 transition-all duration-300 focus-within:ring-2 ${
           errors.email
             ? "border-red-500/40 focus-within:border-red-500/60 focus-within:ring-red-500/10"
-            : "border-[#232733] focus-within:border-[#ffb703]/50 focus-within:ring-[#ffb703]/10"
+            : "border-white/15 focus-within:border-[#aaaaff]/70 focus-within:ring-[#6264b5]/20"
         }`}>
-          <Mail className="h-4 w-4 shrink-0 text-[#4a4d58]" />
+          <Mail className="h-4 w-4 shrink-0 text-[#9fa3d6]" />
           <input
             id="email"
             type="email"
             placeholder="you@gmail.com"
             autoComplete="email"
             aria-invalid={Boolean(errors.email)}
-            className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none placeholder:text-[#3a3d46]"
+            className="w-full bg-transparent text-sm text-[#fffdf2] outline-none placeholder:text-[#9699c5]"
             {...register("email")}
           />
         </div>
@@ -77,38 +77,38 @@ export default function LoginForm() {
       </div>
 
       {/* Password field */}
-      <div className="space-y-2">
+      <div className="login-field login-field-2 space-y-2">
         <div className="flex items-center justify-between gap-4">
-          <label htmlFor="password" className="block text-sm font-semibold text-[#e1e2ec]">
+          <label htmlFor="password" className="block text-sm font-semibold text-[#fffdf2]">
             Password
           </label>
           <Link
             href="/forgot-password"
-            className="text-xs font-semibold text-[#ffb703] transition hover:text-[#ffdea9]"
+            className="text-xs font-semibold text-[#6264b5] transition hover:text-[#8587d8]"
           >
             Lupa password?
           </Link>
         </div>
-        <div className={`flex items-center gap-3 rounded-xl border bg-[#1d1f27] px-4 py-3 transition-all duration-200 focus-within:ring-2 ${
+        <div className={`flex items-center gap-3 rounded-2xl border bg-white/[0.05] px-4 py-3.5 transition-all duration-300 focus-within:ring-2 ${
           errors.password
             ? "border-red-500/40 focus-within:border-red-500/60 focus-within:ring-red-500/10"
-            : "border-[#232733] focus-within:border-[#ffb703]/50 focus-within:ring-[#ffb703]/10"
+            : "border-white/15 focus-within:border-[#aaaaff]/70 focus-within:ring-[#6264b5]/20"
         }`}>
-          <LockKeyhole className="h-4 w-4 shrink-0 text-[#4a4d58]" />
+          <LockKeyhole className="h-4 w-4 shrink-0 text-[#9fa3d6]" />
           <input
             id="password"
             type={showPassword ? "text" : "password"}
             placeholder="Masukkan password"
             autoComplete="current-password"
             aria-invalid={Boolean(errors.password)}
-            className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none placeholder:text-[#3a3d46]"
+            className="w-full bg-transparent text-sm text-[#fffdf2] outline-none placeholder:text-[#9699c5]"
             {...register("password")}
           />
           <button
             type="button"
             aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
             onClick={() => setShowPassword((current) => !current)}
-            className="rounded-full p-1 text-[#4a4d58] transition hover:text-[#ffb703]"
+            className="rounded-full p-1 text-[#9fa3d6] transition hover:text-[#6264b5]"
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -120,7 +120,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-[#ffb703] px-6 text-sm font-bold text-[#10131a] shadow-lg shadow-[#ffb703]/20 transition-all hover:bg-[#ffdea9] hover:shadow-[#ffb703]/40 hover:-translate-y-0.5 disabled:opacity-60 disabled:pointer-events-none active:scale-[0.98]"
+        className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#6264b5] via-[#7779c9] to-[#6264b5] px-6 text-sm font-bold text-[#fffdf2] shadow-lg shadow-[#6264b5]/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#6264b5]/40 disabled:pointer-events-none disabled:opacity-60 active:scale-[0.98]"
       >
         {isSubmitting ? (
           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -135,14 +135,14 @@ export default function LoginForm() {
 
       {/* Divider */}
       <div className="flex items-center gap-4">
-        <div className="h-px flex-1 bg-[#232733]" />
-        <span className="text-xs text-[#4a4d58]">atau</span>
-        <div className="h-px flex-1 bg-[#232733]" />
+        <div className="h-px flex-1 bg-[#283567]" />
+        <span className="text-xs text-[#9fa3d6]">atau</span>
+        <div className="h-px flex-1 bg-[#283567]" />
       </div>
 
-      <p className="text-center text-sm text-[#6b6e7a]">
+      <p className="text-center text-sm text-[#b8b8d6]">
         Belum punya akun?{" "}
-        <Link href="/register" className="font-semibold text-[#ffb703] transition hover:text-[#ffdea9]">
+        <Link href="/register" className="font-semibold text-[#6264b5] transition hover:text-[#8587d8]">
           Buat akun gratis
         </Link>
       </p>

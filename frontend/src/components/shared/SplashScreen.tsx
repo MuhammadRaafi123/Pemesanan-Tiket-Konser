@@ -12,15 +12,16 @@ interface SplashScreenProps {
 }
 
 const SPLASH_STORAGE_KEY = "tixora-splash-seen";
+const OPEN_DURATION = 1100;
 
 export function SplashScreen({
-  duration = 1900,
+  duration = 3000,
   showOnce = true,
   className,
   onComplete,
 }: SplashScreenProps) {
   const [visible, setVisible] = useState(true);
-  const [fading, setFading] = useState(false);
+  const [opening, setOpening] = useState(false);
 
   useEffect(() => {
     let hasSeen = false;
@@ -43,9 +44,9 @@ export function SplashScreen({
       return () => window.clearTimeout(skipTimer);
     }
 
-    const fadeTimer = window.setTimeout(() => {
-      setFading(true);
-    }, Math.max(0, duration - 350));
+    const openTimer = window.setTimeout(() => {
+      setOpening(true);
+    }, Math.max(0, duration - OPEN_DURATION));
 
     const finishTimer = window.setTimeout(() => {
       setVisible(false);
@@ -53,7 +54,7 @@ export function SplashScreen({
     }, duration);
 
     return () => {
-      window.clearTimeout(fadeTimer);
+      window.clearTimeout(openTimer);
       window.clearTimeout(finishTimer);
     };
   }, [duration, onComplete, showOnce]);
@@ -63,44 +64,52 @@ export function SplashScreen({
   return (
     <div
       className={cn(
-        "splash-screen fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#0b0e15] text-[#e1e2ec] transition-opacity duration-300 ease-out",
-        fading ? "opacity-0 pointer-events-none" : "opacity-100",
+        "splash-screen fixed inset-0 z-[100] flex min-h-[100dvh] items-center justify-center overflow-hidden text-white",
+        opening && "splash-screen-opening",
         className,
       )}
       role="status"
       aria-live="polite"
       aria-label="Memuat Tixora"
     >
-      {/* Background ambient lighting */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,183,3,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,183,3,0.02)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ffb703]/[0.09] blur-[120px]" />
-      <div className="pointer-events-none absolute right-1/4 top-1/3 h-48 w-48 rounded-full bg-[#6801d1]/[0.10] blur-[90px]" />
+      <div
+        aria-hidden="true"
+        className="splash-shutter splash-shutter-left"
+      />
+      <div
+        aria-hidden="true"
+        className="splash-shutter splash-shutter-right"
+      />
+      <div className="splash-exit-content relative z-10 flex w-[min(100%-2rem,32rem)] flex-col items-center">
+        <div className="splash-content flex w-full flex-col items-center px-6 py-10 text-center">
+          <div className="relative mb-7 flex items-center justify-center">
+            <Image
+              src="/tixora1.png"
+              alt="Tixora"
+              width={260}
+              height={158}
+              priority
+              className="relative h-auto w-56 object-contain drop-shadow-[0_0_36px_rgba(168,85,247,0.35)] sm:w-72"
+            />
+          </div>
 
-      <div className="relative flex flex-col items-center px-6 text-center">
-        {/* Foto / Logo Tixora */}
-        <div className="relative mb-6 flex items-center justify-center">
-          <Image
-            src="/tixora1.png"
-            alt="Tixora"
-            width={260}
-            height={158}
-            priority
-            className="relative h-auto w-52 sm:w-60 md:w-64 object-contain"
-          />
-        </div>
+          <h1 className="sr-only">Tixora</h1>
 
-        <h1 className="sr-only">Tixora</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#c084fc]">
+            Your next moment awaits.
+          </p>
+          <p className="mt-3 max-w-xs text-sm leading-6 text-[#c4b8d5]">
+            Menyiapkan pengalaman konser terbaik untukmu.
+          </p>
 
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.4em] text-[#ffb703]">
-          Your next moment awaits.
-        </p>
-        <p className="mt-3 max-w-xs text-xs leading-6 text-[#8a8d98]">
-          Menyiapkan pengalaman konser terbaik untukmu.
-        </p>
-
-        {/* Loading progress bar */}
-        <div className="mt-8 h-1 w-52 overflow-hidden rounded-full bg-[#1e2128] border border-[#2a2d36]/60">
-          <div className="splash-progress h-full w-full origin-left rounded-full bg-gradient-to-r from-[#ffb703] via-[#ffdea9] to-[#ffb703]" />
+          <div className="mt-8 h-1.5 w-48 overflow-hidden rounded-full border border-[#a855f7]/25 bg-[#21162f]">
+            <div
+              className="splash-progress h-full w-full origin-left rounded-full bg-gradient-to-r from-[#7c3aed] via-[#d946ef] to-[#a855f7] shadow-[0_0_14px_rgba(192,132,252,0.65)]"
+              style={{
+                animationDuration: `${Math.max(1, duration - OPEN_DURATION)}ms`,
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

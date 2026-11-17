@@ -5,7 +5,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 - `/` — luxury landing page with live event and artist catalog
 - `/home` — authenticated customer home with profile, orders, and event recommendations
 - `/splash` — dedicated splash experience; the app also shows a one-time splash on first visit
-- `/login`, `/register`, `/forgot-password`, `/reset-password` — connected auth flows
+- `/login`, `/register`, `/forgot-password` — connected auth flows; `/forgot-password` also handles reset links
 - `/checkout` → `/payments/:orderId` — customer order reservation, payment proof upload, and expiry-aware payment status
 - `/orders` and `/tickets` — customer order history and issued e-tickets
 - `/admin` — sales dashboard, online payment verification, and offline box-office sales

@@ -14,8 +14,8 @@ export function MobileNav() {
 
   const items = [
     { label: user ? "Untukmu" : "Home", href: user ? "/home" : "/", icon: user ? Compass : Home },
-    { label: "Konser", href: "/events", icon: Ticket },
-    { label: "Artis", href: "/artists", icon: CalendarDays },
+    { label: "Konser", href: user ? "/home/events" : "/events", icon: Ticket },
+    { label: "Artis", href: user ? "/home/artists" : "/artists", icon: CalendarDays },
     ...(user
       ? [{ label: "Tiket", href: "/tickets", icon: Ticket }]
       : [{
@@ -32,7 +32,9 @@ export function MobileNav() {
       <nav className="glass-dock mx-auto flex max-w-lg items-center justify-around rounded-2xl p-1.5">
         {items.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/" && item.href !== "/home" && pathname.startsWith(item.href));
           return (
             <Link
               key={`${item.label}-${item.href}`}

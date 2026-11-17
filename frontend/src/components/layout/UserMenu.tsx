@@ -24,7 +24,11 @@ const MENU_LINKS = [
 export function UserMenu() {
   const router = useRouter();
   const pathname = usePathname();
-  const isLanding = pathname === "/";
+  const usePurpleTheme =
+    pathname === "/" ||
+    pathname.startsWith("/home") ||
+    pathname.startsWith("/tickets") ||
+    pathname.startsWith("/orders");
   const { user, logout } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -57,22 +61,22 @@ export function UserMenu() {
         onClick={() => setIsOpen((current) => !current)}
         aria-expanded={isOpen}
         className={`press flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3 transition ${
-          isLanding
-            ? "border-[#e8e2ed] bg-white/90 shadow-sm hover:border-[#6264b5]/40"
+          usePurpleTheme
+            ? "border-[#e8e2ed] bg-[#fffdf2] shadow-sm hover:border-[#6264b5]/40"
             : "border-[#32353d]/50 bg-[#191b23]/85 hover:border-[#ffb703]/40"
         }`}
       >
-        <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${isLanding ? "bg-[#6264b5] text-white" : "bg-[#ffb703] text-[#10131a]"}`}>
+        <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${usePurpleTheme ? "bg-[#6264b5] text-white" : "bg-[#ffb703] text-[#10131a]"}`}>
           {user.name?.charAt(0).toUpperCase() || "U"}
         </span>
-        <span className={`hidden max-w-24 truncate text-xs font-semibold sm:block ${isLanding ? "text-[#101b4f]" : "text-[#e1e2ec]"}`}>
+        <span className={`hidden max-w-24 truncate text-xs font-semibold sm:block ${usePurpleTheme ? "text-[#101b4f]" : "text-[#e1e2ec]"}`}>
           {user.name}
         </span>
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform duration-300 ${
-            isLanding ? "text-[#646b82]" : "text-muted-foreground"
+            usePurpleTheme ? "text-[#646b82]" : "text-muted-foreground"
           } ${
-            isOpen ? `rotate-180 ${isLanding ? "text-[#6264b5]" : "text-[#ffb703]"}` : ""
+            isOpen ? `rotate-180 ${usePurpleTheme ? "text-[#6264b5]" : "text-[#ffb703]"}` : ""
           }`}
         />
       </button>
@@ -80,15 +84,15 @@ export function UserMenu() {
       {isOpen ? (
         <div
           className={`login-form-card absolute right-0 top-14 z-50 w-60 rounded-2xl border p-2 ${
-            isLanding
+            usePurpleTheme
               ? "border-[#e8e2ed] bg-[#fffdf2] shadow-[0_30px_80px_-34px_rgba(7,22,83,.25)]"
               : "border-[#32353d]/60 bg-[#191b23] shadow-[0_30px_80px_-34px_rgba(0,0,0,.8)]"
           }`}
           style={{ animationDuration: "320ms" }}
         >
-          <div className={`border-b px-3 py-3 ${isLanding ? "border-[#e8e2ed]" : "border-[#2a2d36]"}`}>
-            <p className={`truncate text-sm font-semibold ${isLanding ? "text-[#101b4f]" : "text-[#e1e2ec]"}`}>{user.name}</p>
-            <p className={`mt-1 truncate text-[0.68rem] ${isLanding ? "text-[#646b82]" : "text-[#8a8d98]"}`}>{user.email}</p>
+          <div className={`border-b px-3 py-3 ${usePurpleTheme ? "border-[#e8e2ed]" : "border-[#2a2d36]"}`}>
+            <p className={`truncate text-sm font-semibold ${usePurpleTheme ? "text-[#101b4f]" : "text-[#e1e2ec]"}`}>{user.name}</p>
+            <p className={`mt-1 truncate text-[0.68rem] ${usePurpleTheme ? "text-[#646b82]" : "text-[#8a8d98]"}`}>{user.email}</p>
           </div>
 
           <div className="mt-2 space-y-0.5">
@@ -98,7 +102,7 @@ export function UserMenu() {
                 href={href}
                 onClick={() => setIsOpen(false)}
                 className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium transition ${
-                  isLanding
+                  usePurpleTheme
                     ? "text-[#646b82] hover:bg-[#f0ebf4] hover:text-[#6264b5]"
                     : "text-[#a1a3ac] hover:bg-[#272a32] hover:text-[#ffb703]"
                 }`}
@@ -113,7 +117,7 @@ export function UserMenu() {
                 href="/admin"
                 onClick={() => setIsOpen(false)}
                 className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium transition ${
-                  isLanding
+                  usePurpleTheme
                     ? "text-[#646b82] hover:bg-[#f0ebf4] hover:text-[#6264b5]"
                     : "text-[#a1a3ac] hover:bg-[#272a32] hover:text-[#ffb703]"
                 }`}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowUpDown,
@@ -20,17 +21,18 @@ import { EventGrid } from "@/features/events/components/EventGrid";
 import { fetchEvents } from "@/features/events/api";
 import type { Event } from "@/features/events/types";
 import { formatCurrency } from "@/lib/format";
+import { useAuthStore } from "@/stores/authStore";
 
 type SortBy = "recommended" | "lowest" | "highest" | "date";
 
 const GENRES = [
-  { id: "all", label: "Semua Genre", color: "#ffb703" },
-  { id: "pop", label: "Pop", color: "#38bdf8" },
-  { id: "rock", label: "Rock & Indie", color: "#f97316" },
-  { id: "kpop", label: "K-Pop", color: "#ec4899" },
-  { id: "festival", label: "Festival", color: "#10b981" },
-  { id: "edm", label: "EDM", color: "#8b5cf6" },
-  { id: "jazz", label: "Jazz & Soul", color: "#f59e0b" },
+  { id: "all", label: "Semua Genre", color: "#6264b5" },
+  { id: "pop", label: "Pop", color: "#3156ad" },
+  { id: "rock", label: "Rock & Indie", color: "#9a564b" },
+  { id: "kpop", label: "K-Pop", color: "#8a75b5" },
+  { id: "festival", label: "Festival", color: "#397557" },
+  { id: "edm", label: "EDM", color: "#6264b5" },
+  { id: "jazz", label: "Jazz & Soul", color: "#8b6a2c" },
 ];
 
 const CITIES = [
@@ -44,12 +46,23 @@ const CITIES = [
 ];
 
 export default function EventsPage() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const isCustomerCatalog = pathname.startsWith("/home/");
+  const user = useAuthStore((state) => state.user);
+  const hydrated = useAuthStore((state) => state.hydrated);
   const [events, setEvents] = useState<Event[]>([]);
   const [query, setQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [selectedCity, setSelectedCity] = useState("all");
   const [sortBy, setSortBy] = useState<SortBy>("recommended");
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (hydrated && user && !isCustomerCatalog) {
+      router.replace("/home/events");
+    }
+  }, [hydrated, isCustomerCatalog, router, user]);
 
   useEffect(() => {
     let active = true;
@@ -150,37 +163,26 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0e15] text-[#e1e2ec] selection:bg-[#ffb703]/30 selection:text-white">
+    <div className="landing-page min-h-screen bg-[#fffdf2] text-[#071653] selection:bg-[#6264b5]/25 selection:text-[#071653]">
       <Navbar />
 
-      <main className="relative mx-auto w-full max-w-7xl px-5 pb-24 pt-28 sm:px-8 sm:pt-36">
-        {/* Ambient lighting glows in background */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-10 left-1/2 h-[450px] w-[800px] -translate-x-1/2 rounded-full bg-[#ffb703]/[0.05] blur-[140px]" />
-          <div className="absolute right-0 top-32 h-[350px] w-[400px] rounded-full bg-[#6801d1]/[0.07] blur-[120px]" />
-          <div className="absolute left-0 top-96 h-[300px] w-[350px] rounded-full bg-[#06b6d4]/[0.04] blur-[100px]" />
-        </div>
-
-        {/* ==================== HERO & SEARCH SECTION ==================== */}
-        <section className="relative overflow-hidden rounded-[28px] border border-[#232733] bg-[#141720]/95 p-6 shadow-[0_30px_90px_-30px_rgba(0,0,0,0.8)] backdrop-blur-2xl sm:p-8 md:p-10">
-          {/* Subtle top gold accent line */}
-          <div aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#ffb703]/60 to-transparent" />
-
+      <main className="mx-auto w-full max-w-7xl px-5 pb-20 pt-24 sm:px-8 sm:pt-28">
+        <section className="rounded-2xl border border-[#e8e5ef] bg-white p-5 shadow-[0_8px_24px_-20px_rgba(7,22,83,0.18)] sm:p-8">
           {/* Header Title & Nav */}
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-
-              <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#6264b5]">Jadwal konser</p>
+              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#071653] sm:text-4xl">
                 Jelajahi Konser Pilihanmu
               </h1>
-              <p className="mt-2.5 max-w-xl text-sm leading-6 text-[#9497a6]">
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c6482]">
                 Temukan jadwal konser, festival musik, dan musisi idola favoritmu di seluruh kota di Indonesia.
               </p>
             </div>
 
             <Link
-              href="/"
-              className="inline-flex items-center gap-2 self-start rounded-xl border border-[#262936] bg-[#1b1e27] px-4 py-2.5 text-xs font-semibold text-[#c4c7d4] transition-all hover:border-[#ffb703]/40 hover:bg-[#202430] hover:text-[#ffb703] lg:self-auto"
+              href={isCustomerCatalog ? "/home" : "/"}
+              className="inline-flex items-center gap-2 self-start rounded-xl border border-[#e8e5ef] bg-[#f7f4fa] px-4 py-2.5 text-xs font-semibold text-[#071653] transition-all hover:border-[#c8b7db] hover:bg-[#eeebf4] hover:text-[#6264b5] lg:self-auto"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Kembali ke Beranda
@@ -188,29 +190,29 @@ export default function EventsPage() {
           </div>
 
           {/* ==================== MAIN SEARCH BAR CONTAINER ==================== */}
-          <div className="mt-8 rounded-2xl border border-[#2a2e3d] bg-[#10131b]/90 p-3 shadow-inner sm:p-4">
+          <div className="mt-6 border-t border-[#e8e5ef] pt-5">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-12">
               {/* 1. Keyword Search */}
-              <div className="group relative flex items-center gap-3 rounded-xl border border-[#262a37] bg-[#1a1d26] px-4 py-3 transition-all duration-300 focus-within:border-[#ffb703] focus-within:bg-[#1d212d] focus-within:ring-2 focus-within:ring-[#ffb703]/20 hover:border-[#383d4f] lg:col-span-6">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#ffb703]/30 bg-[#ffb703]/10 text-[#ffb703] shadow-[0_0_12px_rgba(255,183,3,0.15)] transition-transform group-focus-within:scale-105">
+              <div className="group relative flex items-center gap-3 rounded-xl border border-[#e8e5ef] bg-[#fffdf2] px-4 py-3 transition-all duration-200 focus-within:border-[#6264b5] focus-within:ring-2 focus-within:ring-[#6264b5]/10 hover:border-[#c8b7db] lg:col-span-6">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#c8b7db] bg-[#eeebf4] text-[#6264b5] transition-transform group-focus-within:scale-105">
                   <Search className="h-4.5 w-4.5" />
                 </div>
                 <div className="w-full min-w-0">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#ffb703]">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6264b5]">
                     Cari Konser / Artis / Venue
                   </label>
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Ketik Coldplay, Sheila On 7, GBK..."
-                    className="w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-[#555866]"
+                    className="w-full bg-transparent text-sm font-medium text-[#071653] outline-none placeholder:text-[#8790a8]"
                   />
                 </div>
                 {query && (
                   <button
                     type="button"
                     onClick={() => setQuery("")}
-                    className="rounded-full p-1 text-[#6b6e7d] transition-colors hover:bg-[#282c3a] hover:text-white"
+                    className="rounded-full p-1 text-[#8790a8] transition-colors hover:bg-[#eeebf4] hover:text-[#071653]"
                     title="Hapus pencarian"
                   >
                     <X className="h-4 w-4" />
@@ -219,21 +221,21 @@ export default function EventsPage() {
               </div>
 
               {/* 2. City Dropdown */}
-              <div className="group relative flex items-center gap-3 rounded-xl border border-[#262a37] bg-[#1a1d26] px-4 py-3 transition-all duration-300 focus-within:border-[#06b6d4] focus-within:bg-[#1d212d] focus-within:ring-2 focus-within:ring-[#06b6d4]/20 hover:border-[#383d4f] lg:col-span-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#06b6d4]/30 bg-[#06b6d4]/10 text-[#06b6d4] shadow-[0_0_12px_rgba(6,182,212,0.15)] transition-transform group-focus-within:scale-105">
+              <div className="group relative flex items-center gap-3 rounded-xl border border-[#e8e5ef] bg-[#fffdf2] px-4 py-3 transition-all duration-200 focus-within:border-[#6264b5] focus-within:ring-2 focus-within:ring-[#6264b5]/10 hover:border-[#c8b7db] lg:col-span-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#c8b7db] bg-[#eeebf4] text-[#6264b5] transition-transform group-focus-within:scale-105">
                   <MapPin className="h-4.5 w-4.5" />
                 </div>
                 <div className="w-full min-w-0">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#22d3ee]">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6264b5]">
                     Kota
                   </label>
                   <select
                     value={selectedCity}
                     onChange={(event) => setSelectedCity(event.target.value)}
-                    className="w-full cursor-pointer bg-transparent text-sm font-semibold text-white outline-none"
+                    className="w-full cursor-pointer bg-transparent text-sm font-semibold text-[#071653] outline-none"
                   >
                     {CITIES.map((city) => (
-                      <option key={city.value} value={city.value} className="bg-[#141720] text-[#e1e2ec]">
+                      <option key={city.value} value={city.value} className="bg-white text-[#071653]">
                         {city.label}
                       </option>
                     ))}
@@ -242,32 +244,32 @@ export default function EventsPage() {
               </div>
 
               {/* 3. Sort Dropdown */}
-              <div className="group relative flex items-center gap-3 rounded-xl border border-[#262a37] bg-[#1a1d26] px-4 py-3 transition-all duration-300 focus-within:border-[#a855f7] focus-within:bg-[#1d212d] focus-within:ring-2 focus-within:ring-[#a855f7]/20 hover:border-[#383d4f] lg:col-span-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#a855f7]/30 bg-[#a855f7]/10 text-[#c084fc] shadow-[0_0_12px_rgba(168,85,247,0.15)] transition-transform group-focus-within:scale-105">
+              <div className="group relative flex items-center gap-3 rounded-xl border border-[#e8e5ef] bg-[#fffdf2] px-4 py-3 transition-all duration-200 focus-within:border-[#6264b5] focus-within:ring-2 focus-within:ring-[#6264b5]/10 hover:border-[#c8b7db] lg:col-span-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#c8b7db] bg-[#eeebf4] text-[#6264b5] transition-transform group-focus-within:scale-105">
                   <ArrowUpDown className="h-4.5 w-4.5" />
                 </div>
                 <div className="w-full min-w-0">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#c084fc]">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6264b5]">
                     Urutkan
                   </label>
                   <select
                     value={sortBy}
                     onChange={(event) => setSortBy(event.target.value as SortBy)}
-                    className="w-full cursor-pointer bg-transparent text-sm font-semibold text-white outline-none"
+                    className="w-full cursor-pointer bg-transparent text-sm font-semibold text-[#071653] outline-none"
                   >
-                    <option value="recommended" className="bg-[#141720] text-[#e1e2ec]">Rekomendasi Populer</option>
-                    <option value="lowest" className="bg-[#141720] text-[#e1e2ec]">Harga: Terendah ke Tertinggi</option>
-                    <option value="highest" className="bg-[#141720] text-[#e1e2ec]">Harga: Tertinggi ke Terendah</option>
-                    <option value="date" className="bg-[#141720] text-[#e1e2ec]">Jadwal Terdekat</option>
+                    <option value="recommended" className="bg-white text-[#071653]">Rekomendasi Populer</option>
+                    <option value="lowest" className="bg-white text-[#071653]">Harga: Terendah ke Tertinggi</option>
+                    <option value="highest" className="bg-white text-[#071653]">Harga: Tertinggi ke Terendah</option>
+                    <option value="date" className="bg-white text-[#071653]">Jadwal Terdekat</option>
                   </select>
                 </div>
               </div>
             </div>
 
             {/* ==================== GENRE PILLS ==================== */}
-            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#1e222e] pt-3.5">
-              <div className="flex items-center gap-1.5 pr-2 text-xs font-semibold text-[#8a8d9b]">
-                <Music className="h-3.5 w-3.5 text-[#ffb703]" />
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 pr-2 text-xs font-semibold text-[#5c6482]">
+                <Music className="h-3.5 w-3.5 text-[#6264b5]" />
                 <span className="hidden sm:inline">Pilih Genre:</span>
               </div>
 
@@ -280,14 +282,13 @@ export default function EventsPage() {
                     onClick={() => setSelectedGenre(genre.id)}
                     className={`group relative flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-95 ${
                       isSelected
-                        ? "shadow-lg"
-                        : "bg-[#161922] text-[#9a9db0] hover:border-[#383d4f] hover:text-white"
+                        ? "bg-[#eeebf4]"
+                        : "bg-white text-[#5c6482] hover:border-[#c8b7db] hover:text-[#071653]"
                     }`}
                     style={{
                       borderColor: isSelected ? genre.color : `${genre.color}25`,
                       backgroundColor: isSelected ? `${genre.color}20` : undefined,
-                      color: isSelected ? "#ffffff" : undefined,
-                      boxShadow: isSelected ? `0 0 16px ${genre.color}35` : undefined,
+                      color: isSelected ? genre.color : undefined,
                     }}
                   >
                     <span
@@ -307,7 +308,7 @@ export default function EventsPage() {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="ml-auto inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
+                  className="ml-auto inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-100"
                 >
                   <RotateCcw className="h-3 w-3" />
                   Reset Filter
@@ -318,38 +319,38 @@ export default function EventsPage() {
         </section>
 
         {/* ==================== RESULTS STATS BAR ==================== */}
-        <section className="mt-8">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-[#1e2128] pb-4">
+        <section className="mt-7">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-4 border-b border-[#e8e5ef] pb-4">
             <div className="flex items-center gap-3">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#232733] bg-[#141720] text-xs font-bold text-[#ffb703]">
+              <span className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-[#eeebf4] px-2 text-xs font-bold text-[#6264b5]">
                 {filteredEvents.length}
               </span>
-              <p className="text-sm font-medium text-[#8a8d9b]">
-                Menampilkan <strong className="text-white">{filteredEvents.length}</strong> konser tersedia
-                {selectedCity !== "all" && <span> di <strong className="text-[#06b6d4]">{selectedCity}</strong></span>}
-                {selectedGenre !== "all" && <span> genre <strong className="text-[#ffb703]">{GENRES.find((g) => g.id === selectedGenre)?.label}</strong></span>}
-                {query && <span> dengan kata kunci &ldquo;<strong className="text-white">{query}</strong>&rdquo;</span>}
+              <p className="text-sm font-medium text-[#5c6482]">
+                Menampilkan <strong className="text-[#071653]">{filteredEvents.length}</strong> konser tersedia
+                {selectedCity !== "all" && <span> di <strong className="text-[#6264b5]">{selectedCity}</strong></span>}
+                {selectedGenre !== "all" && <span> genre <strong className="text-[#6264b5]">{GENRES.find((g) => g.id === selectedGenre)?.label}</strong></span>}
+                {query && <span> dengan kata kunci &ldquo;<strong className="text-[#071653]">{query}</strong>&rdquo;</span>}
               </p>
             </div>
 
             {lowestPrice !== null && (
-              <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400">
-                <Ticket className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Harga tiket mulai <strong className="font-bold text-white">{formatCurrency(lowestPrice)}</strong></span>
+              <div className="inline-flex items-center gap-2 rounded-xl border border-[#c7e0d1] bg-[#e6f1eb] px-3.5 py-1.5 text-xs font-medium text-[#397557]">
+                <Ticket className="h-3.5 w-3.5 text-[#397557]" />
+                <span>Harga tiket mulai <strong className="font-bold text-[#071653]">{formatCurrency(lowestPrice)}</strong></span>
               </div>
             )}
           </div>
 
           {/* ==================== EVENTS GRID ==================== */}
           {loading ? (
-            <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-[#232733] bg-[#141720]/50 p-12 text-center">
-              <div className="h-9 w-9 animate-spin rounded-full border-2 border-[#ffb703] border-t-transparent" />
-              <p className="mt-4 text-sm font-medium text-[#8a8d9b]">Memuat katalog konser pilihan...</p>
+            <div className="flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-[#e8e5ef] bg-white p-10 text-center">
+              <div className="h-9 w-9 animate-spin rounded-full border-2 border-[#6264b5] border-t-transparent" />
+              <p className="mt-4 text-sm font-medium text-[#5c6482]">Memuat katalog konser pilihan...</p>
             </div>
           ) : (
             <EventGrid
               events={filteredEvents}
-              variant="dark"
+              variant="light"
               emptyTitle="Tidak ada konser yang cocok"
               emptyDescription="Coba ubah kata kunci pencarian, pilih kota lain, atau reset filter untuk melihat semua konser."
             />

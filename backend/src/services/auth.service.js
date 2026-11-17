@@ -284,7 +284,7 @@ export const forgotPasswordUser =
 
 
     const resetUrl =
-      `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+      `${process.env.FRONTEND_URL}/forgot-password?token=${encodeURIComponent(resetToken)}`;
 
 
     const {

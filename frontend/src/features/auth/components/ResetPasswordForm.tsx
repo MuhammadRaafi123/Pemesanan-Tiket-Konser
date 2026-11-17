@@ -47,10 +47,10 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   };
 
   const inputWrap = (hasError: boolean) =>
-    `flex items-center gap-3 rounded-xl border bg-[#1d1f27] px-4 py-3 transition-all duration-200 focus-within:ring-2 ${
+    `flex items-center gap-3 rounded-2xl border bg-white/[0.05] px-4 py-3.5 transition-all duration-300 focus-within:ring-2 ${
       hasError
         ? "border-red-500/40 focus-within:border-red-500/60 focus-within:ring-red-500/10"
-        : "border-[#232733] focus-within:border-[#ffb703]/50 focus-within:ring-[#ffb703]/10"
+        : "border-white/15 focus-within:border-[#aaaaff]/70 focus-within:ring-[#6264b5]/20"
     }`;
 
   if (!token) {
@@ -60,12 +60,12 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <KeyRound className="h-7 w-7" />
         </span>
         <h2 className="mt-6 text-2xl font-extrabold text-white">Link tidak valid</h2>
-        <p className="mt-2 text-sm leading-6 text-[#6b6e7a]">
+        <p className="mt-2 text-sm leading-6 text-[#b8b8d6]">
           Token reset password tidak ditemukan atau sudah tidak berlaku.
         </p>
         <Link
           href="/forgot-password"
-          className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ffb703] px-6 text-sm font-bold text-[#10131a] shadow-lg shadow-[#ffb703]/20 transition-all hover:bg-[#ffdea9] hover:-translate-y-0.5"
+          className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#6264b5] via-[#7779c9] to-[#6264b5] px-6 text-sm font-bold text-[#fffdf2] shadow-lg shadow-[#6264b5]/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#6264b5]/40"
         >
           Minta link baru
         </Link>
@@ -98,7 +98,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       {successMessage ? (
         <Link
           href="/login"
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#ffb703] px-6 text-sm font-bold text-[#10131a] shadow-lg shadow-[#ffb703]/20 transition-all hover:bg-[#ffdea9] hover:-translate-y-0.5"
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#6264b5] via-[#7779c9] to-[#6264b5] px-6 text-sm font-bold text-[#fffdf2] shadow-lg shadow-[#6264b5]/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#6264b5]/40"
         >
           Masuk sekarang
         </Link>
@@ -106,25 +106,25 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <>
           {/* New password */}
           <div className="space-y-2">
-            <label htmlFor="newPassword" className="block text-sm font-semibold text-[#e1e2ec]">
+            <label htmlFor="newPassword" className="block text-sm font-semibold text-[#fffdf2]">
               Password baru
             </label>
             <div className={inputWrap(Boolean(errors.newPassword))}>
-              <LockKeyhole className="h-4 w-4 shrink-0 text-[#4a4d58]" />
+              <LockKeyhole className="h-4 w-4 shrink-0 text-[#9fa3d6]" />
               <input
                 id="newPassword"
                 type={showPassword ? "text" : "password"}
                 placeholder="Minimal 8 karakter"
                 autoComplete="new-password"
                 aria-invalid={Boolean(errors.newPassword)}
-                className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none placeholder:text-[#3a3d46]"
+                className="w-full bg-transparent text-sm text-[#fffdf2] outline-none placeholder:text-[#9699c5]"
                 {...register("newPassword")}
               />
               <button
                 type="button"
                 aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
                 onClick={() => setShowPassword((current) => !current)}
-                className="rounded-full p-1 text-[#4a4d58] transition hover:text-[#ffb703]"
+                className="rounded-full p-1 text-[#9fa3d6] transition hover:text-[#6264b5]"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -136,18 +136,18 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
           {/* Confirm password */}
           <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[#e1e2ec]">
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[#fffdf2]">
               Konfirmasi password
             </label>
             <div className={inputWrap(Boolean(errors.confirmPassword))}>
-              <ShieldCheck className="h-4 w-4 shrink-0 text-[#4a4d58]" />
+              <ShieldCheck className="h-4 w-4 shrink-0 text-[#9fa3d6]" />
               <input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
                 placeholder="Ulangi password baru"
                 autoComplete="new-password"
                 aria-invalid={Boolean(errors.confirmPassword)}
-                className="w-full bg-transparent text-sm text-[#e1e2ec] outline-none placeholder:text-[#3a3d46]"
+                className="w-full bg-transparent text-sm text-[#fffdf2] outline-none placeholder:text-[#9699c5]"
                 {...register("confirmPassword")}
               />
             </div>
@@ -160,7 +160,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-[#ffb703] px-6 text-sm font-bold text-[#10131a] shadow-lg shadow-[#ffb703]/20 transition-all hover:bg-[#ffdea9] hover:shadow-[#ffb703]/40 hover:-translate-y-0.5 disabled:opacity-60 disabled:pointer-events-none active:scale-[0.98]"
+            className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#6264b5] via-[#7779c9] to-[#6264b5] px-6 text-sm font-bold text-[#fffdf2] shadow-lg shadow-[#6264b5]/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#6264b5]/40 disabled:pointer-events-none disabled:opacity-60 active:scale-[0.98]"
           >
             {isSubmitting ? (
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -175,7 +175,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
           <Link
             href="/login"
-            className="block text-center text-xs font-semibold text-[#ffb703] transition hover:text-[#ffdea9]"
+            className="block text-center text-xs font-semibold text-[#6264b5] transition hover:text-[#8587d8]"
           >
             Kembali ke login
           </Link>

@@ -26,14 +26,17 @@ const sora = Sora({
 
 export const metadata: Metadata = {
   title: {
-    default: "Concertix — Tiket konser resmi pilihan",
-    template: "%s · Concertix",
+    default: "Tixora",
+    template: "%s · Tixora",
   },
   description:
-    "Temukan konser, pesan tiket resmi terverifikasi, dan simpan momen live-mu bersama Concertix.",
-  applicationName: "Concertix",
+    "Temukan konser, pesan tiket resmi terverifikasi, dan simpan momen live-mu bersama Tixora.",
+  applicationName: "Tixora",
+  icons: {
+    icon: "/logo.ico",
+  },
   openGraph: {
-    title: "Concertix — Tiket konser resmi pilihan",
+    title: "Tixora",
     description:
       "Kurasi konser musik lokal dan internasional dengan tiket resmi terverifikasi.",
     locale: "id_ID",

@@ -43,6 +43,11 @@ export function EventHero({ event }: EventHeroProps) {
   const artistPath = pathname.startsWith("/home/") ? "/home/artists" : "/artists";
   const { success } = useToast();
   const isOpen = event.status === "open";
+  const lineupArtists = event.artists_list?.length
+    ? event.artists_list
+    : event.artists
+      ? [event.artists]
+      : [];
 
   const specs = [
     {
@@ -59,7 +64,7 @@ export function EventHero({ event }: EventHeroProps) {
     {
       icon: Clock,
       label: "Waktu Mulai",
-      value: `${formatEventTime(event.event_date)} WIB (Open Gate H-3 Jam)`,
+      value: `${event.start_time || formatEventTime(event.event_date)} WIB (Open Gate H-3 Jam)`,
       color: "#8a75b5",
     },
     {
@@ -177,32 +182,33 @@ export function EventHero({ event }: EventHeroProps) {
               </h1>
             </Reveal>
 
-            {/* Talent / Headliner Tag */}
-            {event.artists ? (
+            {/* Event Lineup */}
+            {lineupArtists.length ? (
               <Reveal delay={140}>
-                <Link
-                  href={`${artistPath}/${event.artists.id}`}
-                  className="group mt-5 inline-flex items-center gap-3 rounded-xl border border-[#e8e5ef] bg-[#f7f4fa] py-2 pl-2 pr-4 transition-colors hover:border-[#c8b7db] hover:bg-[#eeebf4]"
-                >
-                  <span className="relative h-11 w-11 overflow-hidden rounded-xl border border-[#c8b7db] bg-white">
-                    <Image
-                      src={resolveMediaUrl(event.artists.photo || "/globe.svg")}
-                      alt={event.artists.name}
-                      fill
-                      sizes="44px"
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                  </span>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#5c6482]">
-                      Musisi / Headliner
-                    </span>
-                    <span className="flex items-center gap-1.5 text-sm font-bold text-[#071653] transition group-hover:text-[#6264b5]">
-                      {event.artists.name}
-                      <Mic2 className="h-3.5 w-3.5 text-[#6264b5]" />
-                    </span>
+                <div className="mt-5">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#5c6482]">Lineup Artis</p>
+                  <div className="flex flex-wrap gap-2">
+                    {lineupArtists.map((artist) => (
+                      <Link
+                        key={artist.id}
+                        href={`${artistPath}/${artist.id}`}
+                        className="group inline-flex items-center gap-2 rounded-xl border border-[#e8e5ef] bg-[#f7f4fa] py-1.5 pl-1.5 pr-3 transition-colors hover:border-[#c8b7db] hover:bg-[#eeebf4]"
+                      >
+                        <span className="relative h-9 w-9 overflow-hidden rounded-lg border border-[#c8b7db] bg-white">
+                          <Image
+                            src={resolveMediaUrl(artist.photo || "/globe.svg")}
+                            alt={artist.name}
+                            fill
+                            sizes="36px"
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        </span>
+                        <span className="text-xs font-bold text-[#071653] transition group-hover:text-[#6264b5]">{artist.name}</span>
+                        <Mic2 className="h-3.5 w-3.5 text-[#6264b5]" />
+                      </Link>
+                    ))}
                   </div>
-                </Link>
+                </div>
               </Reveal>
             ) : null}
 

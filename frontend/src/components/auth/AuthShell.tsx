@@ -41,11 +41,11 @@ export function AuthShell({
         fill
         priority
         sizes="100vw"
-        className="login-background-image object-cover object-center opacity-[0.84]"
+        className="login-background-image object-cover object-center opacity-100"
       />
 
-      <div aria-hidden className="login-background-overlay absolute inset-0 bg-gradient-to-br from-[#071653]/60 via-[#071653]/25 to-[#071653]/65" />
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#071653]/65 via-transparent to-[#071653]/25" />
+      <div aria-hidden className="login-background-overlay absolute inset-0 bg-gradient-to-br from-[#071653]/30 via-[#071653]/15 to-[#071653]/35" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#071653]/35 via-transparent to-[#071653]/10" />
       <div aria-hidden className="auth-shell-glow absolute inset-0" />
       <div aria-hidden className="login-ambient-grid absolute inset-0 opacity-60" />
       <div aria-hidden className="login-background-beam pointer-events-none absolute -left-1/4 top-0 h-[130%] w-[45%] -rotate-[14deg] bg-gradient-to-r from-transparent via-[#c8b7db]/20 to-transparent blur-2xl" />

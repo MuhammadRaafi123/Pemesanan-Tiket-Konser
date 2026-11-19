@@ -9,6 +9,7 @@ import {
   CalendarDays,
   Check,
   ChevronRight,
+  Clock,
   Compass,
   MapPin,
   Music2,
@@ -27,7 +28,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { Loading } from "@/components/shared/Loading";
 import { fetchEvents } from "@/features/events/api";
 import type { Event } from "@/features/events/types";
-import { formatCurrency, formatEventDate } from "@/lib/format";
+import { formatCurrency, formatEventDate, formatEventTime } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -71,7 +72,7 @@ function eventHref(event: Event, isMember: boolean): string {
 function DiscoveryCard({ event, isMember }: { event: Event; isMember: boolean }) {
   const poster = resolveMediaUrl(event.poster || "");
   const price = getLowestPrice(event);
-  const artistNames = event.artist_names?.join(", ") || event.artists?.name || "Live music";
+  const artistNames = event.artist_names?.join(", ") || event.artists_list?.map((artist) => artist.name).join(", ") || event.artists?.name || "Live music";
 
   return (
     <Link
@@ -92,7 +93,7 @@ function DiscoveryCard({ event, isMember }: { event: Event; isMember: boolean })
         {event.total_remaining != null ? <span className="absolute right-3 top-3 rounded-full bg-[#140d2c]/75 px-2.5 py-1 text-[9px] font-semibold text-white backdrop-blur">Sisa {event.total_remaining}</span> : null}
         <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-2 text-white">
           <div className="min-w-0">
-            <p className="truncate text-[10px] font-semibold uppercase tracking-[.14em] text-white/75">{artistNames}</p>
+            <p className="line-clamp-2 text-[10px] font-semibold uppercase tracking-[.14em] text-white/75">{artistNames}</p>
             <h3 className="mt-1 line-clamp-2 text-lg font-extrabold leading-tight">{event.title}</h3>
           </div>
           <span className="mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 transition group-hover:bg-white group-hover:text-[#21113b]">
@@ -107,6 +108,10 @@ function DiscoveryCard({ event, isMember }: { event: Event; isMember: boolean })
           <span className="text-[#cbc5d3]">·</span>
           <MapPin className="h-3.5 w-3.5 shrink-0 text-[#7959a6]" />
           <span className="truncate">{event.location}</span>
+        </div>
+        <div className="mt-2 flex items-center gap-2 text-xs text-[#625d73]">
+          <Clock className="h-3.5 w-3.5 shrink-0 text-[#7959a6]" />
+          <span>Mulai {event.start_time || formatEventTime(event.event_date)} WIB</span>
         </div>
         <div className="mt-4 flex items-end justify-between gap-3 border-t border-[#eee8f4] pt-3">
           <div>
@@ -408,11 +413,12 @@ function FeaturePoster({ event, isMember }: { event: Event; isMember: boolean })
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0a0716]/95 via-[#0a0716]/15 to-[#0a0716]/15" />
       <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full border border-white/20 bg-[#170f2b]/65 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.16em] text-white backdrop-blur"></div>
       <div className="absolute inset-x-5 bottom-5 text-white sm:inset-x-6 sm:bottom-6">
-        <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#ddc9f4]">{event.artist_names?.join(", ") || event.artists?.name || event.genre || "Live music"}</p>
+        <p className="line-clamp-2 text-[10px] font-bold uppercase tracking-[.16em] text-[#ddc9f4]">{event.artist_names?.join(", ") || event.artists_list?.map((artist) => artist.name).join(", ") || event.artists?.name || event.genre || "Live music"}</p>
         <h2 className="mt-2 max-w-lg text-2xl font-extrabold leading-tight sm:text-3xl">{event.title}</h2>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-medium text-white/80">
           <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" />{formatEventDate(event.event_date, { day: "numeric", month: "short", year: "numeric" })}</span>
           <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{event.location}</span>
+          <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />Mulai {event.start_time || formatEventTime(event.event_date)} WIB</span>
         </div>
         <span className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-3.5 py-2.5 text-[10px] font-extrabold text-[#21123a] transition group-hover:bg-[#e6d9f5]">Lihat konser <ArrowRight className="h-3.5 w-3.5" /></span>
       </div>
@@ -429,7 +435,8 @@ function MiniFeature({ event, isMember }: { event: Event; isMember: boolean }) {
       <div className="mt-auto p-4 text-white">
         <p className="text-[9px] font-bold uppercase tracking-[.15em] text-[#ddc9f4]">{event.genre || "Live music"}</p>
         <h3 className="mt-1 line-clamp-2 text-base font-extrabold leading-tight">{event.title}</h3>
-        <p className="mt-2 text-[9px] text-white/70">{formatEventDate(event.event_date, { day: "numeric", month: "short" })} · {getCity(event)}</p>
+        <p className="mt-2 line-clamp-2 text-[9px] text-white/70">{event.artist_names?.join(", ") || event.artists_list?.map((artist) => artist.name).join(", ") || event.artists?.name || "Live music"}</p>
+        <p className="mt-1 text-[9px] text-white/70">{formatEventDate(event.event_date, { day: "numeric", month: "short" })} · {event.start_time || formatEventTime(event.event_date)} WIB · {getCity(event)}</p>
       </div>
     </Link>
   );

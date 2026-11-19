@@ -25,11 +25,29 @@ interface AuthState {
   logout: () => void;
 
   initializeAuth: () => void;
+  syncSessionCookie: (user: User | null) => void;
 }
 
 export const useAuthStore =
   create<AuthState>(
-    (set) => ({
+    (set, get) => ({
+
+      // Proxy runs before the client app and cannot read localStorage. Keep a
+      // small, non-sensitive session hint in a cookie for route redirects.
+      // The API remains responsible for validating the actual access token.
+      syncSessionCookie: (user: User | null) => {
+        if (typeof document === "undefined") return;
+
+        const secure = window.location.protocol === "https:" ? "; Secure" : "";
+        if (!user) {
+          document.cookie = `tixora_session=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
+          document.cookie = `tixora_role=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
+          return;
+        }
+
+        document.cookie = `tixora_session=1; Path=/; Max-Age=604800; SameSite=Lax${secure}`;
+        document.cookie = `tixora_role=${encodeURIComponent(user.role)}; Path=/; Max-Age=604800; SameSite=Lax${secure}`;
+      },
 
       user: null,
 
@@ -46,6 +64,8 @@ export const useAuthStore =
         user,
         token
       ) => {
+
+        get().syncSessionCookie(user);
 
         localStorage.setItem(
           "access_token",
@@ -73,6 +93,8 @@ export const useAuthStore =
         user
       ) => {
 
+        get().syncSessionCookie(user);
+
         localStorage.setItem(
           "user",
           JSON.stringify(user)
@@ -89,6 +111,8 @@ export const useAuthStore =
       // ===================================
 
       logout: () => {
+
+        get().syncSessionCookie(null);
 
         localStorage.removeItem(
           "access_token"
@@ -141,6 +165,8 @@ export const useAuthStore =
           user,
           hydrated: true,
         });
+
+        get().syncSessionCookie(token && user ? user : null);
       },
 
     })

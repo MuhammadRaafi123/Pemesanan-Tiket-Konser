@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarDays, ChevronRight, MapPin, Star, Ticket } from "lucide-react";
+import { CalendarDays, ChevronRight, Clock, MapPin, Star, Ticket } from "lucide-react";
 import type { Event } from "../types";
-import { formatCurrency, formatEventDate } from "@/lib/format";
+import { formatCurrency, formatEventDate, formatEventTime } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import { usePathname } from "next/navigation";
 
@@ -114,8 +114,8 @@ export function EventCard({ event }: EventCardProps) {
           {/* Artist & Genre */}
           <div>
             <div className="flex items-center justify-between gap-2">
-              <p className="truncate text-[10px] font-bold uppercase tracking-wider text-[#6264b5]">
-                {event.artist_names?.join(", ") || event.artists?.name || "Live Experience"}
+              <p className="line-clamp-2 text-[10px] font-bold uppercase tracking-wider text-[#6264b5]">
+                {event.artist_names?.join(", ") || event.artists_list?.map((artist) => artist.name).join(", ") || event.artists?.name || "Live Experience"}
               </p>
               {event.genre ? (
                 <span
@@ -135,6 +135,10 @@ export function EventCard({ event }: EventCardProps) {
             <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-[#5c6482]">
               <MapPin className="h-3.5 w-3.5 shrink-0 text-[#6264b5]" />
               <span className="truncate">{event.venue || event.location}</span>
+            </p>
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-[#5c6482]">
+              <Clock className="h-3.5 w-3.5 shrink-0 text-[#6264b5]" />
+              <span>Mulai {event.start_time || formatEventTime(event.event_date)} WIB</span>
             </p>
           </div>
 

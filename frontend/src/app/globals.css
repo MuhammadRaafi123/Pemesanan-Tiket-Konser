@@ -702,9 +702,9 @@ html.js-ready .stagger > *:nth-child(12) { --i: 11; }
 /* Login / auth ambient motion */
 .auth-shell-glow {
   background:
-    radial-gradient(circle at 10% 12%, rgba(27, 69, 199, 0.12), transparent 34%),
-    radial-gradient(circle at 88% 78%, rgba(200, 168, 106, 0.14), transparent 36%),
-    radial-gradient(circle at 60% 40%, rgba(63, 111, 224, 0.08), transparent 42%);
+    radial-gradient(circle at 10% 12%, rgba(98, 100, 181, 0.06), transparent 34%),
+    radial-gradient(circle at 88% 78%, rgba(98, 100, 181, 0.04), transparent 36%),
+    radial-gradient(circle at 60% 40%, rgba(200, 183, 219, 0.03), transparent 42%);
 }
 .login-ambient-grid {
   background-image: linear-gradient(rgba(27, 69, 199, 0.05) 1px, transparent 1px),
@@ -720,7 +720,7 @@ html.js-ready .stagger > *:nth-child(12) { --i: 11; }
   will-change: transform;
 }
 .login-background-image {
-  animation: login-background-zoom 30s ease-in-out infinite alternate;
+  animation: login-background-zoom 18s ease-in-out infinite alternate;
   transform-origin: center center;
   will-change: transform;
 }
@@ -1011,7 +1011,7 @@ body { background: #0b0b09; color: #f5f0e5; }
    Register Page — Futuristic / Luxury
    ================================================================== */
 .register-bg-drift {
-  animation: register-bg-drift 28s ease-in-out infinite alternate;
+  animation: register-bg-drift 18s ease-in-out infinite alternate;
   transform-origin: center center;
   will-change: transform;
 }
@@ -1041,10 +1041,10 @@ body { background: #0b0b09; color: #f5f0e5; }
 
 @keyframes register-bg-drift {
   from {
-    transform: scale(1.05) translate3d(-0.5%, -0.5%, 0);
+    transform: scale(1.05) translate3d(-1.2%, -0.8%, 0);
   }
   to {
-    transform: scale(1.14) translate3d(0.5%, 0.5%, 0);
+    transform: scale(1.18) translate3d(1.2%, 0.8%, 0);
   }
 }
 
@@ -1064,6 +1064,34 @@ body { background: #0b0b09; color: #f5f0e5; }
   75% {
     transform: translate3d(10px, -14px, 0);
     opacity: calc(var(--particle-opacity, 0.2) * 0.6);
+  }
+}
+
+.stage-3d-scene {
+  perspective: 1100px;
+  perspective-origin: 50% 46%;
+}
+
+.stage-3d-turn {
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  will-change: transform;
+  animation: stage-3d-rotation 18s linear infinite;
+}
+
+.stage-3d-turn:hover {
+  animation-play-state: paused;
+}
+
+@keyframes stage-3d-rotation {
+  from { transform: rotateX(8deg) rotateY(0deg); }
+  to { transform: rotateX(8deg) rotateY(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-3d-turn {
+    animation: none;
+    transform: rotateX(1deg) rotateY(-5deg);
   }
 }
 

@@ -30,9 +30,16 @@ const GENRES = [
   { id: "pop", label: "Pop", color: "#3156ad" },
   { id: "rock", label: "Rock & Indie", color: "#9a564b" },
   { id: "kpop", label: "K-Pop", color: "#8a75b5" },
+  { id: "hiphop", label: "Hip-Hop & Rap", color: "#a34f3c" },
+  { id: "rnb", label: "R&B & Soul", color: "#9c4e79" },
+  { id: "edm", label: "EDM & Electronic", color: "#6264b5" },
+  { id: "jazz", label: "Jazz & Blues", color: "#8b6a2c" },
+  { id: "metal", label: "Metal & Punk", color: "#59616e" },
+  { id: "folk", label: "Folk & Country", color: "#8b7045" },
+  { id: "reggae", label: "Reggae", color: "#397557" },
+  { id: "classical", label: "Klasik", color: "#546e9f" },
+  { id: "dangdut", label: "Dangdut", color: "#b45e35" },
   { id: "festival", label: "Festival", color: "#397557" },
-  { id: "edm", label: "EDM", color: "#6264b5" },
-  { id: "jazz", label: "Jazz & Soul", color: "#8b6a2c" },
 ];
 
 const CITIES = [
@@ -105,13 +112,20 @@ export default function EventsPage() {
 
       // Genre filter
       if (selectedGenre !== "all") {
-        const genre = (event.genre ?? "").toLowerCase();
+        const genre = `${event.genre ?? ""} ${event.artists?.genre ?? ""} ${event.artists_list?.map((artist) => artist.genre ?? "").join(" ") ?? ""}`.toLowerCase();
         if (selectedGenre === "rock" && !(genre.includes("rock") || genre.includes("indie"))) return false;
         if (selectedGenre === "pop" && !genre.includes("pop")) return false;
         if (selectedGenre === "kpop" && !(genre.includes("k-pop") || genre.includes("kpop") || genre.includes("korean"))) return false;
         if (selectedGenre === "festival" && !genre.includes("festival")) return false;
         if (selectedGenre === "edm" && !(genre.includes("edm") || genre.includes("electronic") || genre.includes("dance"))) return false;
-        if (selectedGenre === "jazz" && !(genre.includes("jazz") || genre.includes("soul") || genre.includes("blues"))) return false;
+        if (selectedGenre === "hiphop" && !(genre.includes("hip-hop") || genre.includes("hip hop") || genre.includes("hiphop") || genre.includes("rap"))) return false;
+        if (selectedGenre === "rnb" && !(genre.includes("r&b") || genre.includes("rnb") || genre.includes("rhythm and blues") || genre.includes("soul"))) return false;
+        if (selectedGenre === "jazz" && !(genre.includes("jazz") || genre.includes("blues"))) return false;
+        if (selectedGenre === "metal" && !(genre.includes("metal") || genre.includes("punk") || genre.includes("hardcore"))) return false;
+        if (selectedGenre === "folk" && !(genre.includes("folk") || genre.includes("country") || genre.includes("bluegrass"))) return false;
+        if (selectedGenre === "reggae" && !(genre.includes("reggae") || genre.includes("ska") || genre.includes("dancehall"))) return false;
+        if (selectedGenre === "classical" && !(genre.includes("classical") || genre.includes("klasik") || genre.includes("orchestra") || genre.includes("orchestral"))) return false;
+        if (selectedGenre === "dangdut" && !genre.includes("dangdut")) return false;
       }
 
       return true;

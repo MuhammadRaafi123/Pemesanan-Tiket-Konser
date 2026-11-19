@@ -3,1214 +3,361 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  BadgeCheck,
-  CalendarDays,
-  Check,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  Copy,
-  CreditCard,
-  Eye,
-  Layers,
-  Lock,
-  MapPin,
-  Music,
-  Play,
-  QrCode,
-  Radio,
-  RefreshCw,
-  Search,
-  Shield,
-  ShieldCheck,
-  Sparkles,
-  Star,
-  Ticket,
-  Users,
-  Volume2,
-  X,
-  Zap,
-} from "lucide-react";
+import { ArrowDown, ArrowRight, CalendarDays, Check, ChevronDown, Clock, MapPin, Music2, Search, Star } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { Reveal, Stagger } from "@/components/shared/Reveal";
-import { Marquee } from "@/components/shared/Marquee";
-import { CountUp } from "@/components/shared/CountUp";
 import { fetchEvents } from "@/features/events/api";
 import type { Event } from "@/features/events/types";
-import { formatCurrency, formatEventDate } from "@/lib/format";
+import { formatCurrency, formatEventDate, formatEventTime } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
-import { useAuthStore } from "@/stores/authStore";
-
-/* ================================= DATA ================================= */
-
-const MARQUEE_ARTISTS = [
-  "Coldplay",
-  "Sheila On 7",
-  "Stray Kids",
-  "Ed Sheeran",
-  "Bruno Major",
-  "NIKI",
-  "Tulus",
-  "Hindia",
-  "Reality Club",
-  "Rich Brian",
-  "Raim Laode",
-  "Payung Teduh",
-];
 
 const GENRES = [
-  { id: "Semua", label: "Semua Genre", icon: Sparkles, count: "50+ Event" },
-  { id: "Pop", label: "Pop", icon: Music, count: "18 Konser" },
-  { id: "Rock", label: "Rock & Indie", icon: Volume2, count: "14 Konser" },
-  { id: "K-Pop", label: "K-Pop", icon: Star, count: "8 Konser" },
-  { id: "Festival", label: "Festival", icon: Layers, count: "6 Event" },
-  { id: "EDM", label: "EDM & Rave", icon: Zap, count: "11 Event" },
-  { id: "Jazz", label: "Jazz & Soul", icon: Music, count: "5 Jadwal" },
+  { value: "Pop", label: "Pop", tone: "from-fuchsia-950/90" },
+  { value: "Rock", label: "Rock & Indie", tone: "from-slate-950/90" },
+  { value: "K-Pop", label: "K-Pop", tone: "from-violet-950/90" },
+  { value: "Hip-Hop & Rap", label: "Hip-Hop & Rap", tone: "from-rose-950/90" },
+  { value: "R&B & Soul", label: "R&B & Soul", tone: "from-pink-950/90" },
+  { value: "EDM", label: "EDM & Electronic", tone: "from-indigo-950/90" },
+  { value: "Jazz", label: "Jazz & Blues", tone: "from-amber-950/90" },
+  { value: "Metal", label: "Metal & Punk", tone: "from-zinc-950/90" },
+  { value: "Folk & Country", label: "Folk & Country", tone: "from-orange-950/90" },
+  { value: "Reggae", label: "Reggae", tone: "from-emerald-950/90" },
+  { value: "Classical", label: "Klasik", tone: "from-blue-950/90" },
+  { value: "Dangdut", label: "Dangdut", tone: "from-yellow-950/90" },
 ];
 
-const CITIES = [
-  "Semua Kota",
-  "Jakarta",
-  "Bandung",
-  "Surabaya",
-  "Bali",
-  "Yogyakarta",
-  "Semarang",
-];
-
-const SECURITY_FEATURES = [
-  {
-    icon: QrCode,
-    badge: "ISO 27001 ENCRYPTED",
-    title: "Dynamic Anti-Calo Barcode",
-    desc: "Token barcode kriptografi SHA-256 yang berganti otomatis setiap 30 detik. Tangkapan layar, duplikat PDF, dan calo tiket 100% tertolak di gerbang scan gate.",
-    accent: "from-[#6264b5]/10 to-transparent",
-    pillColor: "text-[#6264b5] border-[#c8b7db] bg-[#c8b7db]/20",
-  },
-  {
-    icon: Zap,
-    badge: "NEURAL BOT SHIELD",
-    title: "Antrean War Cerdas & Adil",
-    desc: "Arsitektur penahan bot canggih dengan mitigasi multi-IP dan traffic limiter real-time. Rasakan checkout tiket tanpa crash dan adil bagi seluruh penggemar sejati.",
-    accent: "from-[#c8b7db]/20 to-transparent",
-    pillColor: "text-[#071653] border-[#6264b5]/30 bg-[#6264b5]/10",
-  },
-  {
-    icon: CreditCard,
-    badge: "INSTANT SETTLEMENT",
-    title: "Pembayaran Instan Terverifikasi",
-    desc: "Mendukung QRIS otomatis, Virtual Account semua bank nasional, GoPay, OVO, hingga kartu kredit cicilan 0% dengan konfirmasi real-time dalam 3 detik.",
-    accent: "from-[#6264b5]/10 to-transparent",
-    pillColor: "text-[#6264b5] border-[#c8b7db] bg-[#c8b7db]/20",
-  },
-  {
-    icon: Shield,
-    badge: "PROTEKSI FINANSIAL",
-    title: "100% Garansi Refund Resmi",
-    desc: "Jaminan pengembalian dana penuh tanpa potongan berbelit jika musisi berhalangan hadir atau jadwal konser dibatalkan resmi oleh pihak promotor.",
-    accent: "from-[#c8b7db]/20 to-transparent",
-    pillColor: "text-[#071653] border-[#6264b5]/30 bg-[#6264b5]/10",
-  },
-];
-
-interface SeatingZone {
-  id: string;
-  name: string;
-  price: string;
-  distance: string;
-  visibility: string;
-  color: string;
-  features: string[];
+function matchesGenre(event: Event, genre: string): boolean {
+  const value = `${event.genre || ""} ${event.artists?.genre || ""}`.toLowerCase();
+  if (genre === "Rock") return value.includes("rock") || value.includes("indie");
+  if (genre === "K-Pop") return value.includes("k-pop") || value.includes("kpop") || value.includes("korean");
+  if (genre === "EDM") return value.includes("edm") || value.includes("electronic") || value.includes("dance");
+  if (genre === "Hip-Hop & Rap") return value.includes("hip-hop") || value.includes("hip hop") || value.includes("hiphop") || value.includes("rap");
+  if (genre === "R&B & Soul") return value.includes("r&b") || value.includes("rnb") || value.includes("rhythm and blues") || value.includes("soul");
+  if (genre === "Jazz") return value.includes("jazz") || value.includes("blues");
+  if (genre === "Metal") return value.includes("metal") || value.includes("punk") || value.includes("hardcore");
+  if (genre === "Folk & Country") return value.includes("folk") || value.includes("country") || value.includes("bluegrass");
+  if (genre === "Reggae") return value.includes("reggae") || value.includes("ska") || value.includes("dancehall");
+  if (genre === "Classical") return value.includes("classical") || value.includes("klasik") || value.includes("orchestra");
+  if (genre === "Dangdut") return value.includes("dangdut");
+  return value.includes(genre.toLowerCase());
 }
 
-const SEATING_ZONES: Record<string, SeatingZone> = {
-  vvip: {
-    id: "vvip",
-    name: "Royal Lounge VVIP",
-    price: "Rp 3.850.000",
-    distance: "12 m dari panggung",
-    visibility: "Pandangan panorama dari area lounge",
-    color: "#6264b5",
-    features: [
-      "Area lounge eksklusif dengan pendingin ruangan",
-      "Jalur masuk khusus tanpa antre panjang",
-      "Akses sesi soundcheck terbatas",
-      "Layanan dan konsumsi premium",
-    ],
-  },
-  diamond: {
-    id: "diamond",
-    name: "Pit Diamond",
-    price: "Rp 2.250.000",
-    distance: "3 m dari bibir panggung",
-    visibility: "Barisan depan, tepat menghadap panggung",
-    color: "#071653",
-    features: [
-      "Posisi paling dekat dengan panggung",
-      "Suara dan efek cahaya terasa maksimal",
-      "Jalur masuk lebih awal",
-      "Merchandise khusus kategori",
-    ],
-  },
-  platinum: {
-    id: "platinum",
-    name: "Tribun Platinum",
-    price: "Rp 1.450.000",
-    distance: "30 m dari panggung",
-    visibility: "Tribun tinggi dengan pandangan luas",
-    color: "#6264b5",
-    features: [
-      "Kursi bernomor ergonomis dengan sandaran tangan",
-      "Sudut elevasi tinggi tanpa terhalang barisan depan",
-      "Akustik tata suara surround paling seimbang",
-      "Akses toilet dan area makanan khusus tribun",
-    ],
-  },
-  festival: {
-    id: "festival",
-    name: "Area Festival",
-    price: "Rp 850.000",
-    distance: "20 m dari panggung",
-    visibility: "Area berdiri dengan suasana meriah",
-    color: "#8486d4",
-    features: [
-      "Lautan penonton dengan atmosfer euforia terbaik",
-      "Kebebasan bergerak di seluruh area festival luas",
-      "Akses merchandise booth & visual screens raksasa",
-      "Gelang masuk khusus yang menyala saat konser dimulai",
-    ],
-  },
-};
+function getLowestPrice(event: Event): number | null {
+  if (event.ticket_categories?.length) return Math.min(...event.ticket_categories.map((ticket) => ticket.price));
+  return event.min_price ?? null;
+}
 
-const TESTIMONIALS = [
-  {
-    name: "Audrey Kirana",
-    role: "GBK Senayan • War Tiket Coldplay",
-    avatar: "A",
-    text: "Sistem antrean Tixora beneran lancar tanpa reload! Progress bar antreannya transparan, begitu dapat giliran langsung bayar via QRIS, 2 menit tiket digital ber-barcode aktif langsung tersimpan di akun.",
-    rating: 5,
-    tag: "Verified VIP Pass",
-  },
-  {
-    name: "Dimas Wicaksono",
-    role: "ICE BSD • Festival Musik Internasional",
-    avatar: "D",
-    text: "Fitur Dynamic Barcode-nya luar biasa aman. Barcode-nya mutar token tiap 30 detik jadi mustahil dijual oknum calo lewat screenshot. Pas scan di gate cuma tap sekali langsung bunyi beep hijau. Sangat rapi!",
-    rating: 5,
-    tag: "Verified Diamond Fan",
-  },
-  {
-    name: "Nathania & Arga",
-    role: "GWK Bali • Soundcheck Hospitality Experience",
-    avatar: "N",
-    text: "Peta 3D Seat Map-nya super akurat! View panggung yang kita liat di web sama persis waktu kita duduk di venue aslinya. Fasilitas lounge VVIP-nya mewah dan penukaran gelang wristband tanpa antre sama sekali.",
-    rating: 5,
-    tag: "Verified VVIP Guest",
-  },
+const fallbackTickets = [
+  { name: "Regular", price: 450000, perks: ["Akses area regular", "E-ticket digital", "Free standing"] },
+  { name: "Festival", price: 850000, perks: ["Akses festival floor", "Fast lane entry", "Exclusive wristband"] },
+  { name: "VIP", price: 1650000, perks: ["Zona dekat panggung", "Dedicated entrance", "Merchandise eksklusif"] },
+  { name: "VVIP", price: 2850000, perks: ["Premium viewing deck", "Lounge & refreshments", "Meet & greet session"] },
 ];
 
-/* ============================ SUB-COMPONENTS ============================ */
-
-function FuturisticCountdownBox({
-  value,
-  label,
-  highlight,
-}: {
-  value: string;
-  label: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div
-      className={`relative flex flex-col items-center justify-center rounded-xl border p-2.5 transition-all duration-300 ${
-        highlight
-          ? "border-[#6264b5] bg-gradient-to-b from-[#6264b5]/15 to-[#c8b7db]/20 shadow-[0_4px_16px_rgba(98,100,181,0.2)]"
-          : "border-[#c8b7db]/40 bg-[#f7f4fa] hover:border-[#6264b5]/40 hover:bg-[#eeebf4]"
-      }`}
-    >
-      <span
-        className={`font-mono text-xl font-extrabold tracking-tight ${
-          highlight ? "text-[#6264b5]" : "text-[#071653]"
-        }`}
-      >
-        {value}
-      </span>
-      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-widest text-[#5c6482]">
-        {label}
-      </span>
-      {highlight && (
-        <span className="absolute -top-1 -right-1 flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#6264b5] opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-[#6264b5]" />
-        </span>
-      )}
-    </div>
-  );
+function getTicketZone(name: string, index: number) {
+  const normalized = name.toLowerCase();
+  if (/vvip|diamond|soundcheck|meet/.test(normalized)) return { index: 3, label: "Zona premium, paling dekat dengan panggung" };
+  if (/vip|platinum|gold/.test(normalized)) return { index: 2, label: "Zona VIP di sisi depan panggung" };
+  if (/festival|pit|standing/.test(normalized)) return { index: 1, label: "Festival floor, tepat di depan panggung" };
+  if (/regular|reguler|tribune|tribun|silver/.test(normalized)) return { index: 0, label: "Area reguler di sisi kiri panggung" };
+  const zones = [
+    "Area reguler di sisi kiri panggung",
+    "Festival floor, tepat di depan panggung",
+    "Zona VIP di sisi depan panggung",
+    "Zona premium, paling dekat dengan panggung",
+  ];
+  return { index: index % zones.length, label: zones[index % zones.length] };
 }
 
-function LuxuryTicketCard({ event, index }: { event: Event; index: number }) {
-  const minPrice = event.min_price ?? 0;
-  const poster = resolveMediaUrl(event.poster || "");
+const highlights = [
+  { n: "01", title: "Energi panggung yang terasa langsung", text: "Rasakan setiap chorus, riff, dan drop dalam pengalaman musik yang bisa dinikmati bersama." },
+  { n: "02", title: "Penampilan berkesan dari para artis", text: "Temukan konser dan lineup pilihan untuk berbagai suasana dan jenis acara." },
+  { n: "03", title: "Cerita dan kenangan untuk dibawa pulang", text: "Nikmati musik, suasana, dan momen yang membuat setiap acara terasa istimewa." },
+];
 
-  return (
-    <Reveal delay={index * 60}>
-      <Link
-        href={`/events/${event.id}`}
-        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#e8e5ef] bg-white shadow-[0_2px_10px_rgba(7,22,83,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#c8b7db] hover:shadow-[0_14px_32px_-12px_rgba(7,22,83,0.16)]"
-      >
-        {/* Media Container */}
-        <div className="relative h-52 w-full overflow-hidden bg-[#f4f2f7]">
-          {poster ? (
-            <Image
-              src={poster}
-              alt={event.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#eeebf4] to-[#e4dfed]">
-              <Ticket className="h-10 w-10 text-[#c8b7db]" />
-            </div>
-          )}
+const sampleReviews = [
+  { initials: "A", category: "Pembelian tiket", quote: "Alur pemesanan terasa simpel dan informasi kategori tiket mudah dipahami." },
+  { initials: "B", category: "Pengalaman event", quote: "Pilihan konsernya menarik. Detail tanggal dan lokasi membantu saat memilih acara." },
+  { initials: "C", category: "E-ticket", quote: "Tiket digital mudah ditemukan kembali saat dibutuhkan." },
+];
 
-          {/* Vignette */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
-
-          {/* Badges */}
-          <div className="absolute left-3.5 top-3.5 flex items-center gap-2">
-            {event.genre && (
-              <span className="rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-semibold text-[#071653] shadow-sm">
-                {event.genre}
-              </span>
-            )}
-          </div>
-
-          {/* Date and location */}
-          <div className="absolute inset-x-3.5 bottom-3 flex items-center gap-2 text-[11px]">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1 font-semibold text-[#071653] shadow-sm">
-              <CalendarDays className="h-3 w-3 text-[#6264b5]" />
-              {formatEventDate(event.event_date, {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
-            </span>
-            <span className="truncate rounded-lg bg-white/95 px-2.5 py-1 font-semibold text-[#071653] shadow-sm">{event.location}</span>
-          </div>
-        </div>
-
-        {/* Content Body */}
-        <div className="flex flex-1 flex-col p-4 sm:p-5">
-          <p className="truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-[#777b98]">
-            {event.artist_names?.join(", ") || "Live Concert Experience"}
-          </p>
-          <h3 className="mt-1 line-clamp-1 text-lg font-bold text-[#071653] transition-colors duration-300 group-hover:text-[#6264b5]">
-            {event.title}
-          </h3>
-          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#5c6482]">
-            <MapPin className="h-3.5 w-3.5 shrink-0 text-[#6264b5]" />
-            <span className="truncate">{event.venue || event.location}</span>
-          </p>
-
-          {/* Ticket categories */}
-          {event.ticket_categories && event.ticket_categories.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {event.ticket_categories.slice(0, 3).map((cat) => (
-                <span
-                  key={cat.id}
-                  className="rounded-md bg-[#f5f4f8] px-2 py-1 text-[10px] font-medium text-[#555c7b]"
-                >
-                  {cat.category_name}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Footer Card Pricing & Action */}
-          <div className="mt-auto flex items-center justify-between border-t border-[#eeecf2] pt-4">
-            <div>
-              <span className="text-[10px] uppercase tracking-wider text-[#5c6482]">
-                Mulai Dari
-              </span>
-              <p className="mt-0.5 text-base font-bold text-[#071653]">
-                {formatCurrency(minPrice)}
-              </p>
-            </div>
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#6264b5] px-3 py-2 text-xs font-semibold text-white transition-colors duration-300 group-hover:bg-[#51539f]">
-              Beli Tiket
-              <ChevronRight className="h-3.5 w-3.5" />
-            </span>
-          </div>
-        </div>
-      </Link>
-    </Reveal>
-  );
-}
-
-/* ================================== PAGE ================================== */
+const fallbackArtists = [
+  { name: "NIKI", genre: "Alternative R&B", photo: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=85" },
+  { name: "Hindia", genre: "Indie Pop / Rock", photo: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=85" },
+  { name: "Reality Club", genre: "Indie Rock", photo: "https://images.unsplash.com/photo-1501612780327-45045538702b?auto=format&fit=crop&w=900&q=85" },
+];
 
 export default function LandingPage() {
-  const user = useAuthStore((state) => state.user);
+  const [event, setEvent] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("Semua");
-  const [selectedCity, setSelectedCity] = useState("Semua Kota");
-  const [activeZoneKey, setActiveZoneKey] = useState<string>("diamond");
-  const [countdown, setCountdown] = useState({ d: "02", h: "14", m: "25", s: "33" });
-  const [qrTokenSeconds, setQrTokenSeconds] = useState(28);
-  const [tokenHash, setTokenHash] = useState("TX-8492-B7F1-LIVE");
-  const [isGateScanning, setIsGateScanning] = useState(false);
-  const [gateScanResult, setGateScanResult] = useState<"idle" | "success">("idle");
-  const [copiedToken, setCopiedToken] = useState(false);
-  const [qrDisplayMode, setQrDisplayMode] = useState<"gif" | "qr">("gif");
-
+  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("all");
+  const [eventSearch, setEventSearch] = useState("");
+  const [selectedTicketName, setSelectedTicketName] = useState<string | null>(null);
+  const [showAllGenres, setShowAllGenres] = useState(false);
   useEffect(() => {
     let active = true;
-    fetchEvents({ limit: 8, status: "open" })
-      .then((data) => {
-        if (active) setEvents(data);
+    fetchEvents({ status: "open", limit: 100, sort: "popular" })
+      .then((items) => {
+        if (active) {
+          setEvents(items);
+          setEvent(items.find((item) => item.slug === "peterpan-tour-of-love") || items.find((item) => item.featured) || items[0] || null);
+        }
       })
-      .catch(() => undefined)
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+      .catch(() => undefined);
+    return () => { active = false; };
   }, []);
 
-  // Presale Countdown
-  useEffect(() => {
-    let s = 33,
-      m = 25,
-      h = 14,
-      d = 2;
-    const id = setInterval(() => {
-      if (s > 0) s--;
-      else {
-        s = 59;
-        if (m > 0) m--;
-        else {
-          m = 59;
-          if (h > 0) h--;
-          else {
-            h = 23;
-            if (d > 0) d--;
-          }
-        }
-      }
-      setCountdown({
-        d: String(d).padStart(2, "0"),
-        h: String(h).padStart(2, "0"),
-        m: String(m).padStart(2, "0"),
-        s: String(s).padStart(2, "0"),
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  // Dynamic QR Token Counter
-  useEffect(() => {
-    const id = setInterval(() => {
-      setQrTokenSeconds((prev) => {
-        if (prev <= 1) {
-          setTokenHash(
-            `TX-${Math.floor(1000 + Math.random() * 9000)}-${Math.random().toString(16).substring(2, 6).toUpperCase()}-LIVE`
-          );
-          return 30;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const handleManualRotateToken = () => {
-    setQrTokenSeconds(30);
-    setTokenHash(
-      `TX-${Math.floor(1000 + Math.random() * 9000)}-${Math.random().toString(16).substring(2, 6).toUpperCase()}-LIVE`
-    );
-  };
-
-  const handleSimulateGateScan = () => {
-    if (isGateScanning) return;
-    setQrDisplayMode("gif");
-    setIsGateScanning(true);
-    setGateScanResult("idle");
-    setTimeout(() => {
-      setIsGateScanning(false);
-      setGateScanResult("success");
-      setTimeout(() => {
-        setGateScanResult("idle");
-      }, 5000);
-    }, 900);
-  };
-
-  const handleCopyToken = () => {
-    navigator.clipboard?.writeText(tokenHash);
-    setCopiedToken(true);
-    setTimeout(() => setCopiedToken(false), 2000);
-  };
-
-  const filteredEvents = events.filter((e) => {
-    const matchSearch =
-      !searchQuery ||
-      e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (e.artist_names || []).some((a) =>
-        a.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    const matchGenre =
-      selectedGenre === "Semua" ||
-      (e.genre || "").toLowerCase().includes(selectedGenre.toLowerCase());
-    const matchCity =
-      selectedCity === "Semua Kota" ||
-      (e.location || "").toLowerCase().includes(selectedCity.toLowerCase());
-    return matchSearch && matchGenre && matchCity;
+  const artistNames = event?.artist_names?.length ? event.artist_names : ["NIKI", "Hindia", "Reality Club"];
+  const lineup = event?.artists_list?.length
+    ? event.artists_list.map((artist, index) => ({
+        name: artist.name,
+        genre: artist.genre || event.genre || "Live performance",
+        photo: resolveMediaUrl(artist.photo || fallbackArtists[index % fallbackArtists.length].photo),
+      }))
+    : event?.artist_names?.length
+      ? event.artist_names.map((name, index) => ({
+          name,
+          genre: event.genre || "Live performance",
+          photo: fallbackArtists[index % fallbackArtists.length].photo,
+        }))
+      : fallbackArtists;
+  const tickets = event?.ticket_categories?.length
+    ? event.ticket_categories.map((ticket) => ({ name: ticket.category_name, price: ticket.price, perks: ticket.perks?.length ? ticket.perks : ["Akses konser", "E-ticket digital", "Official event wristband"] }))
+    : fallbackTickets;
+  const selectedTicket = tickets.find((ticket) => ticket.name === selectedTicketName) || tickets[0];
+  const selectedTicketIndex = Math.max(0, tickets.findIndex((ticket) => ticket.name === selectedTicket?.name));
+  const selectedZone = selectedTicket ? getTicketZone(selectedTicket.name, selectedTicketIndex) : getTicketZone("Regular", 0);
+  const eventHref = event ? `/events/${event.id}` : "/events";
+  const firstTitleWord = "Tixora";
+  const titleRemainder = "Temukan Momen Musikmu";
+  const eventDate = event?.event_date ? formatEventDate(event.event_date, { day: "numeric", month: "long", year: "numeric" }) : "14 November 2026";
+  const venue = event?.venue || "Sasana Budaya Ganesha (Sabuga)";
+  const city = event?.location || "Bandung, Jawa Barat";
+  const visibleEvents = events.filter((item) => {
+    const genreMatch = selectedGenre === "all" || matchesGenre(item, selectedGenre);
+    const cityMatch = selectedCity === "all" || `${item.location || ""} ${item.venue || ""}`.toLowerCase().includes(selectedCity.toLowerCase());
+    const searchable = `${item.title} ${item.artist_names?.join(" ") || ""} ${item.artists_list?.map((artist) => artist.name).join(" ") || ""} ${item.artists?.name || ""} ${item.genre || ""}`.toLowerCase();
+    return genreMatch && cityMatch && searchable.includes(eventSearch.trim().toLowerCase());
   });
+  const selectGenre = (genre: string) => {
+    setSelectedGenre(genre);
+    document.getElementById("concert-events")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const cityOptions = ["Jakarta", "Bandung", "Surabaya", "Bali", "Yogyakarta", "Semarang"];
 
-  const featuredEvent = events.find((e) => e.featured) || events[0];
-  const activeZone = SEATING_ZONES[activeZoneKey] || SEATING_ZONES.diamond;
-
-  return (
-    <div className="landing-page min-h-screen bg-[#fffdf2] text-[#071653] selection:bg-[#6264b5]/25 selection:text-[#071653]">
-      <Navbar />
-
-      <main>
-        {/* ==================== HERO / HEADER SECTION ==================== */}
-        <section className="relative overflow-hidden px-5 pb-20 pt-28 sm:px-8 sm:pt-36 lg:pb-28">
-          {/* Header Background Image: background-header.png */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-            <Image
-              src="/background-header.png"
-              alt="Background Header"
-              fill
-              priority
-              quality={90}
-              className="object-cover object-center [animation:drift-a_22s_ease-in-out_infinite_alternate]"
-            />
-            {/* Cinematic Gradient Overlays for contrast, readability, and seamless transition */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#070914]/85 via-[#071653]/65 to-[#fffdf2]" />
-            <div className="absolute inset-0 bg-[#070914]/30 backdrop-blur-[0.5px]" />
-
-            {/* Subtle Cyber Grid */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-
-            {/* Glowing Auroras in Lilac & Royal Iris */}
-            <div className="absolute -top-32 left-1/2 h-[550px] w-[900px] -translate-x-1/2">
-              <div className="h-full w-full rounded-full bg-gradient-to-b from-[#6264b5]/35 via-[#c8b7db]/20 to-transparent blur-[140px] [animation:drift-b_18s_ease-in-out_infinite_alternate]" />
+  return <div className="landing-page tixora-event min-h-screen bg-[#0b0917] text-white selection:bg-violet-400 selection:text-[#0b0917]">
+    <Navbar />
+    <main>
+      <section className="relative flex min-h-[620px] items-end overflow-hidden bg-[#0b0917] px-5 pb-10 pt-28 sm:min-h-[690px] sm:px-10 sm:pb-14 lg:min-h-[740px]">
+        <div aria-hidden className="home-header-drift absolute inset-0 bg-[url('/background-header.png')] bg-cover bg-[center_38%]" />
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,7,24,.92)_0%,rgba(8,7,24,.66)_48%,rgba(8,7,24,.12)_100%),linear-gradient(0deg,#0b0917_0%,transparent_48%)]" />
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_76%_42%,rgba(139,92,246,.28),transparent_36%)]" />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0b0917] to-transparent" />
+        <div className="relative mx-auto grid w-full max-w-7xl items-end gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-8">
+          <div className="max-w-3xl">
+            <h1 className="max-w-3xl text-[clamp(2.7rem,7vw,5.8rem)] font-black uppercase leading-[.88] tracking-[-.065em] drop-shadow-[0_8px_35px_rgba(0,0,0,.35)]">{firstTitleWord}<br/><span className="bg-gradient-to-r from-violet-200 via-violet-400 to-fuchsia-300 bg-clip-text text-transparent">{titleRemainder}</span></h1>
+            <p className="mt-5 max-w-lg text-sm leading-6 text-white/80 sm:mt-6 sm:text-base sm:leading-7">Temukan konser favorit, kenali lineup artis, dan pesan tiket resmi dengan mudah lewat Tixora.</p>
+            <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 text-xs font-semibold sm:text-sm">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-black/25 px-3.5 py-2.5 backdrop-blur-md"><CalendarDays className="h-4 w-4 text-violet-300"/>{eventDate}</span>
+              <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-black/25 px-3.5 py-2.5 backdrop-blur-md"><MapPin className="h-4 w-4 text-violet-300"/>{venue}, {city}</span>
             </div>
-            <div className="absolute right-[8%] top-[28%] h-[300px] w-[420px] rounded-full bg-[#8b7bff]/15 blur-[120px] [animation:drift-b_16s_ease-in-out_infinite_alternate]" />
-
+            <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-7 sm:gap-4">
+              <Link href={eventHref} className="group inline-flex items-center gap-3 rounded-full bg-violet-300 px-6 py-3.5 text-sm font-extrabold text-[#100d20] shadow-[0_12px_35px_-12px_rgba(167,139,250,.75)] transition duration-300 hover:-translate-y-1 hover:bg-white">Pesan Tiket <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1"/></Link>
+              <a href="#lineup" className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/[.04] px-5 py-3.5 text-sm font-bold backdrop-blur-sm transition hover:border-white hover:bg-white/10">Lihat lineup <ArrowDown className="h-4 w-4"/></a>
+            </div>
+            <p className="mt-6 text-[10px] font-medium tracking-wide text-white/50">Tiket resmi Tixora <span className="mx-2 text-violet-300">·</span> E-ticket instan <span className="mx-2 text-violet-300">·</span> Pembayaran aman</p>
           </div>
-
-          <div className="relative mx-auto max-w-7xl">
-            <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
-              {/* Left Column: Tixora Brand Capsule, Copy & CTA */}
-              <div className="space-y-7 lg:col-span-7">
-
-
-                <Reveal delay={100}>
-                  <h1 className="font-extrabold tracking-tight text-white text-[clamp(2.5rem,5.2vw,4.5rem)] leading-[1.08] drop-shadow-md">
-                    Konser Impianmu,
-                    <br />
-                    <span className="bg-gradient-to-r from-[#d5baff] via-[#ffffff] to-[#c8b7db] bg-clip-text text-transparent">
-                      Satu Detak Bersama Tixora.
-                    </span>
-                  </h1>
-                </Reveal>
-
-                <Reveal delay={180}>
-                  <p className="max-w-xl text-base leading-relaxed text-[#d0d3e2] sm:text-lg drop-shadow-sm">
-                    Platform tiket konser kurasi resmi dengan Dynamic Anti-Calo Barcode,
-                    visualisasi stadium 3D interaktif, dan proteksi refund resmi 100%.
-                    Dari musisi lokal legendaris hingga tur dunia spektakuler.
-                  </p>
-                </Reveal>
-
-                <Reveal delay={240}>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <Link
-                      href="/events"
-                      className="group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#6264b5] via-[#7577cf] to-[#6264b5] px-7 py-4 text-sm font-bold text-[#fffdf2] shadow-[0_10px_25px_-5px_rgba(98,100,181,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_15px_30px_-5px_rgba(98,100,181,0.65)]"
-                    >
-                      {user ? "Cari Konser Berikutnya" : "Jelajahi Konser Resmi"}
-                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                    </Link>
-
-                    <a
-                      href="#venue-3d"
-                      className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-4 text-sm font-semibold text-white shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-[#6264b5] hover:bg-white/20 hover:text-white"
-                    >
-                      <Eye className="h-4 w-4 text-[#c8b7db]" />
-                      Simulator Panggung 3D
-                    </a>
-                  </div>
-                </Reveal>
+          <aside className="relative hidden lg:block">
+            <div className="absolute -right-4 -top-12 rotate-90 text-[9px] font-bold uppercase tracking-[.35em] text-white/45">Pengalaman konser</div>
+            <div className="overflow-hidden rounded-2xl border border-white/20 bg-[#130f25]/75 shadow-[0_30px_100px_-35px_rgba(0,0,0,.9)] backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-violet-300/60">
+              <div className="border-b border-dashed border-white/20 p-5">
+                <p className="text-[9px] font-bold uppercase tracking-[.24em] text-violet-300">Jadwal konser pilihan</p>
+                <p className="mt-3 text-xl font-black uppercase leading-tight">Musiknya memanggil.<br/>Jangan lewatkan.</p>
+                <div className="mt-5 flex items-center gap-3 text-xs text-white/65"><CalendarDays className="h-4 w-4 text-violet-300"/>{eventDate}</div>
+                <div className="mt-2 flex items-center gap-3 text-xs text-white/65"><MapPin className="h-4 w-4 text-violet-300"/><span className="line-clamp-1">{venue}</span></div>
               </div>
+              <div className="flex items-center justify-between p-5"><div><p className="text-[9px] font-bold uppercase tracking-[.2em] text-white/40">Tiket mulai dari</p><p className="mt-1 text-xl font-black text-violet-200">{formatCurrency(Math.min(...tickets.map((ticket) => ticket.price)))}</p></div><Link href={eventHref} aria-label="Pilih tiket" className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-300 text-[#100d20] transition hover:scale-110 hover:bg-white"><ArrowRight className="h-5 w-5"/></Link></div>
+              <div className="h-1 bg-gradient-to-r from-violet-500 via-fuchsia-300 to-violet-500"/>
             </div>
+          </aside>
+        </div>
+      </section>
 
-            {/* ==================== BRIGHT FUTURISTIC SEARCH TERMINAL ==================== */}
-            <Reveal delay={360}>
-              <div className="mt-12 mx-auto w-full max-w-7xl">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const el = document.getElementById("upcoming-concerts");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="group relative flex flex-col min-[900px]:flex-row min-[900px]:items-center rounded-[28px] min-[900px]:rounded-full border border-white/15 bg-[#0b1230]/85 p-2.5 shadow-[0_24px_70px_-24px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl transition-all duration-300 hover:border-[#a6a8ff]/35 hover:bg-[#0d1537]/90"
-                >
-                  {/* Search Query Field */}
-                  <div className="relative flex min-h-[72px] flex-1 items-center gap-4 rounded-2xl min-[900px]:rounded-full border-b border-white/10 px-4 min-[900px]:border-b-0 min-[900px]:border-r min-[900px]:px-6 py-3 transition-colors hover:bg-white/[0.04] focus-within:bg-white/[0.06]">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#a5a7ff]/20 bg-[#6264b5]/20 text-[#c5c6ff]">
-                      <Search className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <label htmlFor="landing-event-search" className="block whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.14em] text-[#aeb1ed]">
-                        Cari Musisi / Jadwal Konser
-                      </label>
-                      <input
-                        id="landing-event-search"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Coldplay, Sheila On 7, NIKI..."
-                        className="mt-1 w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-[#9aa2c1]"
-                      />
-                    </div>
-                    {searchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setSearchQuery("")}
-                        className="rounded-full p-1.5 text-[#aab0ca] transition-colors hover:bg-white/10 hover:text-white"
-                        aria-label="Hapus pencarian"
-                        title="Hapus pencarian"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* City Selector Field */}
-                  <div className="relative flex min-h-[72px] items-center gap-4 rounded-2xl min-[900px]:rounded-full border-b border-white/10 px-4 min-[900px]:w-[23%] min-[900px]:border-b-0 min-[900px]:border-r min-[900px]:px-4 py-3 transition-colors hover:bg-white/[0.04] focus-within:bg-white/[0.06]">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#a5a7ff]/20 bg-[#6264b5]/20 text-[#c5c6ff]">
-                      <MapPin className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <label htmlFor="landing-event-city" className="block whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.14em] text-[#aeb1ed]">
-                        Kota Venue
-                      </label>
-                      <div className="relative flex items-center">
-                        <select
-                          id="landing-event-city"
-                          aria-label="Pilih kota venue"
-                          value={selectedCity}
-                          onChange={(e) => setSelectedCity(e.target.value)}
-                          className="mt-1 w-full appearance-none bg-transparent pr-1 text-[13px] font-semibold text-white outline-none cursor-pointer"
-                        >
-                          {CITIES.map((city) => (
-                            <option key={city} value={city} className="bg-[#111832] text-white">
-                              {city}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-0 h-4 w-4 text-[#b8bbec]" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Genre Selector Field */}
-                  <div className="relative flex min-h-[72px] items-center gap-4 rounded-2xl min-[900px]:rounded-full px-4 min-[900px]:w-[23%] min-[900px]:px-4 py-3 transition-colors hover:bg-white/[0.04] focus-within:bg-white/[0.06]">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#a5a7ff]/20 bg-[#6264b5]/20 text-[#c5c6ff]">
-                      <Music className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <label htmlFor="landing-event-genre" className="block whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.14em] text-[#aeb1ed]">
-                        Kategori Genre
-                      </label>
-                      <div className="relative flex items-center">
-                        <select
-                          id="landing-event-genre"
-                          aria-label="Pilih kategori genre"
-                          value={selectedGenre}
-                          onChange={(e) => setSelectedGenre(e.target.value)}
-                          className="mt-1 w-full appearance-none bg-transparent pr-1 text-[13px] font-semibold text-white outline-none cursor-pointer"
-                        >
-                          {GENRES.map((g) => (
-                            <option key={g.id} value={g.id} className="bg-[#111832] text-white">
-                              {g.label}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-0 h-4 w-4 text-[#b8bbec]" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="p-1 min-[900px]:p-0 min-[900px]:pl-2">
-                    <a
-                      href="#upcoming-concerts"
-                      className="inline-flex h-12 min-[900px]:h-[68px] w-full min-[900px]:w-auto items-center justify-center gap-2 rounded-2xl min-[900px]:rounded-full border border-white/20 bg-gradient-to-r from-[#6264b5] via-[#7b7ddd] to-[#6264b5] px-5 text-sm font-bold text-white shadow-[0_12px_30px_-8px_rgba(98,100,181,0.75)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_16px_34px_-8px_rgba(98,100,181,0.9)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a5a7ff] active:translate-y-0 shrink-0"
-                    >
-                      <Search className="h-5 w-5" />
-                      <span className="whitespace-nowrap">Temukan Tiket</span>
-                    </a>
-                  </div>
-                </form>
-              </div>
-            </Reveal>
+      <section aria-label="Cari event konser" className="border-y border-white/[.08] bg-[#100d20] px-5 pb-8 pt-12 sm:px-10 sm:pb-10 sm:pt-16">
+        <div className="mx-auto max-w-7xl rounded-2xl border border-white/10 bg-[#171329] p-3 shadow-[0_18px_55px_-38px_rgba(167,139,250,.65)] sm:p-4">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(180px,.8fr)_minmax(180px,.8fr)_auto]">
+            <label className="flex min-h-14 items-center gap-3 rounded-xl border border-white/10 bg-[#0f0c1d] px-4 transition focus-within:border-violet-300/60 focus-within:ring-2 focus-within:ring-violet-300/10">
+              <Search className="h-5 w-5 shrink-0 text-violet-300" />
+              <span className="min-w-0 flex-1"><span className="block text-[9px] font-bold uppercase tracking-[.16em] text-white/45">Cari konser</span><input type="search" value={eventSearch} onChange={(e) => setEventSearch(e.target.value)} placeholder="Nama event atau artis" className="mt-0.5 w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:font-normal placeholder:text-white/35" /></span>
+            </label>
+            <label className="relative flex min-h-14 items-center gap-3 rounded-xl border border-white/10 bg-[#0f0c1d] px-4 transition focus-within:border-violet-300/60">
+              <Music2 className="h-5 w-5 shrink-0 text-violet-300" /><span className="min-w-0 flex-1"><span className="block text-[9px] font-bold uppercase tracking-[.16em] text-white/45">Kategori genre</span><select value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)} className="mt-0.5 w-full appearance-none bg-transparent pr-5 text-sm font-semibold text-white outline-none"><option value="all" className="bg-[#171329]">Semua genre</option>{GENRES.map((genre) => <option key={genre.value} value={genre.value} className="bg-[#171329]">{genre.label}</option>)}</select></span><ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-white/40" />
+            </label>
+            <label className="relative flex min-h-14 items-center gap-3 rounded-xl border border-white/10 bg-[#0f0c1d] px-4 transition focus-within:border-violet-300/60">
+              <MapPin className="h-5 w-5 shrink-0 text-violet-300" /><span className="min-w-0 flex-1"><span className="block text-[9px] font-bold uppercase tracking-[.16em] text-white/45">Kota</span><select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} className="mt-0.5 w-full appearance-none bg-transparent pr-5 text-sm font-semibold text-white outline-none"><option value="all" className="bg-[#171329]">Semua kota</option>{cityOptions.map((item) => <option key={item} value={item} className="bg-[#171329]">{item}</option>)}</select></span><ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-white/40" />
+            </label>
+            <button type="button" onClick={() => document.getElementById("concert-events")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-violet-300 px-6 text-sm font-extrabold text-[#171329] transition hover:bg-violet-200 lg:min-w-32"><Search className="h-4 w-4" />Cari event</button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ==================== ARTIST INFINITE MARQUEE ==================== */}
-        <section className="relative w-full overflow-hidden border-y border-[#c8b7db]/40 bg-[#f7f4fa] py-5">
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 z-10 w-32 bg-gradient-to-r from-[#f7f4fa] to-transparent" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 z-10 w-32 bg-gradient-to-l from-[#f7f4fa] to-transparent" />
-          <Marquee
-            items={MARQUEE_ARTISTS}
-            className="text-xs font-bold uppercase tracking-[0.3em] text-[#5c6482] hover:text-[#6264b5] transition-colors"
-          />
-        </section>
-
-        {/* ==================== UPCOMING CONCERTS SHOWCASE ==================== */}
-        <section id="upcoming-concerts" className="relative mx-auto w-full max-w-7xl px-5 py-24 sm:px-8">
-          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end mb-10">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#6264b5]">
-                Jadwal Konser Paling Dinanti
-              </p>
-              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#071653] sm:text-4xl">
-                Kurasi Panggung 2026
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {(searchQuery || selectedGenre !== "Semua" || selectedCity !== "Semua Kota") && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedGenre("Semua");
-                    setSelectedCity("Semua Kota");
-                  }}
-                  className="rounded-xl border border-[#c8b7db] bg-white px-3.5 py-2 text-xs font-semibold text-[#071653] hover:text-[#6264b5] transition-colors"
-                >
-                  Reset Filter &times;
-                </button>
-              )}
-
-              <Link
-                href="/events"
-                className="group inline-flex items-center gap-1.5 rounded-xl border border-[#c8b7db] bg-white px-4 py-2 text-xs font-bold text-[#6264b5] shadow-sm transition-all hover:bg-[#6264b5] hover:text-[#fffdf2]"
-              >
-                Lihat Semua ({events.length})
-                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Genre Tabs */}
-          <div className="mb-10 flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-none">
-            {GENRES.map((g) => {
-              const isSelected = selectedGenre === g.id;
-              const Icon = g.icon;
-              return (
-                <button
-                  key={g.id}
-                  type="button"
-                  onClick={() => setSelectedGenre(g.id)}
-                  className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all duration-300 ${
-                    isSelected
-                      ? "bg-[#6264b5] text-[#fffdf2] shadow-md shadow-[#6264b5]/30"
-                      : "border border-[#c8b7db]/60 bg-white text-[#071653] hover:border-[#6264b5] hover:text-[#6264b5]"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{g.label}</span>
-                </button>
-              );
+      <section aria-label="Jelajahi berdasarkan genre" className="bg-[#f2effb] px-5 py-14 text-[#171329] sm:px-10 sm:py-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-[.24em] text-violet-700">Pilih suasana</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Jelajahi berdasarkan genre</h2><p className="mt-2 text-sm text-[#656078]">Temukan konser yang cocok dengan musik favoritmu.</p></div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {GENRES.slice(0, showAllGenres ? GENRES.length : 5).map((genre, index) => {
+              const art = events.find((item) => matchesGenre(item, genre.value)) || events[index];
+              const image = resolveMediaUrl(art?.poster || "");
+              const count = events.filter((item) => matchesGenre(item, genre.value)).length;
+              return <button key={genre.value} type="button" onClick={() => selectGenre(genre.value)} className="group relative isolate min-h-32 overflow-hidden rounded-2xl bg-[#211634] text-left text-white transition hover:-translate-y-1 hover:shadow-xl sm:min-h-40">
+                <Image src={image} alt="" fill sizes="(max-width: 768px) 45vw, 16vw" className="-z-20 object-cover opacity-65 transition duration-700 group-hover:scale-110" />
+                <span className={`absolute inset-0 -z-10 bg-gradient-to-br ${genre.tone} via-[#1d1530]/55 to-transparent`} />
+                <span className="absolute bottom-3 left-3 right-3"><span className="mb-2 flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur"><Music2 className="h-4 w-4"/></span><span className="block text-sm font-extrabold">{genre.label}</span><span className="mt-0.5 block text-[9px] font-medium text-white/65">{count} konser</span></span>
+              </button>;
             })}
           </div>
+          {GENRES.length > 5 ? <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowAllGenres((showAll) => !showAll)}
+              aria-expanded={showAllGenres}
+              className="inline-flex items-center gap-2 rounded-full border border-violet-300 bg-white px-5 py-2.5 text-sm font-bold text-violet-800 shadow-sm transition hover:border-violet-400 hover:bg-violet-50"
+            >
+              {showAllGenres ? "Tampilkan lebih sedikit" : "Lihat semua genre"}
+              <ChevronDown className={`h-4 w-4 transition-transform ${showAllGenres ? "rotate-180" : ""}`} />
+            </button>
+          </div> : null}
+        </div>
+      </section>
 
-          {/* Concerts Grid */}
-          {filteredEvents.length > 0 ? (
-            <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" step={50}>
-              {filteredEvents.map((event: Event, i: number) => (
-                <LuxuryTicketCard key={event.id} event={event} index={i} />
-              ))}
-            </Stagger>
-          ) : !loading ? (
-            <div className="rounded-3xl border border-dashed border-[#c8b7db] bg-white px-6 py-16 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#6264b5]/10 text-[#6264b5]">
-                <Ticket className="h-8 w-8" />
-              </div>
-              <h4 className="text-lg font-bold text-[#071653]">Tidak ada konser ditemukan</h4>
-              <p className="mx-auto mt-1 max-w-sm text-sm text-[#5c6482]">
-                Belum ada jadwal yang sesuai dengan filter pencarianmu saat ini.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedGenre("Semua");
-                  setSelectedCity("Semua Kota");
-                }}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#6264b5] px-5 py-2.5 text-xs font-bold text-[#fffdf2] shadow-md hover:bg-[#51539f]"
-              >
-                Reset Semua Filter
-              </button>
-            </div>
-          ) : null}
-        </section>
-
-        {/* ==================== SECURITY & ANTI-SCALPER ARCHITECTURE ==================== */}
-        <section className="relative mx-auto w-full max-w-7xl px-5 py-24 sm:px-8">
-          <Reveal className="mx-auto mb-16 max-w-2xl text-center">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#6264b5]">
-              Infrastruktur & Arsitektur
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#071653] sm:text-4xl">
-              Kenapa Jutaan Fans Memilih Tixora?
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-[#4b5578]">
-              Dibangun dari nol untuk menangani lonjakan jutaan penonton Indonesia dengan teknologi
-              kriptografi mutakhir dan standar keamanan perbankan.
-            </p>
-          </Reveal>
-
-          <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4" step={70}>
-            {SECURITY_FEATURES.map((feat) => {
-              const Icon = feat.icon;
-              return (
-                <div
-                  key={feat.title}
-                  className="group relative overflow-hidden rounded-3xl border border-[#c8b7db]/50 bg-white p-6 shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-[#6264b5] hover:shadow-[0_20px_50px_-15px_rgba(7,22,83,0.12)]"
-                >
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-b ${feat.accent} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
-                  />
-
-                  <div className="relative">
-                    <span className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[#c8b7db]/50 bg-[#f7f4fa] text-[#6264b5] transition-transform duration-500 group-hover:scale-110">
-                      <Icon className="h-6 w-6" />
-                    </span>
-
-                    <span
-                      className={`inline-block rounded-full border px-2.5 py-0.5 text-[9px] font-bold tracking-wider ${feat.pillColor}`}
-                    >
-                      {feat.badge}
-                    </span>
-
-                    <h3 className="mt-3 text-base font-extrabold text-[#071653]">{feat.title}</h3>
-                    <p className="mt-2 text-xs leading-relaxed text-[#4b5578]">{feat.desc}</p>
-                  </div>
-                </div>
-              );
+      <section id="concert-events" aria-label="Event konser" className="scroll-mt-24 bg-[#fffdfc] px-5 py-14 text-[#171329] sm:px-10 sm:py-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div><p className="text-xs font-bold uppercase tracking-[.24em] text-violet-700">Konser pilihan</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">{selectedGenre === "all" ? "Event konser" : `Konser ${GENRES.find((genre) => genre.value === selectedGenre)?.label}`}</h2><p className="mt-2 text-sm text-[#656078]">Pilih event dan amankan tiketmu.</p></div>
+            <div className="flex items-center gap-3"><button type="button" onClick={() => setSelectedGenre("all")} className={`rounded-full px-3.5 py-2 text-xs font-bold transition ${selectedGenre === "all" ? "bg-violet-100 text-violet-800" : "border border-[#ddd4e9] bg-white text-[#777087] hover:border-violet-300 hover:text-violet-800"}`}>Semua genre</button><Link href="/events" className="inline-flex items-center gap-2 text-sm font-bold text-violet-800 transition hover:text-violet-600">Lihat semua <ArrowRight className="h-4 w-4"/></Link></div>
+          </div>
+          {visibleEvents.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {visibleEvents.slice(0, 8).map((item) => {
+              const price = getLowestPrice(item);
+              const poster = resolveMediaUrl(item.poster || "");
+              return <Link key={item.id} href={`/events/${item.id}`} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#e3deed] bg-white transition duration-300 hover:-translate-y-1 hover:border-[#aa8fd0] hover:shadow-[0_22px_50px_-35px_rgba(19,12,50,.45)]">
+                <div className="relative aspect-[1.45] overflow-hidden bg-[#17112b]"><Image src={poster} alt={item.title} fill sizes="(max-width: 768px) 90vw, 25vw" className="object-cover transition duration-700 group-hover:scale-105"/><div className="absolute inset-0 bg-gradient-to-t from-[#0b0820]/90 via-transparent to-[#0b0820]/10"/><span className="absolute left-3 top-3 rounded-full bg-emerald-300/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-950">Tiket tersedia</span><div className="absolute inset-x-4 bottom-4 text-white"><p className="line-clamp-2 text-[10px] font-semibold uppercase tracking-[.14em] text-white/75">{item.artist_names?.join(", ") || item.artists_list?.map((artist) => artist.name).join(", ") || item.artists?.name || "Live music"}</p><h3 className="mt-1 line-clamp-2 text-lg font-extrabold leading-tight">{item.title}</h3></div></div>
+                <div className="flex flex-1 flex-col p-4"><div className="flex items-center gap-2 text-xs text-[#625d73]"><CalendarDays className="h-3.5 w-3.5 shrink-0 text-violet-700"/><span>{formatEventDate(item.event_date, { day: "numeric", month: "short", year: "numeric" })}</span></div><p className="mt-2 flex items-center gap-2 text-xs text-[#625d73]"><MapPin className="h-3.5 w-3.5 shrink-0 text-violet-700"/><span className="truncate">{item.venue || item.location}</span></p><p className="mt-2 flex items-center gap-2 text-xs text-[#625d73]"><Clock className="h-3.5 w-3.5 shrink-0 text-violet-700"/><span>Mulai {item.start_time || formatEventTime(item.event_date)} WIB</span></p><div className="mt-auto flex items-end justify-between gap-3 border-t border-[#eee8f4] pt-3 mt-4"><div><p className="text-[9px] font-bold uppercase tracking-[.14em] text-[#777087]">Harga mulai</p><p className="mt-0.5 text-sm font-extrabold text-[#071653]">{price == null ? "Cek detail" : formatCurrency(price)}</p></div>{item.genre ? <span className="rounded-lg border border-[#e4d9f0] bg-[#f2ebfa] px-2.5 py-1.5 text-[9px] font-bold text-[#624589]">{item.genre}</span> : null}</div></div>
+              </Link>;
             })}
-          </Stagger>
-        </section>
+          </div> : <p className="rounded-2xl border border-dashed border-[#d6cde1] bg-white p-8 text-center text-sm text-[#777083]">Belum ada konser untuk genre ini.</p>}
+        </div>
+      </section>
 
-        {/* ==================== 3D VENUE & SEAT SIMULATOR ==================== */}
-        <section id="venue-3d" className="relative w-full border-y border-[#c8b7db]/40 bg-[#f7f4fa] py-24">
-          <div className="mx-auto max-w-7xl px-5 sm:px-8">
-            <div className="grid items-center gap-12 lg:grid-cols-12">
-              {/* Left: 3D Stage Simulation Canvas */}
-              <Reveal className="lg:col-span-7">
-                <div className="relative overflow-hidden rounded-3xl border border-[#c8b7db]/50 bg-white shadow-xl">
-                  {/* Top Header */}
-                  <div className="flex items-center justify-between border-b border-[#c8b7db]/30 px-6 py-4">
-                    <div>
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#6264b5]">
-                        SIMULASI TATA VENUE • GBK STADIUM
-                      </span>
-                      <h4 className="mt-0.5 text-base font-extrabold text-[#071653]">
-                        Peta Panggung & Area Penonton
-                      </h4>
-                    </div>
-
-                    <div className="flex items-center gap-2 rounded-full border border-[#6264b5]/30 bg-[#6264b5]/10 px-3 py-1 text-[#6264b5]">
-                      <span className="h-2 w-2 rounded-full bg-[#6264b5] animate-pulse" />
-                      <span className="text-[10px] font-mono font-bold uppercase">Simulasi Aktif</span>
-                    </div>
-                  </div>
-
-                  {/* 3D Scene Viewport */}
-                  <div className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden bg-gradient-to-b from-[#eeebf4] to-[#e4dfed] p-6">
-                    <div
-                      className="relative h-[300px] w-full max-w-[560px]"
-                      style={{ perspective: "1400px" }}
-                    >
-                      <div
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{
-                          transformStyle: "preserve-3d",
-                          animation: "stage-float 7s ease-in-out infinite",
-                        }}
-                      >
-                        <div
-                          aria-hidden="true"
-                          className="absolute left-1/2 top-[53%] h-[230px] w-full max-w-[520px]"
-                          style={{
-                            transform: "translate(-50%, -50%) rotateX(58deg) rotateZ(-5deg)",
-                            transformStyle: "preserve-3d",
-                          }}
-                        >
-                          <div
-                            className={`absolute inset-0 rounded-[50%] border-[16px] transition-all duration-500 ${
-                              activeZoneKey === "platinum"
-                                ? "border-[#6264b5]/90 bg-[#6264b5]/20 shadow-[0_0_42px_rgba(98,100,181,0.5)]"
-                                : "border-[#8587c9]/55 bg-[#c8b7db]/15"
-                            }`}
-                          />
-                          <div
-                            className={`absolute inset-[12%] rounded-[50%] border-[14px] transition-all duration-500 ${
-                              activeZoneKey === "diamond"
-                                ? "border-[#071653]/90 bg-[#071653]/25 shadow-[0_0_36px_rgba(7,22,83,0.45)]"
-                                : "border-[#7779be]/55 bg-[#6264b5]/10"
-                            }`}
-                          />
-                          <div
-                            className={`absolute inset-[25%] rounded-[50%] border-[12px] transition-all duration-500 ${
-                              activeZoneKey === "festival"
-                                ? "border-[#6264b5]/90 bg-[#6264b5]/30 shadow-[0_0_34px_rgba(98,100,181,0.5)]"
-                                : "border-[#a49bd4]/60 bg-[#c8b7db]/20"
-                            }`}
-                          />
-                          <div className="absolute inset-[39%] rounded-[50%] border border-white/70 bg-gradient-to-br from-[#fffdf2] to-[#d9d3ef] shadow-[inset_0_0_24px_rgba(98,100,181,0.18)]" />
-
-                          <div className="absolute left-[20%] right-[20%] top-[13%] grid grid-cols-10 gap-x-2">
-                            {Array.from({ length: 10 }, (_, index) => (
-                              <span
-                                key={`upper-seat-${index}`}
-                                className={`h-1.5 rounded-full ${
-                                  activeZoneKey === "platinum" ? "bg-[#6264b5]" : "bg-[#7779be]/70"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <div className="absolute bottom-[13%] left-[20%] right-[20%] grid grid-cols-10 gap-x-2">
-                            {Array.from({ length: 10 }, (_, index) => (
-                              <span
-                                key={`lower-seat-${index}`}
-                                className={`h-1.5 rounded-full ${
-                                  activeZoneKey === "platinum" ? "bg-[#6264b5]" : "bg-[#7779be]/70"
-                                }`}
-                              />
-                            ))}
-                          </div>
-
-                          <div
-                            className={`absolute left-[31%] top-[39%] h-7 w-12 rounded-lg border transition-all duration-500 ${
-                              activeZoneKey === "vvip"
-                                ? "border-[#6264b5] bg-[#6264b5]/70 shadow-[0_0_24px_rgba(98,100,181,0.65)]"
-                                : "border-[#6264b5]/60 bg-[#c8b7db]/70"
-                            }`}
-                            style={{ transform: "translateZ(32px)" }}
-                          />
-                          <div
-                            className={`absolute right-[31%] top-[39%] h-7 w-12 rounded-lg border transition-all duration-500 ${
-                              activeZoneKey === "vvip"
-                                ? "border-[#6264b5] bg-[#6264b5]/70 shadow-[0_0_24px_rgba(98,100,181,0.65)]"
-                                : "border-[#6264b5]/60 bg-[#c8b7db]/70"
-                            }`}
-                            style={{ transform: "translateZ(32px)" }}
-                          />
-
-                          <svg
-                            aria-hidden="true"
-                            viewBox="0 0 300 180"
-                            className="absolute left-1/2 top-[20%] h-[180px] w-[300px] max-w-[74%] overflow-visible"
-                            style={{ transform: "translate(-50%, -50%) translateZ(48px)" }}
-                          >
-                            <defs>
-                              <linearGradient id="venue-stage-screen" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0" stopColor="#161942" />
-                                <stop offset="0.55" stopColor="#41458f" />
-                                <stop offset="1" stopColor="#7779d1" />
-                              </linearGradient>
-                              <linearGradient id="venue-stage-deck" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0" stopColor="#8c8fe0" />
-                                <stop offset="1" stopColor="#45488f" />
-                              </linearGradient>
-                              <linearGradient id="venue-stage-beam" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0" stopColor="#d7ccff" stopOpacity="0.5" />
-                                <stop offset="1" stopColor="#a8a2ff" stopOpacity="0" />
-                              </linearGradient>
-                              <filter id="venue-stage-glow" x="-50%" y="-50%" width="200%" height="200%">
-                                <feGaussianBlur stdDeviation="7" />
-                              </filter>
-                            </defs>
-
-                            <path d="M83 91 19 170h85l20-70Z" fill="url(#venue-stage-beam)" />
-                            <path d="m217 91 64 79h-85l-20-70Z" fill="url(#venue-stage-beam)" />
-                            <ellipse cx="150" cy="106" rx="82" ry="18" fill="#7779d1" opacity="0.32" filter="url(#venue-stage-glow)" />
-
-                            <path d="M42 37h216M54 37v72m192-72v72M54 66h192" fill="none" stroke="#42457f" strokeWidth="5" strokeLinecap="round" />
-                            <path d="M54 37h192M65 37v72m170-72v72" fill="none" stroke="#a9abe9" strokeWidth="1.5" opacity="0.8" />
-                            <path d="m66 39 40 26m-40 0 40-28m48 2 40 26m-40 0 40-28m-96 1 32 22m64-22-32 22" fill="none" stroke="#c9caff" strokeWidth="1" opacity="0.65" />
-
-                            {[74, 112, 150, 188, 226].map((x) => (
-                              <g key={x}>
-                                <circle cx={x} cy="38" r="5" fill="#fffdf2" />
-                                <circle cx={x} cy="38" r="10" fill="#b9b4ff" opacity="0.32" filter="url(#venue-stage-glow)" />
-                              </g>
-                            ))}
-
-                            <path d="m74 52 152 0 13 53H61Z" fill="#25285d" stroke="#b5b6ff" strokeWidth="2" />
-                            <path d="m82 58 136 0 9 39H73Z" fill="url(#venue-stage-screen)" />
-                            <path d="M86 63h128" stroke="#bdbdff" strokeWidth="1.5" opacity="0.85" />
-                            <text x="150" y="82" fill="#fffdf2" textAnchor="middle" fontSize="12" fontWeight="800" letterSpacing="2.5">TIXORA</text>
-                            <text x="150" y="92" fill="#d8d8ff" textAnchor="middle" fontSize="5.5" fontWeight="700" letterSpacing="2">LIVE IN CONCERT</text>
-
-                            <path d="m42 108 216 0 21 17H21Z" fill="#34366f" />
-                            <path d="m48 105 204 0 17 13H31Z" fill="url(#venue-stage-deck)" stroke="#d4d4ff" strokeWidth="1.5" />
-                            <path d="m124 117 52 0 14 42h-80Z" fill="url(#venue-stage-deck)" stroke="#d4d4ff" strokeWidth="1.5" />
-                            <path d="m110 159 80 0 8 8h-96Z" fill="#45488f" stroke="#bcbcff" strokeWidth="1" />
-                            <path d="M61 108h178" stroke="#fffdf2" strokeWidth="2" opacity="0.8" />
-                          </svg>
-                        </div>
-
-                        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                          <div
-                            className="absolute left-[18%] top-[8%] h-[85%] w-px origin-top bg-gradient-to-b from-[#6264b5]/70 via-[#c8b7db]/50 to-transparent blur-[1px]"
-                            style={{ animation: "light-beam 3s ease-in-out infinite alternate" }}
-                          />
-                          <div
-                            className="absolute right-[18%] top-[8%] h-[85%] w-px origin-top bg-gradient-to-b from-[#c8b7db] via-[#6264b5]/50 to-transparent blur-[1px]"
-                            style={{ animation: "light-beam 3.5s ease-in-out infinite alternate-reverse" }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-4 inset-x-6 flex items-center justify-between text-[11px] font-mono font-bold text-[#071653]">
-                      <span>PANGGUNG</span>
-                      <span>PIT DIAMOND</span>
-                      <span>TRIBUN</span>
-                      <span>LOUNGE VVIP</span>
-                    </div>
-                  </div>
-
-                  {/* Zone Selector Buttons */}
-                  <div className="grid grid-cols-2 gap-2 border-t border-[#c8b7db]/30 p-4 sm:grid-cols-4">
-                    {Object.values(SEATING_ZONES).map((z) => {
-                      const isActive = activeZoneKey === z.id;
-                      return (
-                        <button
-                          key={z.id}
-                          type="button"
-                          onClick={() => setActiveZoneKey(z.id)}
-                          className={`flex flex-col rounded-xl p-3 text-left transition-all duration-300 ${
-                            isActive
-                              ? "border border-[#6264b5] bg-[#6264b5]/10 shadow-sm"
-                              : "border border-[#c8b7db]/40 bg-[#f7f4fa] hover:bg-[#eeebf4]"
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{ backgroundColor: z.color }}
-                            />
-                            <span className="truncate text-xs font-bold text-[#071653]">
-                              {z.name.split(" ")[0]}
-                            </span>
-                          </div>
-                          <span
-                            className="mt-1 font-mono text-[11px] font-extrabold"
-                            style={{ color: z.color }}
-                          >
-                            {z.price}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </Reveal>
-
-              {/* Right: Zone Inspection Detail */}
-              <Reveal delay={140} className="space-y-6 lg:col-span-5">
-                <div>
-
-                  <h3 className="mt-3 text-3xl font-extrabold tracking-tight text-[#071653]">
-                    Pilih Area, Kenali Suasananya
-                  </h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-[#4b5578]">
-                    Lihat posisi panggung, area festival, dan tribun sebelum memesan tiket.
-                    Pilih kategori untuk mengetahui jarak, sudut pandang, dan fasilitasnya.
-                  </p>
-                </div>
-
-                {/* Inspected Active Zone Card */}
-                <div className="rounded-2xl border border-[#c8b7db]/50 bg-white p-5 shadow-sm">
-                  <div className="flex items-center justify-between border-b border-[#c8b7db]/30 pb-3">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#5c6482]">
-                        Area Pilihanmu
-                      </span>
-                      <h4 className="text-lg font-extrabold text-[#071653]">{activeZone.name}</h4>
-                    </div>
-                    <span
-                      className="font-mono text-base font-extrabold"
-                      style={{ color: activeZone.color }}
-                    >
-                      {activeZone.price}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                    <div className="rounded-xl border border-[#c8b7db]/40 bg-[#f7f4fa] p-2.5">
-                      <span className="text-[10px] text-[#5c6482]">Jarak ke panggung</span>
-                      <p className="font-semibold text-[#071653]">{activeZone.distance}</p>
-                    </div>
-                    <div className="rounded-xl border border-[#c8b7db]/40 bg-[#f7f4fa] p-2.5">
-                      <span className="text-[10px] text-[#5c6482]">Sudut pandang</span>
-                      <p className="font-semibold text-[#071653]">{activeZone.visibility}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 space-y-2 text-xs text-[#4b5578]">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#5c6482]">
-                      Keunggulan area:
-                    </span>
-                    {activeZone.features.map((feat, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <Check className="h-3.5 w-3.5 shrink-0 text-[#6264b5]" />
-                        <span>{feat}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 pt-1">
-                  <Link
-                    href="/events"
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#6264b5] to-[#7577cf] px-6 py-3.5 text-xs font-bold text-[#fffdf2] shadow-lg shadow-[#6264b5]/25 hover:brightness-110"
-                  >
-                    Pilih Tiket Area Ini
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </div>
-              </Reveal>
+      <section className="bg-[#0b0917] px-5 py-16 sm:px-10 sm:py-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="relative min-h-[360px] overflow-hidden rounded-[1.75rem] bg-[#211b35] sm:min-h-[480px]">
+            <Image src="/background-header.png" alt="Panggung konser Tixora" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover object-center transition duration-700 hover:scale-105" />
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#100d20]/90 via-[#100d20]/20 to-[#100d20]/10" />
+            <div className="absolute inset-x-5 bottom-5 sm:inset-x-8 sm:bottom-8">
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-violet-100">Music for every moment</p>
+              <p className="mt-2 max-w-md text-2xl font-black leading-tight text-white sm:text-4xl">Musik yang terasa dekat, di setiap suasana.</p>
             </div>
           </div>
-        </section>
 
-        {/* ==================== TESTIMONIALS ==================== */}
-        <section className="relative mx-auto w-full max-w-7xl px-5 py-24 sm:px-8">
-          <Reveal className="mb-14 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[.24em] text-violet-300">The experience</p>
+            <h2 className="mt-4 max-w-xl text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">Lebih dari sekadar <span className="text-violet-300">live music.</span></h2>
+            <p className="mt-5 max-w-lg text-sm leading-7 text-white/55">Datang untuk musiknya. Pulang membawa cerita yang akan kamu ulang terus.</p>
+            <div className="mt-8 border-t border-white/10">
+              {highlights.map((item) => <article key={item.n} className="group grid gap-3 border-b border-white/10 py-5 transition sm:grid-cols-[52px_1fr] sm:gap-4">
+                <span className="font-mono text-xs font-bold tracking-wider text-violet-300">{item.n}</span>
+                <div><h3 className="text-base font-bold text-white transition group-hover:text-violet-200 sm:text-lg">{item.title}</h3><p className="mt-1.5 max-w-lg text-xs leading-6 text-white/50 sm:text-sm">{item.text}</p></div>
+              </article>)}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="ticket-zones" className="bg-[#f2effb] px-5 py-16 text-[#171329] sm:px-10 sm:py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-9 flex flex-wrap items-end justify-between gap-5">
+            <div><p className="text-xs font-bold uppercase tracking-[.24em] text-violet-700">Pilih pengalamanmu</p><h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Panggung &amp; harga tiket<span className="text-violet-600">.</span></h2></div>
+            <p className="max-w-sm text-sm leading-6 text-[#656078]">Lihat ilustrasi area panggung dan bandingkan kategori tiket event pilihan.</p>
+          </div>
+          <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-12">
+            <div className="relative flex min-h-[390px] flex-col items-center justify-center overflow-hidden rounded-3xl bg-[radial-gradient(ellipse_at_50%_30%,#30204f,#100d20_72%)] p-5 sm:min-h-[470px] sm:p-8">
+              <div aria-hidden className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(ellipse_at_50%_0%,rgba(196,157,255,.3),transparent_70%)]" />
+              <div className="absolute left-5 top-5 z-10"><p className="text-[10px] font-black uppercase tracking-[.2em] text-violet-200">3D stage view</p><p className="mt-1 text-[9px] text-white/55">Berputar 360° · arahkan kursor untuk jeda</p></div>
+              <div className="stage-3d-scene relative mt-8 flex h-[280px] w-full max-w-[480px] items-center justify-center sm:h-[320px]" role="img" aria-label="Ilustrasi panggung konser isometrik dengan layar, rig lampu, dan area penonton">
+                <div className="stage-3d-turn w-full">
+                  <svg viewBox="0 0 680 440" className="h-auto w-full overflow-visible drop-shadow-[0_28px_28px_rgba(0,0,0,.5)]" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="stageFloor" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#47365d"/><stop offset=".55" stopColor="#251b34"/><stop offset="1" stopColor="#110d1c"/></linearGradient>
+                      <linearGradient id="stageDeck" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#725493"/><stop offset="1" stopColor="#21172e"/></linearGradient>
+                      <linearGradient id="stageScreen" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#efdcff"/><stop offset=".45" stopColor="#a35dff"/><stop offset="1" stopColor="#3a1f62"/></linearGradient>
+                      <linearGradient id="stageBeam" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#d8c1ff" stopOpacity=".5"/><stop offset="1" stopColor="#a78bfa" stopOpacity="0"/></linearGradient>
+                      <filter id="stageGlow"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <g opacity=".7"><path d="m213 116-91 168h46l75-148Z" fill="url(#stageBeam)"/><path d="m467 116 91 168h-46l-75-148Z" fill="url(#stageBeam)"/><path d="m291 117-37 160h44l26-157Z" fill="url(#stageBeam)"/><path d="m389 117 37 160h-44l-26-157Z" fill="url(#stageBeam)"/></g>
+                    <path d="m94 293 246-117 246 117-246 120Z" fill="url(#stageFloor)" stroke="#9272ba" strokeOpacity=".6" strokeWidth="2"/>
+                    <path d="m112 294 102-49 71 34-102 51Z" fill="#fbbf24" fillOpacity={selectedZone.index === 0 ? ".78" : ".12"} stroke="#fcd34d" strokeOpacity={selectedZone.index === 0 ? ".95" : ".25"} strokeWidth="2"/>
+                    <path d="m218 350 122-59 122 59-122 59Z" fill="#e879f9" fillOpacity={selectedZone.index === 1 ? ".72" : ".12"} stroke="#f0abfc" strokeOpacity={selectedZone.index === 1 ? ".95" : ".25"} strokeWidth="2"/>
+                    <path d="m395 279 71-34 102 49-71 36Z" fill="#a78bfa" fillOpacity={selectedZone.index === 2 ? ".78" : ".12"} stroke="#c4b5fd" strokeOpacity={selectedZone.index === 2 ? ".95" : ".25"} strokeWidth="2"/>
+                    <path d="m273 286 67-33 67 33-67 34Z" fill="#38bdf8" fillOpacity={selectedZone.index === 3 ? ".82" : ".12"} stroke="#7dd3fc" strokeOpacity={selectedZone.index === 3 ? ".95" : ".25"} strokeWidth="2"/>
+                    <path d="m94 293 246 120v20L94 313Z" fill="#17111f" stroke="#57436e" strokeWidth="2"/><path d="m340 413 246-120v20L340 433Z" fill="#100c18" stroke="#49365f" strokeWidth="2"/>
+                    <path d="m171 274 169-81 169 81-169 82Z" fill="#362746" stroke="#b89bdb" strokeOpacity=".8" strokeWidth="2"/>
+                    <path d="m171 274 169 82v19l-169-82Z" fill="url(#stageDeck)"/><path d="m340 356 169-82v19l-169 82Z" fill="#30223f"/>
+                    <path d="m265 273 75-35 75 35-75 37Z" fill="#71538c" stroke="#cbb2eb" strokeWidth="2"/><path d="m265 273 75 37v10l-75-37Z" fill="#3c2a50"/><path d="m340 310 75-37v10l-75 37Z" fill="#281d37"/>
+                    <path d="m202 150 138-66 138 66v11H202Z" fill="#322443" stroke="#c6a7e8" strokeWidth="4"/><path d="m211 145 129-61 129 61" fill="none" stroke="#e2d0f8" strokeWidth="5"/>
+                    <path d="m213 152v118m25-130v142m254-130v118m-25-130v142" fill="none" stroke="#a88dc6" strokeWidth="7"/>
+                    <path d="m223 166 117-56 117 56-117 56Z" fill="url(#stageScreen)" stroke="#f0ddff" strokeWidth="3"/><path d="m242 165 98-47 98 47-98 47Z" fill="none" stroke="#f5eaff" strokeOpacity=".55" strokeWidth="2"/>
+                    <path d="m193 157 294 0m-268 12 242 0" stroke="#e8d8ff" strokeOpacity=".8" strokeWidth="3"/>
+                    <g fill="#f5e8ff" filter="url(#stageGlow)"><circle cx="225" cy="153" r="5"/><circle cx="277" cy="128" r="5"/><circle cx="340" cy="98" r="6"/><circle cx="403" cy="128" r="5"/><circle cx="455" cy="153" r="5"/></g>
+                    <g><path d="m172 218 33-16 0 77-33 16Z" fill="#181220" stroke="#a88dc6" strokeWidth="2"/><path d="m177 228 23-11v17l-23 11Zm0 27 23-11v17l-23 11Z" fill="#9874bd"/><path d="m475 202 33 16v77l-33-16Z" fill="#100d16" stroke="#a88dc6" strokeWidth="2"/><path d="m480 217 23 11v17l-23-11Zm0 27 23 11v17l-23-11Z" fill="#9874bd"/></g>
+                    <path d="m276 345 22 11v18l-22-11Zm128 0-22 11v18l22-11Z" fill="#ddd0ec" stroke="#8d72aa" strokeWidth="2"/>
+                    <g fill="#d8c1ff" opacity=".8"><circle cx="148" cy="306" r="4"/><circle cx="174" cy="318" r="4"/><circle cx="200" cy="331" r="4"/><circle cx="226" cy="344" r="4"/><circle cx="252" cy="357" r="4"/><circle cx="532" cy="306" r="4"/><circle cx="506" cy="318" r="4"/><circle cx="480" cy="331" r="4"/><circle cx="454" cy="344" r="4"/><circle cx="428" cy="357" r="4"/></g>
+                  </svg>
+                </div>
+              </div>
+              <div className="relative mt-1 w-full max-w-[480px] border-t border-white/10 pt-3">
+                <p className="mb-2 text-[9px] font-bold uppercase tracking-[.18em] text-violet-200">Pilih kategori area</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {tickets.map((ticket, index) => <button key={ticket.name} type="button" aria-pressed={selectedTicket?.name === ticket.name} onClick={() => setSelectedTicketName(ticket.name)} className={`flex min-w-0 items-start gap-2 rounded-lg border px-2.5 py-2 text-left transition ${selectedTicket?.name === ticket.name ? "border-violet-200/60 bg-violet-300/15" : "border-white/10 bg-black/20 hover:border-white/25 hover:bg-white/[.06]"}`}>
+                    <span className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-sm ${getTicketZone(ticket.name, index).index === 0 ? "bg-amber-300" : getTicketZone(ticket.name, index).index === 1 ? "bg-fuchsia-300" : getTicketZone(ticket.name, index).index === 2 ? "bg-violet-300" : "bg-sky-300"}`} />
+                    <span className="min-w-0"><span className="block truncate text-[10px] font-bold text-white">{ticket.name}</span><span className="mt-0.5 block line-clamp-2 text-[9px] leading-4 text-white/55">{getTicketZone(ticket.name, index).label}</span></span>
+                  </button>)}
+                </div>
+              </div>
+              <p className="relative mt-1 text-center text-[10px] font-bold uppercase tracking-[.2em] text-white/65">Model ilustrasi · Tampilan dapat berbeda tiap event</p>
+            </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#6264b5]">
-                Testimoni Pengguna
-              </p>
-              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#071653] sm:text-4xl">
-                Cerita dari Garis Depan Panggung
-              </h2>
+              <div className="mb-4 flex items-center justify-between gap-4"><div><h3 className="text-xl font-extrabold">Detail tiket pilihan</h3><p className="mt-1 text-xs text-[#777087]">Pilih kategori area di bawah panggung untuk melihat isi tiket.</p></div><span className="max-w-[40%] text-right text-[10px] font-semibold uppercase tracking-widest text-[#777087]">{event?.title || "Event pilihan"}</span></div>
+              {selectedTicket ? <article className="rounded-2xl border border-violet-300 bg-white p-5 shadow-[0_18px_45px_-34px_rgba(98,57,150,.8)] sm:p-6">
+                <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-violet-700">Kategori terpilih</p><h4 className="mt-1 text-2xl font-black text-[#171329]">{selectedTicket.name}</h4><p className="mt-2 text-2xl font-black text-violet-800">{formatCurrency(selectedTicket.price)}</p></div><Link href={eventHref} className="inline-flex items-center gap-2 rounded-full bg-violet-700 px-4 py-2.5 text-[10px] font-extrabold text-white transition hover:bg-violet-600">Pilih tiket <ArrowRight className="h-3.5 w-3.5"/></Link></div>
+                <div className="mt-5 border-t border-[#eee8f4] pt-4"><p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#777087]">Lokasi area</p><p className="mb-4 text-xs font-semibold text-violet-800">{selectedZone.label}</p><p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#777087]">Yang termasuk</p>{selectedTicket.perks?.length ? <ul className="space-y-2.5">{selectedTicket.perks.map((perk) => <li key={perk} className="flex items-start gap-2.5 text-xs leading-5 text-[#656078]"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700"/>{perk}</li>)}</ul> : <p className="text-xs text-[#656078]">Detail fasilitas kategori ini tersedia di halaman event.</p>}</div>
+              </article> : null}
+              <p className="mt-4 text-[10px] leading-5 text-[#777087]">Harga dan ketersediaan tiket mengikuti informasi event.</p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#5c6482]">
-              <span className="font-mono text-xl font-black text-[#6264b5]">4.9/5</span>
-              <span>dari 240.000+ ulasan terverifikasi</span>
-            </div>
-          </Reveal>
+          </div>
+        </div>
+      </section>
 
-          <Stagger className="grid gap-6 md:grid-cols-3" step={80}>
-            {TESTIMONIALS.map((item) => (
-              <div
-                key={item.name}
-                className="group relative flex flex-col justify-between rounded-3xl border border-[#c8b7db]/50 bg-white p-6 shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-[#6264b5] hover:shadow-[0_20px_50px_-15px_rgba(7,22,83,0.12)]"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-1 text-[#6264b5]">
-                      {Array.from({ length: item.rating }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-[#6264b5]" />
-                      ))}
-                    </div>
-                    <span className="rounded-full border border-[#c8b7db] bg-[#c8b7db]/20 px-2.5 py-0.5 text-[9px] font-bold text-[#071653]">
-                      {item.tag}
-                    </span>
-                  </div>
-
-                  <p className="text-sm leading-relaxed text-[#4b5578]">
-                    &ldquo;{item.text}&rdquo;
-                  </p>
-                </div>
-
-                <div className="mt-6 flex items-center gap-3 border-t border-[#c8b7db]/30 pt-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#6264b5] to-[#7577cf] font-bold text-[#fffdf2]">
-                    {item.avatar}
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-bold text-[#071653]">{item.name}</h5>
-                    <p className="text-[11px] text-[#5c6482]">{item.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </Stagger>
-        </section>
-
-        {/* ==================== RADAR DROP / VIP NEWSLETTER ==================== */}
-        <section className="relative mx-auto w-full max-w-7xl px-5 pb-28 sm:px-8">
-          <Reveal>
-            <div className="relative overflow-hidden rounded-3xl border border-[#c8b7db]/50 bg-white p-8 sm:p-14 shadow-sm">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-[250px] w-[250px] rounded-full bg-[#6264b5]/10 blur-[80px]" />
-              <div className="pointer-events-none absolute -left-10 -bottom-10 h-[250px] w-[250px] rounded-full bg-[#c8b7db]/20 blur-[80px]" />
-
-              <div className="relative grid items-center gap-8 lg:grid-cols-12">
-                <div className="space-y-3 lg:col-span-7">
-                  <div className="inline-flex items-center gap-2 text-xs font-bold text-[#6264b5]">
-                    <Radio className="h-4 w-4 animate-pulse" />
-                    <span>RADAR PRESALE & DROP ALERT</span>
-                  </div>
-                  <h2 className="text-2xl font-extrabold tracking-tight text-[#071653] sm:text-3xl">
-                    Jangan Sampai Ketinggalan Tiket Konser
-                  </h2>
-                  <p className="max-w-md text-sm leading-relaxed text-[#4b5578]">
-                    Dapatkan peringatan dini presale tiket, kode promo promotor eksklusif,
-                    dan paket akomodasi konser langsung ke email Anda.
-                  </p>
-                </div>
-
-                <div className="lg:col-span-5">
-                  <form
-                    className="flex flex-col gap-3 sm:flex-row"
-                    onSubmit={(e) => e.preventDefault()}
-                  >
-                    <div className="flex flex-1 items-center gap-2.5 rounded-2xl border border-[#c8b7db]/50 bg-[#f7f4fa] px-4 py-3.5 focus-within:border-[#6264b5] focus-within:ring-2 focus-within:ring-[#6264b5]/20">
-                      <Search className="h-4 w-4 shrink-0 text-[#5c6482]" />
-                      <input
-                        placeholder="Alamat email Anda..."
-                        type="email"
-                        className="w-full bg-transparent text-sm text-[#071653] outline-none placeholder:text-[#5c6482]/50"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#6264b5] to-[#7577cf] px-7 py-3.5 text-sm font-bold text-[#fffdf2] shadow-lg shadow-[#6264b5]/25 transition-all hover:brightness-110 hover:-translate-y-0.5"
-                    >
-                      Langganan
-                    </button>
-                  </form>
-                  <p className="mt-3 text-[11px] text-[#5c6482]">
-                    Bebas spam. Berhenti berlangganan kapan saja dengan 1 klik.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </section>
-      </main>
-
-      <Footer />
-      <MobileNav />
-    </div>
-  );
+      <section aria-labelledby="audience-reviews-title" className="bg-[#100d20] px-5 py-16 text-white sm:px-10 sm:py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
+            <div><p className="text-xs font-bold uppercase tracking-[.24em] text-violet-300">Cerita penonton</p><h2 id="audience-reviews-title" className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Ulasan dari komunitas<span className="text-violet-300">.</span></h2><p className="mt-4 max-w-xl text-sm leading-7 text-white/55">Pengalaman penonton membantu orang lain menemukan acara yang tepat untuk mereka.</p></div>
+            <span className="rounded-full border border-violet-300/20 bg-violet-300/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-200">Contoh ulasan</span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {sampleReviews.map((review, index) => <article key={review.category} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.04] p-5 transition duration-300 hover:-translate-y-1 hover:border-violet-300/35 hover:bg-white/[.07] sm:p-6">
+              <div aria-hidden className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-violet-400/10 blur-2xl transition group-hover:bg-violet-400/20" />
+              <div className="relative flex items-center justify-between gap-3"><div className="flex gap-1" aria-label="Rating contoh 5 dari 5">{Array.from({ length: 5 }, (_, star) => <Star key={star} className="h-3.5 w-3.5 fill-amber-300 text-amber-300" />)}</div><span className="font-mono text-[10px] text-white/35">0{index + 1}</span></div>
+              <p className="relative mt-5 min-h-20 text-sm leading-6 text-white/75">&ldquo;{review.quote}&rdquo;</p>
+              <div className="relative mt-5 flex items-center gap-3 border-t border-white/10 pt-4"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-300 to-fuchsia-400 text-xs font-black text-[#171129]">{review.initials}</span><div><p className="text-xs font-bold text-white">Penonton Tixora</p><p className="mt-0.5 text-[10px] text-white/45">{review.category}</p></div></div>
+            </article>)}
+          </div>
+        </div>
+      </section>
+    </main>
+    <Footer />
+    <MobileNav />
+  </div>;
 }

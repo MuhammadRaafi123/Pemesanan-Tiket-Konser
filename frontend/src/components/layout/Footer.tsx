@@ -159,25 +159,6 @@ export function Footer() {
                 ))}
               </div>
             </div>
-
-            {/* Mini CTA */}
-            <div className="relative overflow-hidden rounded-2xl border border-[#c8b7db]/20 bg-[#0b1b5e]/70 p-5 shadow-[inset_0_1px_0_rgba(200,183,219,0.15)]">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#fffdf2]">
-                <Ticket className="h-4 w-4 text-[#6264b5]" />
-                Catatan untuk jalan pulang.
-              </div>
-              <p className="mt-2 text-xs leading-6 text-[#c8b7db]/90">
-                {user
-                  ? "Lihat rekomendasi dan kelola semua pengalaman konsermu."
-                  : "Dapatkan kurasi event dan cerita live terbaru langsung di inbox."}
-              </p>
-              <Link
-                href={user ? "/home" : "/register"}
-                className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#fffdf2] transition hover:gap-2.5 hover:text-[#c8b7db]"
-              >
-                {user ? "Buka dashboard" : "Gabung sekarang"} <ArrowUpRight className="h-3.5 w-3.5 text-[#6264b5]" />
-              </Link>
-            </div>
           </div>
         </div>
 

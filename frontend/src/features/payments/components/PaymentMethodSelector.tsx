@@ -38,18 +38,18 @@ export function PaymentMethodSelector({ methods, selectedMethod, onSelect }: Pay
         const Icon = group.icon;
         const isOpen = expandedGroups === null ? selectedCategory === group.id : expandedGroups.has(group.id);
         return (
-          <section key={group.id} className="overflow-hidden rounded-2xl border border-[#e8e5ef] bg-white">
+          <section key={group.id} className="overflow-hidden rounded-2xl border border-[#eeeaf6] bg-white">
             <button type="button" aria-expanded={isOpen} onClick={() => toggleGroup(group.id)} className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-[#faf8ff]">
-              <span className="flex items-center gap-2"><Icon className="h-4 w-4 text-[#6264b5]" /><span className="text-xs font-bold text-[#3156ad]">{group.label}</span><span className="rounded-full bg-[#f1edff] px-2 py-0.5 text-[10px] font-semibold text-[#6264b5]">{groupMethods.length}</span></span>
-              <ChevronDown className={`h-4 w-4 text-[#5c6482] transition-transform ${isOpen ? "rotate-180" : ""}`} />
+              <span className="flex items-center gap-2"><Icon className="h-4 w-4 text-[#7048e8]" /><span className="text-xs font-bold text-[#5c6482]">{group.label}</span><span className="rounded-full bg-[#f1edff] px-2 py-0.5 text-[10px] font-semibold text-[#7048e8]">{groupMethods.length}</span></span>
+              <ChevronDown className={`h-4 w-4 text-[#817994] transition-transform ${isOpen ? "rotate-180" : ""}`} />
             </button>
             {isOpen && <div className="grid gap-2 border-t border-[#f0edf6] p-3 sm:grid-cols-2">
               {groupMethods.map((method) => {
                 const selected = selectedMethod === method.id;
                 const providerMark = method.name.split(" ")[0].slice(0, 3).toUpperCase();
                 return (
-                  <button key={method.id} type="button" onClick={() => onSelect(method.id)} aria-pressed={selected} className={`flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition ${selected ? "border-[#6264b5] bg-[#e6eefb] ring-2 ring-[#6264b5]/10" : "border-[#e8e5ef] bg-white hover:border-[#c8b7db]"}`}>
-                    <span className="flex items-center gap-3"><span aria-hidden="true" className="flex h-9 min-w-9 items-center justify-center rounded-lg bg-[#eeebf4] px-1 text-[10px] font-extrabold text-[#6264b5]">{group.id === "qris" ? <Icon className="h-4 w-4" /> : providerMark}</span><span className="text-xs font-semibold text-[#071653]">{method.name}</span></span>
+                  <button key={method.id} type="button" onClick={() => onSelect(method.id)} aria-pressed={selected} className={`flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition ${selected ? "border-[#7048e8] bg-[#f5f1ff] ring-2 ring-[#7048e8]/10" : "border-[#e8e5ef] bg-white hover:border-[#c8b7db]"}`}>
+                    <span className="flex items-center gap-3"><span aria-hidden="true" className="flex h-9 min-w-9 items-center justify-center rounded-lg bg-[#f0ebff] px-1 text-[10px] font-extrabold text-[#7048e8]">{group.id === "qris" ? <Icon className="h-4 w-4" /> : providerMark}</span><span className="text-xs font-semibold text-[#211a39]">{method.name}</span></span>
                     {selected && <Check className="h-4 w-4 text-[#6264b5]" />}
                   </button>
                 );

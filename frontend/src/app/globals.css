@@ -978,26 +978,26 @@ body { background: #fffdf2; color: #071653; }
   }
 }
 
-/* Checkout/payment use the same warm-white, violet, and blue palette as Home. */
+/* Checkout/payment use a light lavender surface and preserve white cards. */
 .checkout-page,
 .payment-page {
-  --background: #fffdf2;
-  --foreground: #071653;
+  --background: #f5f2ff;
+  --foreground: #211a39;
   --card: #ffffff;
-  --card-foreground: #071653;
+  --card-foreground: #211a39;
   --popover: #ffffff;
-  --popover-foreground: #071653;
-  --primary: #6264b5;
+  --popover-foreground: #211a39;
+  --primary: #7048e8;
   --primary-foreground: #ffffff;
-  --secondary: #eeebf4;
-  --secondary-foreground: #071653;
-  --muted: #f7f4fa;
-  --muted-foreground: #5c6482;
-  --accent: #e6eefb;
-  --accent-foreground: #3156ad;
-  --border: #e8e5ef;
-  --input: #e8e5ef;
-  --ring: #6264b5;
+  --secondary: #f0ebff;
+  --secondary-foreground: #51486c;
+  --muted: #f8f6ff;
+  --muted-foreground: #817994;
+  --accent: #f0ebff;
+  --accent-foreground: #51486c;
+  --border: #e4def5;
+  --input: #ded5f3;
+  --ring: #9673ff;
   color-scheme: light;
 }
 

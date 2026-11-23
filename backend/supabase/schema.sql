@@ -199,6 +199,12 @@ CREATE TABLE payments (
 
     payment_method VARCHAR(100) NOT NULL,
 
+    payer_name VARCHAR(120),
+
+    transaction_reference VARCHAR(120),
+
+    paid_amount NUMERIC(12, 2),
+
     proof_image TEXT,
 
     status VARCHAR(20) NOT NULL DEFAULT 'pending'

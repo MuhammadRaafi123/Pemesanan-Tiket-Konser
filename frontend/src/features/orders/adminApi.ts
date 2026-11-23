@@ -14,6 +14,9 @@ export interface AdminOrder extends Order {
     id: number | string;
     status: string;
     payment_method: string;
+    payer_name?: string;
+    transaction_reference?: string;
+    paid_amount?: number;
     proof_image?: string;
     verified_at?: string;
   }[];

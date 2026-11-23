@@ -192,6 +192,9 @@ export const createPayment = async (
     const {
       order_id,
       payment_method,
+      payer_name,
+      transaction_reference,
+      paid_amount,
     } = req.validated.body;
 
 
@@ -327,6 +330,12 @@ export const createPayment = async (
         order_id,
 
         payment_method,
+
+        payer_name,
+
+        transaction_reference,
+
+        paid_amount,
 
         proof_image:
           proofImage,

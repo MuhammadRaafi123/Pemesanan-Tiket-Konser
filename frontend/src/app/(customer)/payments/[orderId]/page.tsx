@@ -11,6 +11,8 @@ import {
   Clock3,
   Loader2,
   MapPin,
+  PencilLine,
+  QrCode,
   ShieldCheck,
   Ticket,
 } from "lucide-react";
@@ -20,6 +22,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { fetchOrderById } from "@/features/orders/api";
 import { fetchLocalPaymentQr, LOCAL_PAYMENT_METHODS } from "@/features/payments/api";
 import { PaymentMethodSelector } from "@/features/payments/components/PaymentMethodSelector";
+import { ManualPaymentForm } from "@/features/payments/components/ManualPaymentForm";
 import { isOrderExpired, type Order } from "@/features/orders/types";
 import { formatCurrency } from "@/lib/format";
 import { getApiErrorMessage } from "@/lib/apiError";
@@ -29,6 +32,7 @@ export default function PaymentPage() {
   const params = useParams();
   const orderId = String(params.orderId ?? "");
   const { error } = useToast();
+  const [paymentType, setPaymentType] = useState<"qr" | "manual">("qr");
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(Boolean(params.orderId));
   const [selectedMethod, setSelectedMethod] = useState("BCA");
@@ -159,7 +163,15 @@ export default function PaymentPage() {
           {canPay ? (
             <aside className="space-y-5 rounded-[30px] border border-white bg-white/90 p-6 shadow-[0_24px_80px_-48px_rgba(67,45,126,.3)] sm:p-7">
               <div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#7048e8]">Pembayaran lokal</p><h2 className="mt-1 text-xl font-bold">{simulationReady ? "Konfirmasi simulasi" : "Pilih metode demo"}</h2></div>
-              {!simulationReady ? (
+              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#f5f2ff] p-1.5">
+                <button type="button" onClick={() => { setPaymentType("qr"); setSimulationReady(false); }} aria-pressed={paymentType === "qr"} className={`flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-xs font-bold transition ${paymentType === "qr" ? "bg-white text-[#7048e8] shadow-sm" : "text-[#817994] hover:text-[#51486c]"}`}><QrCode className="h-4 w-4" /> QR demo</button>
+                <button type="button" onClick={() => { setPaymentType("manual"); setSimulationReady(false); }} aria-pressed={paymentType === "manual"} className={`flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-xs font-bold transition ${paymentType === "manual" ? "bg-white text-[#7048e8] shadow-sm" : "text-[#817994] hover:text-[#51486c]"}`}><PencilLine className="h-4 w-4" /> Input manual</button>
+              </div>
+              {paymentType === "manual" ? (
+                <ManualPaymentForm orderId={order.id} amount={Number(order.total)} onSubmitted={() => {
+                  fetchOrderById(order.id).then(setOrder).catch(() => undefined);
+                }} />
+              ) : !simulationReady ? (
                 <>
                   <PaymentMethodSelector methods={LOCAL_PAYMENT_METHODS} selectedMethod={selectedMethod} onSelect={(method) => { setSelectedMethod(method); setSimulationReady(false); }} />
                   <div className="rounded-xl border border-[#eeeaf6] bg-[#f8f6ff] p-4 text-xs leading-5 text-[#51486c]"><strong>Mode simulasi:</strong> tidak ada uang sungguhan yang ditagih. QR yang dibuat adalah QR demo dan tidak bisa dibayar melalui bank atau e-wallet.</div>

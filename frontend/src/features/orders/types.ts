@@ -30,6 +30,9 @@ export interface Order {
   events?: Event;
   payment?: {
     payment_method: string;
+    payer_name?: string;
+    transaction_reference?: string;
+    paid_amount?: number;
     proof_image?: string;
     status: string;
     rejection_reason?: string;

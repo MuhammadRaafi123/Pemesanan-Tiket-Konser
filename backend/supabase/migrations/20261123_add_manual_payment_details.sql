@@ -1,0 +1,4 @@
+ALTER TABLE payments
+    ADD COLUMN IF NOT EXISTS payer_name VARCHAR(120),
+    ADD COLUMN IF NOT EXISTS transaction_reference VARCHAR(120),
+    ADD COLUMN IF NOT EXISTS paid_amount NUMERIC(12, 2);

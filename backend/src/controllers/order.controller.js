@@ -164,6 +164,9 @@ export const getMyOrders = async (
         payments (
           id,
           payment_method,
+          payer_name,
+          transaction_reference,
+          paid_amount,
           proof_image,
           status,
           verified_at
@@ -265,6 +268,9 @@ export const getOrderById = async (
         payments (
           id,
           payment_method,
+          payer_name,
+          transaction_reference,
+          paid_amount,
           proof_image,
           status,
           verified_at
@@ -371,6 +377,9 @@ export const getAllOrders = async (
         payments (
           id,
           payment_method,
+          payer_name,
+          transaction_reference,
+          paid_amount,
           proof_image,
           status,
           verified_at

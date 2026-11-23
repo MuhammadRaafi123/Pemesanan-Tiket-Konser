@@ -23,6 +23,9 @@ export const createPaymentSchema = z.object({
       .string()
       .min(2, "Metode pembayaran wajib diisi")
       .max(100, "Metode pembayaran maksimal 100 karakter"),
+    payer_name: z.string().trim().min(2, "Nama pengirim wajib diisi").max(120),
+    transaction_reference: z.string().trim().min(3, "Nomor transaksi wajib diisi").max(120),
+    paid_amount: z.coerce.number().positive("Nominal pembayaran harus lebih dari 0"),
   }),
 });
 

@@ -333,6 +333,9 @@ export default function AdminOrdersPage() {
                             <p className="text-xs capitalize text-[#d8d1c1]">
                               {paymentLabel(payment?.payment_method)}
                             </p>
+                            {payment?.payer_name && <p className="mt-1 text-[10px] text-[#aaa69b]">Pengirim: {payment.payer_name}</p>}
+                            {payment?.transaction_reference && <p className="mt-1 max-w-52 truncate text-[10px] text-[#aaa69b]" title={payment.transaction_reference}>Ref: {payment.transaction_reference}</p>}
+                            {payment?.paid_amount != null && <p className="mt-1 text-[10px] text-[#aaa69b]">Dibayar: {formatCurrency(Number(payment.paid_amount))}</p>}
                             {payment?.proof_image && (
                               <a
                                 href={resolveMediaUrl(payment.proof_image)}
@@ -394,6 +397,9 @@ export default function AdminOrdersPage() {
                             Pembayaran
                           </p>
                           <p className="mt-1 capitalize">{paymentLabel(payment?.payment_method)}</p>
+                          {payment?.payer_name && <p className="mt-1 text-[11px] text-[#aaa69b]">Pengirim: {payment.payer_name}</p>}
+                          {payment?.transaction_reference && <p className="mt-1 break-all text-[11px] text-[#aaa69b]">Ref: {payment.transaction_reference}</p>}
+                          {payment?.paid_amount != null && <p className="mt-1 text-[11px] text-[#aaa69b]">Dibayar: {formatCurrency(Number(payment.paid_amount))}</p>}
                           {payment?.proof_image && (
                             <a
                               href={resolveMediaUrl(payment.proof_image)}

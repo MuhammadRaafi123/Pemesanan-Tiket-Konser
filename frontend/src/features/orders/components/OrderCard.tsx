@@ -10,11 +10,12 @@ import {
   Ticket,
   XCircle,
 } from "lucide-react";
-import type { Order } from "../types";
+import { isOrderExpired, type Order } from "../types";
 import { formatCurrency, formatEventDate } from "@/lib/format";
 
 interface OrderCardProps {
   order: Order;
+  now: number;
 }
 
 const STATUS_META: Record<Order["status"], { label: string; tone: string; icon: typeof CheckCircle2 }> = {
@@ -40,8 +41,13 @@ const STATUS_META: Record<Order["status"], { label: string; tone: string; icon: 
   },
 };
 
-export function OrderCard({ order }: OrderCardProps) {
-  const meta = STATUS_META[order.status] ?? STATUS_META.cancelled;
+export function OrderCard({ order, now }: OrderCardProps) {
+  const isExpired = isOrderExpired(order, now) || (order.status === "cancelled" && Boolean(
+    order.expires_at && new Date(order.expires_at).getTime() <= now,
+  ));
+  const meta = isExpired
+    ? { ...STATUS_META.cancelled, label: "Pesanan hangus" }
+    : STATUS_META[order.status] ?? STATUS_META.cancelled;
   const StatusIcon = meta.icon;
 
   return (
@@ -97,7 +103,7 @@ export function OrderCard({ order }: OrderCardProps) {
             <Link href="/tickets" className="inline-flex items-center gap-2 rounded-xl bg-[#6264b5] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#51539f]">
               <Ticket className="h-4 w-4" /> Buka e-ticket
             </Link>
-          ) : order.status === "pending" ? (
+          ) : order.status === "pending" && !isExpired ? (
             <Link href={`/payments/${order.id}`} className="inline-flex items-center gap-2 rounded-xl bg-[#071653] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#172b70]">
               <CreditCard className="h-4 w-4 text-[#c8b7db]" /> Bayar sekarang
             </Link>

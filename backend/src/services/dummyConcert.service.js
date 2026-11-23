@@ -115,17 +115,34 @@ const getMinPrice = (event) => {
   );
 };
 
+// Stok demo sengaja dibatasi agar setiap event hanya punya 10 tiket selama
+// tahap uji coba. Distribusi tetap mempertahankan kategori tiket yang tersedia.
+const DEMO_TICKETS_PER_EVENT = 10;
+
+const getTickets = (event) => {
+  const categories = event.ticket_categories || [];
+
+  if (categories.length === 0) return [];
+
+  const baseQuota = Math.floor(DEMO_TICKETS_PER_EVENT / categories.length);
+  const extraQuota = DEMO_TICKETS_PER_EVENT % categories.length;
+
+  return categories.map((category, index) => {
+    const quota = baseQuota + (index < extraQuota ? 1 : 0);
+    return formatPrice({
+      ...category,
+      quota,
+      remaining: quota,
+      reserved: 0,
+    });
+  });
+};
+
 const getTotalQuota = (event) =>
-  (event.ticket_categories || []).reduce(
-    (total, category) => total + category.quota,
-    0
-  );
+  getTickets(event).reduce((total, category) => total + category.quota, 0);
 
 const getTotalRemaining = (event) =>
-  (event.ticket_categories || []).reduce(
-    (total, category) => total + category.remaining,
-    0
-  );
+  getTickets(event).reduce((total, category) => total + category.remaining, 0);
 
 const getArtistSummaries = (event) =>
   (event.artist_slugs || [])
@@ -177,12 +194,6 @@ const getSetlist = (event) =>
       };
     })
     .filter(Boolean);
-
-const getTickets = (event) =>
-  (event.ticket_categories || []).map(
-    formatPrice
-  );
-
 
 // =========================================
 // PUBLIC SHAPES

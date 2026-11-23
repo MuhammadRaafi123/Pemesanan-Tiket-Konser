@@ -6,7 +6,9 @@ export interface OrderItem {
   ticket_category_id: number | string;
   qty: number;
   subtotal: number;
-  ticket_categories?: TicketCategory;
+  ticket_categories?: TicketCategory & {
+    events?: Pick<Event, "id" | "title" | "event_date" | "location">;
+  };
 }
 
 export interface Order {
@@ -32,4 +34,10 @@ export interface Order {
     status: string;
     rejection_reason?: string;
   };
+}
+
+export function isOrderExpired(order: Order, now = Date.now()): boolean {
+  if (order.status !== "pending" || order.payment || !order.expires_at) return false;
+  const expiresAt = new Date(order.expires_at).getTime();
+  return Number.isFinite(expiresAt) && expiresAt <= now;
 }

@@ -152,7 +152,7 @@ export default function CustomerEventsPage() {
             )}
           </div>
           {loading ? (
-            <div className="rounded-2xl border border-[#e8e5ef] bg-[#fffdf2] py-16"><Loading message="Memuat jadwal konser..." /></div>
+            <Loading message="Memuat jadwal konser..." />
           ) : loadError ? (
             <div className="rounded-2xl border border-rose-200 bg-[#fffdf2] p-8 text-center">
               <p className="text-sm font-semibold text-rose-700">{loadError}</p>

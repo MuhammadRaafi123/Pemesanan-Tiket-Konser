@@ -4,6 +4,9 @@ import {
   createPayment,
   getPaymentByOrderId,
   verifyPayment,
+  getLocalPaymentPreview,
+  getLocalPaymentQr,
+  simulateLocalPayment,
 } from "../controllers/payment.controller.js";
 
 import {
@@ -25,9 +28,14 @@ import {
 import {
   createPaymentSchema,
   verifyPaymentSchema,
+  localPaymentSimulationSchema,
 } from "../validators/payment.validator.js";
 
 const router = express.Router();
+
+router.get("/local-simulation/preview", getLocalPaymentPreview);
+router.get("/local-simulation/:orderId/qr", authenticate, getLocalPaymentQr);
+router.post("/local-simulation/confirm", validate(localPaymentSimulationSchema), simulateLocalPayment);
 
 
 // CREATE PAYMENT
@@ -46,7 +54,6 @@ router.get(
   authenticate,
   getPaymentByOrderId
 );
-
 
 // VERIFY PAYMENT - ADMIN
 router.patch(

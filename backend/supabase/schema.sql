@@ -313,6 +313,11 @@ BEGIN
         WHERE status = 'pending'
           AND expires_at IS NOT NULL
           AND expires_at <= NOW()
+          AND NOT EXISTS (
+              SELECT 1 FROM payments
+              WHERE payments.order_id = orders.id
+                AND payments.proof_image IS NOT NULL
+        )
         FOR UPDATE
     LOOP
         FOR v_item IN SELECT ticket_category_id, qty FROM order_items WHERE order_id = v_order.id LOOP

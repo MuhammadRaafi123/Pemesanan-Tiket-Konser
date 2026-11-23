@@ -1,5 +1,91 @@
 import supabase from "../config/supabase.js";
 import { generateOrderCode } from "../utils/generateOrderCode.js";
+import { DUMMY_ARTISTS } from "../data/dummyConcertData.js";
+import { DUMMY_EVENTS } from "../data/dummyConcertEvents.js";
+import { findLocation } from "./dummyConcert.service.js";
+
+const DEMO_EVENT_ID_OFFSET = 900000;
+const DEMO_ARTIST_ID_OFFSET = 2000000;
+const DEMO_TICKET_CATEGORY_ID_OFFSET = 1000000;
+
+const ensureDemoCatalog = async (ticketCategoryIds) => {
+  const requestedIds = new Set(ticketCategoryIds.map(Number));
+  // Jangan lakukan upsert katalog dummy untuk setiap checkout. Hanya siapkan
+  // kategori demo yang benar-benar belum ada di database.
+  const { data: existingCategories, error: lookupError } = await supabase
+    .from("ticket_categories")
+    .select("id")
+    .in("id", [...requestedIds]);
+  if (lookupError) throw lookupError;
+
+  const existingIds = new Set((existingCategories || []).map((category) => Number(category.id)));
+  const demoEvents = DUMMY_EVENTS.filter((event) =>
+    event.ticket_categories.some((category) =>
+      requestedIds.has(category.id + DEMO_TICKET_CATEGORY_ID_OFFSET) &&
+      !existingIds.has(category.id + DEMO_TICKET_CATEGORY_ID_OFFSET)
+    )
+  );
+
+  if (demoEvents.length === 0) return;
+
+  const artistSlugs = new Set(demoEvents.flatMap((event) => event.artist_slugs));
+  const demoArtists = DUMMY_ARTISTS.filter((artist) => artistSlugs.has(artist.slug));
+  const { error: artistError } = await supabase
+    .from("artists")
+    .upsert(
+      demoArtists.map((artist) => ({
+        id: artist.id + DEMO_ARTIST_ID_OFFSET,
+        name: artist.name,
+        photo: artist.photo,
+        description: artist.description,
+      })),
+      { onConflict: "id", ignoreDuplicates: true }
+    );
+  if (artistError) throw artistError;
+
+  const now = Date.now();
+  const { error: eventError } = await supabase
+    .from("events")
+    .upsert(
+      demoEvents.map((event) => {
+        const artist = demoArtists.find((item) => event.artist_slugs.includes(item.slug));
+        const location = findLocation(event.location_slug);
+        return {
+          id: event.id + DEMO_EVENT_ID_OFFSET,
+          artist_id: artist.id + DEMO_ARTIST_ID_OFFSET,
+          title: event.title,
+          description: event.description,
+          location: location ? `${location.city}, ${location.province}` : event.location_slug,
+          event_date: event.event_date,
+          poster: event.poster,
+          status: new Date(event.event_date).getTime() > now && event.status === "open" ? "open" : "closed",
+        };
+      }),
+      { onConflict: "id", ignoreDuplicates: true }
+    );
+  if (eventError) throw eventError;
+
+  const categories = demoEvents.flatMap((event) => {
+    const baseQuota = Math.floor(10 / event.ticket_categories.length);
+    const extraQuota = 10 % event.ticket_categories.length;
+    return event.ticket_categories.map((category, index) => {
+      const quota = baseQuota + (index < extraQuota ? 1 : 0);
+      return {
+        id: category.id + DEMO_TICKET_CATEGORY_ID_OFFSET,
+        event_id: event.id + DEMO_EVENT_ID_OFFSET,
+        category_name: category.name,
+        price: category.price,
+        quota,
+        remaining: quota,
+        reserved: 0,
+      };
+    });
+  });
+  const { error: categoryError } = await supabase
+    .from("ticket_categories")
+    .upsert(categories, { onConflict: "id", ignoreDuplicates: true });
+  if (categoryError) throw categoryError;
+};
 
 
 // =====================================================
@@ -34,6 +120,8 @@ export const createOrderService = async (
 
     throw error;
   }
+
+  await ensureDemoCatalog(ticketCategoryIds);
 
 
   // =========================================

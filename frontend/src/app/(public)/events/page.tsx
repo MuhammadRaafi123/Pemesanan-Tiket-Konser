@@ -357,10 +357,7 @@ export default function EventsPage() {
 
           {/* ==================== EVENTS GRID ==================== */}
           {loading ? (
-            <div className="flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-[#e8e5ef] bg-white p-10 text-center">
-              <div className="h-9 w-9 animate-spin rounded-full border-2 border-[#6264b5] border-t-transparent" />
-              <p className="mt-4 text-sm font-medium text-[#5c6482]">Memuat katalog konser pilihan...</p>
-            </div>
+            <Loading message="Memuat katalog konser pilihan..." />
           ) : (
             <EventGrid
               events={filteredEvents}

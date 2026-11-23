@@ -19,7 +19,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Loading } from "@/components/shared/Loading";
 import { fetchMyOrders } from "@/features/orders/api";
-import type { Order } from "@/features/orders/types";
+import { isOrderExpired, type Order } from "@/features/orders/types";
 import { getApiErrorMessage } from "@/lib/apiError";
 
 const FILTERS = [
@@ -27,7 +27,7 @@ const FILTERS = [
   { id: "pending", label: "Menunggu", icon: Clock3 },
   { id: "paid", label: "Lunas", icon: CheckCircle2 },
   { id: "rejected", label: "Ditolak", icon: XCircle },
-  { id: "cancelled", label: "Dibatalkan", icon: XCircle },
+  { id: "cancelled", label: "Pesanan hangus", icon: XCircle },
 ] as const;
 
 export default function OrdersPage() {
@@ -36,10 +36,17 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [now, setNow] = useState(0);
+
+  useEffect(() => {
+    const initialClock = window.setTimeout(() => setNow(Date.now()), 0);
+    const clock = window.setInterval(() => setNow(Date.now()), 5000);
+    return () => { window.clearTimeout(initialClock); window.clearInterval(clock); };
+  }, []);
 
   useEffect(() => {
     let active = true;
-    fetchMyOrders()
+    const loadOrders = () => fetchMyOrders()
       .then((data) => {
         if (active) setOrders(data);
       })
@@ -49,17 +56,23 @@ export default function OrdersPage() {
       .finally(() => {
         if (active) setLoading(false);
       });
+    void loadOrders();
+    const refresh = window.setInterval(() => { void loadOrders(); }, 30_000);
     return () => {
       active = false;
+      window.clearInterval(refresh);
     };
   }, [reloadKey]);
 
   const filteredOrders = useMemo(
-    () => orders.filter((order) => selectedStatus === "all" || order.status === selectedStatus),
-    [orders, selectedStatus],
+    () => orders.filter((order) => {
+      const status = isOrderExpired(order, now) ? "cancelled" : order.status;
+      return selectedStatus === "all" || status === selectedStatus;
+    }),
+    [orders, selectedStatus, now],
   );
   const paidCount = orders.filter((order) => order.status === "paid").length;
-  const pendingCount = orders.filter((order) => order.status === "pending").length;
+  const pendingCount = orders.filter((order) => order.status === "pending" && !isOrderExpired(order, now)).length;
   const totalSpent = orders
     .filter((order) => order.status === "paid")
     .reduce((total, order) => total + order.total, 0);
@@ -111,7 +124,9 @@ export default function OrdersPage() {
           </div>
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
             {FILTERS.map(({ id, label, icon: Icon }) => {
-              const count = id === "all" ? orders.length : orders.filter((order) => order.status === id).length;
+              const count = id === "all" ? orders.length : orders.filter((order) =>
+                (isOrderExpired(order, now) ? "cancelled" : order.status) === id,
+              ).length;
               return (
                 <button
                   key={id}
@@ -147,7 +162,7 @@ export default function OrdersPage() {
             </div>
           ) : filteredOrders.length ? (
             <div className="space-y-4">
-              {filteredOrders.map((order) => <OrderCard key={order.id} order={order} />)}
+              {filteredOrders.map((order) => <OrderCard key={order.id} order={order} now={now} />)}
             </div>
           ) : (
             <EmptyState

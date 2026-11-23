@@ -54,19 +54,23 @@ const attachLiveInventory = async (events) => {
     const source = sources[index];
     if (!source) return item;
 
-    const ticketCategories = source.ticket_categories.map((category) => {
+    const ticketCategories = source.ticket_categories.map((category, index) => {
       const id = category.id + DEMO_TICKET_CATEGORY_ID_OFFSET;
       const live = stockById.get(String(id));
+      const fallbackQuota = Math.floor(10 / source.ticket_categories.length) +
+        (index < 10 % source.ticket_categories.length ? 1 : 0);
 
       return {
         ...category,
         id,
-        quota: live?.quota ?? 0,
-        remaining: live?.remaining ?? 0,
+        // Jika kategori demo belum ada di database, katalog tetap menampilkan
+        // stok dummy. Kategori yang ada memakai stok live untuk mencegah oversell.
+        quota: live?.quota ?? fallbackQuota,
+        remaining: live?.remaining ?? fallbackQuota,
         reserved: live?.reserved ?? 0,
         available: live
           ? Math.max(live.remaining - live.reserved, 0)
-          : 0,
+          : fallbackQuota,
         price: live ? Number(live.price) : category.price,
       };
     });

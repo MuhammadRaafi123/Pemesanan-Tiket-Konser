@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+export const localPaymentSimulationSchema = z.object({
+  body: z.object({
+    token: z.string().min(20, "Token QR tidak valid").max(2048),
+    payment_method: z.enum([
+      "BCA", "BRI", "BNI", "MANDIRI", "CIMB", "PERMATA",
+      "BCA_VA", "BRI_VA", "BNI_VA", "MANDIRI_VA", "PERMATA_VA",
+      "GOPAY", "DANA", "OVO", "SHOPEEPAY", "LINKAJA", "QRIS",
+    ]),
+  }),
+});
+
 export const createPaymentSchema = z.object({
   body: z.object({
     order_id: z

@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: [
+    "192.168.*.*",
+    "10.*.*.*",
+    ...Array.from({ length: 16 }, (_, index) => `172.${index + 16}.*.*`),
+  ],
   turbopack: {
     root: process.cwd(),
   },
@@ -27,6 +32,15 @@ const nextConfig: NextConfig = {
         port: "5000",
       },
     ],
+  },
+  async rewrites() {
+    const backendOrigin = (process.env.BACKEND_INTERNAL_URL || "http://127.0.0.1:5000").replace(/\/$/, "");
+    return [
+      {
+        source: "/__tixora_api/:path*",
+        destination: `${backendOrigin}/api/:path*`,
+      },
+    ];
   },
 };
 

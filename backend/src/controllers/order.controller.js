@@ -228,6 +228,8 @@ export const getOrderById = async (
       id,
     } = req.params;
 
+    const isNumericId = /^\d+$/.test(String(id));
+
 
     const {
       data,
@@ -268,10 +270,7 @@ export const getOrderById = async (
           verified_at
         )
       `)
-      .eq(
-        "id",
-        id
-      )
+      .eq(isNumericId ? "id" : "order_code", id)
       .maybeSingle();
 
 

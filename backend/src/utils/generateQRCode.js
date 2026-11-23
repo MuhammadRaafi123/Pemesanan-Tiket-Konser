@@ -3,7 +3,13 @@ import QRCode from "qrcode";
 export const generateQRCode = async (data) => {
   try {
     const qrCode = await QRCode.toDataURL(
-      JSON.stringify(data)
+      typeof data === "string" ? data : JSON.stringify(data),
+      {
+        errorCorrectionLevel: "M",
+        margin: 4,
+        width: 512,
+        type: "image/png",
+      }
     );
 
     return qrCode;

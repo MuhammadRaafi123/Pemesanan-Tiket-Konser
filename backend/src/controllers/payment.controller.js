@@ -1,3 +1,5 @@
+import os from "node:os";
+import jwt from "jsonwebtoken";
 import supabase from "../config/supabase.js";
 
 import {
@@ -8,6 +10,172 @@ import {
 import {
   generateQRCode,
 } from "../utils/generateQRCode.js";
+
+const LOCAL_PAYMENT_METHODS = new Set([
+  "BCA", "BRI", "BNI", "MANDIRI", "CIMB", "PERMATA",
+  "BCA_VA", "BRI_VA", "BNI_VA", "MANDIRI_VA", "PERMATA_VA",
+  "GOPAY", "DANA", "OVO", "SHOPEEPAY", "LINKAJA", "QRIS",
+]);
+
+const getLanAddress = () => {
+  const interfaces = os.networkInterfaces();
+  const addresses = Object.values(interfaces).flatMap((items) => (items || [])
+    .filter((item) => item.family === "IPv4" && !item.internal && !item.address.startsWith("169.254."))
+    .map((item) => item.address));
+  return addresses.find((address) => address.startsWith("192.168.")) ||
+    addresses.find((address) => address.startsWith("10.")) || addresses[0] || null;
+};
+
+const readLocalPaymentToken = (token) => {
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (payload?.purpose !== "local_demo_payment" || !LOCAL_PAYMENT_METHODS.has(payload.payment_method)) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+};
+
+export const getLocalPaymentQr = async (req, res, next) => {
+  try {
+    if (process.env.NODE_ENV === "production") {
+      return errorResponse(res, "QR simulasi hanya tersedia di lingkungan lokal", 404);
+    }
+    const paymentMethod = String(req.query.payment_method || "");
+    if (!LOCAL_PAYMENT_METHODS.has(paymentMethod)) return errorResponse(res, "Metode pembayaran tidak valid", 400);
+
+    const { data: order, error } = await supabase.from("orders")
+      .select("id,user_id,order_code,total,status,expires_at")
+      .eq("id", req.params.orderId).maybeSingle();
+    if (error) throw error;
+    if (!order) return errorResponse(res, "Order tidak ditemukan", 404);
+    if (String(order.user_id) !== String(req.user.id)) return errorResponse(res, "Anda tidak memiliki akses", 403);
+    if (order.status !== "pending" || (order.expires_at && new Date(order.expires_at) <= new Date())) {
+      return errorResponse(res, "Pesanan sudah tidak dapat dibayar", 400);
+    }
+
+    // Referer preserves the actual frontend port (Next may use 3001 when 3000 is busy).
+    const frontendOrigin = req.get("referer") || req.get("origin") || process.env.FRONTEND_URL || "http://localhost:3000";
+    const scanUrl = new URL("/scan-payment", frontendOrigin);
+    if (["localhost", "127.0.0.1"].includes(scanUrl.hostname)) {
+      const lanHost = process.env.QR_PUBLIC_HOST || getLanAddress();
+      if (lanHost) scanUrl.hostname = lanHost;
+    }
+    const remainingSeconds = order.expires_at
+      ? Math.max(1, Math.ceil((new Date(order.expires_at).getTime() - Date.now()) / 1000))
+      : 900;
+    const token = jwt.sign({
+      purpose: "local_demo_payment",
+      order_id: order.id,
+      user_id: order.user_id,
+      payment_method: paymentMethod,
+    }, process.env.JWT_SECRET, { expiresIn: Math.min(900, remainingSeconds) });
+    scanUrl.searchParams.set("token", token);
+    const qrCode = await generateQRCode(scanUrl.toString());
+    return successResponse(res, "QR simulasi dibuat", {
+      qr_code: qrCode,
+      scan_url: scanUrl.toString(),
+      order_code: order.order_code,
+      amount: Number(order.total),
+      expires_at: order.expires_at,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getLocalPaymentPreview = async (req, res, next) => {
+  try {
+    if (process.env.NODE_ENV === "production") return errorResponse(res, "Simulasi lokal tidak tersedia", 404);
+    const token = readLocalPaymentToken(String(req.query.token || ""));
+    if (!token) return errorResponse(res, "QR tidak valid atau sudah kedaluwarsa", 400);
+
+    const { data: order, error } = await supabase.from("orders")
+      .select(`id,user_id,order_code,total,status,qr_code,created_at,expires_at,order_items(id,qty,subtotal,ticket_categories(category_name,events(id,title,event_date,location,status))),payments(status,payment_method)`)
+      .eq("id", token.order_id).maybeSingle();
+    if (error) throw error;
+    if (!order || String(order.user_id) !== String(token.user_id)) return errorResponse(res, "Tagihan tidak ditemukan", 404);
+
+    const firstEvent = order.order_items?.[0]?.ticket_categories?.events || null;
+    const firstPayment = Array.isArray(order.payments) ? order.payments[0] : order.payments;
+    return successResponse(res, "Detail tagihan simulasi", {
+      id: order.id,
+      user_id: order.user_id,
+      order_code: order.order_code,
+      total: Number(order.total),
+      status: order.status,
+      is_expired: Boolean(order.expires_at && new Date(order.expires_at) <= new Date()),
+      qr_code: order.qr_code,
+      created_at: order.created_at,
+      expires_at: order.expires_at,
+      events: firstEvent,
+      payment_method: firstPayment?.payment_method?.replace(/^SIMULASI_/, "") || token.payment_method,
+      payment: firstPayment || undefined,
+      order_items: (order.order_items || []).map((item) => ({
+        id: item.id,
+        qty: item.qty,
+        subtotal: Number(item.subtotal),
+        ticket_categories: item.ticket_categories ? { category_name: item.ticket_categories.category_name } : undefined,
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const simulateLocalPayment = async (req, res, next) => {
+  try {
+    if (process.env.NODE_ENV === "production") {
+      return errorResponse(res, "Simulasi pembayaran hanya tersedia di lingkungan lokal", 404);
+    }
+
+    const token = readLocalPaymentToken(req.validated.body.token);
+    if (!token) return errorResponse(res, "QR tidak valid atau sudah kedaluwarsa", 400);
+    const paymentMethod = req.validated.body.payment_method;
+    if (!LOCAL_PAYMENT_METHODS.has(paymentMethod)) return errorResponse(res, "Metode pembayaran tidak valid", 400);
+    const { data: order, error: orderError } = await supabase.from("orders")
+      .select("id,user_id,order_code,total,status,expires_at")
+      .eq("id", token.order_id).maybeSingle();
+    if (orderError) throw orderError;
+    if (!order) return errorResponse(res, "Order tidak ditemukan", 404);
+    if (String(order.user_id) !== String(token.user_id)) return errorResponse(res, "Anda tidak memiliki akses", 403);
+    if (order.status !== "pending" || (order.expires_at && new Date(order.expires_at) <= new Date())) {
+      return errorResponse(res, "Pesanan sudah tidak dapat dibayar", 400);
+    }
+
+    const { data: existing, error: existingError } = await supabase.from("payments")
+      .select("id,status").eq("order_id", order.id).maybeSingle();
+    if (existingError) throw existingError;
+    if (existing) {
+      if (existing.status === "approved") return successResponse(res, "Simulasi pembayaran sudah selesai");
+      return errorResponse(res, "Pembayaran pesanan ini sudah dibuat", 409);
+    }
+
+    const { data: payment, error: paymentError } = await supabase.from("payments")
+      .insert({ order_id: order.id, payment_method: `SIMULASI_${paymentMethod}`, status: "pending" })
+      .select("id").single();
+    if (paymentError) throw paymentError;
+
+    try {
+      const qrCode = await generateQRCode({ order_id: order.id, order_code: order.order_code, user_id: order.user_id });
+      const { error: verifyError } = await supabase.rpc("verify_payment_transaction", {
+        p_payment_id: payment.id,
+        p_status: "approved",
+        p_verified_by: null,
+        p_rejection_reason: null,
+        p_qr_code: qrCode,
+      });
+      if (verifyError) throw verifyError;
+    } catch (verificationError) {
+      await supabase.from("payments").delete().eq("id", payment.id).eq("status", "pending");
+      throw verificationError;
+    }
+
+    return successResponse(res, "Simulasi pembayaran berhasil", { payment_id: payment.id, status: "approved" }, 201);
+  } catch (error) {
+    next(error);
+  }
+};
 
 
 // =====================================================
@@ -186,11 +354,6 @@ export const createPayment = async (
     next(error);
   }
 };
-
-
-// =====================================================
-// GET PAYMENT BY ORDER ID
-// =====================================================
 
 export const getPaymentByOrderId = async (
   req,

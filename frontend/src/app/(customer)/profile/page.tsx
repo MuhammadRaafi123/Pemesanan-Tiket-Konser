@@ -111,7 +111,7 @@ export default function ProfilePage() {
                 logout();
                 router.replace("/");
               }}
-              className="gap-1.5 border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+              className="gap-1.5 border-primary/20 text-primary hover:border-primary/40 hover:bg-accent hover:text-accent-foreground"
             >
               <LogOut className="h-4 w-4" />
               Keluar
@@ -133,7 +133,7 @@ export default function ProfilePage() {
           ))}
 
           <div className="panel rounded-2xl p-6 text-center">
-            <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#fdf9f1] text-gold">
+            <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-accent text-primary">
               <Heart className="h-5 w-5" />
             </span>
             <p className="font-display truncate text-lg text-ink">

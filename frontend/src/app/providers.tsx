@@ -31,7 +31,7 @@ export default function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
-        {pathname !== "/splash" && <SplashScreen showOnce={false} />}
+        {pathname !== "/splash" && <SplashScreen duration={1100} showOnce />}
         <PageTransition>{children}</PageTransition>
       </ToastProvider>
     </QueryClientProvider>

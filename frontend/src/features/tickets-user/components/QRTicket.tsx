@@ -62,6 +62,7 @@ export function QRTicket({ ticket }: QRTicketProps) {
       src={ticket.qr_code}
       alt={ticket.ticket_code}
       fill
+      unoptimized
       sizes="(max-width: 640px) 220px, 256px"
       className="object-contain p-2"
     />
@@ -148,7 +149,7 @@ export function QRTicket({ ticket }: QRTicketProps) {
                 <button type="button" onClick={handleDownload} className="inline-flex items-center gap-2 rounded-lg bg-[#6264b5] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#51539f]">
                   <Download className="h-3.5 w-3.5" /> Unduh QR
                 </button>
-                <Link href={`/orders/${ticket.order_code}`} className="inline-flex items-center gap-2 rounded-lg border border-[#e8e5ef] px-4 py-2.5 text-xs font-bold text-[#071653] transition hover:border-[#c8b7db] hover:bg-[#f7f4fa]">
+                <Link href={`/orders/${ticket.id}`} className="inline-flex items-center gap-2 rounded-lg border border-[#e8e5ef] px-4 py-2.5 text-xs font-bold text-[#071653] transition hover:border-[#c8b7db] hover:bg-[#f7f4fa]">
                   <ExternalLink className="h-3.5 w-3.5 text-[#6264b5]" /> Detail invoice
                 </Link>
               </div>

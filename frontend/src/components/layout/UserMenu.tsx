@@ -28,7 +28,8 @@ export function UserMenu() {
     pathname === "/" ||
     pathname.startsWith("/home") ||
     pathname.startsWith("/tickets") ||
-    pathname.startsWith("/orders");
+    pathname.startsWith("/orders") ||
+    pathname.startsWith("/payments");
   const { user, logout } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

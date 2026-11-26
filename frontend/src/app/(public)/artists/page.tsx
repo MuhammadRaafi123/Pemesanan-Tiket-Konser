@@ -151,38 +151,39 @@ export default function ArtistsPage() {
 
       <main className="relative flex-1">
         {/* ==================== HERO SECTION ==================== */}
-        <section className="px-5 pb-8 pt-24 sm:px-8 sm:pt-28">
+        <section className="px-5 pb-9 pt-24 sm:px-8 sm:pt-28">
           <div className="mx-auto max-w-7xl">
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#6264b5]">Artis &amp; musisi</p>
-              <h1 className="mt-2 text-[clamp(2.25rem,4.5vw,3.75rem)] font-extrabold leading-[1.05] tracking-tight text-[#071653]">
-                Temukan Suara &amp;{" "}
+            <div className="relative overflow-hidden rounded-2xl border border-[#e8e5ef] bg-white px-6 py-7 sm:px-9 sm:py-9">
+            <div className="relative">
+              <p className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#6264b5]"><Disc3 className="h-3.5 w-3.5" />Artis &amp; musisi</p>
+              <h1 className="mt-3 text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-[#071653]">
+                Temukan suara baru dan kenali{" "}
                 <br className="hidden sm:inline" />
-                <span className="bg-gradient-to-r from-[#6264b5] via-[#a5a7dd] to-[#6264b5] bg-clip-text text-transparent">
-                  Musisi Favoritmu.
+                <span className="text-[#6264b5]">
+                  musisi favoritmu.
                 </span>
               </h1>
 
               {/* Subtitle */}
-              <p className="mt-4 max-w-xl text-sm leading-7 text-[#5c6482] sm:text-base">
-                Kenali musisi idola, jelajahi karya mereka, dan dapatkan akses langsung ke jadwal konser serta tiket resmi di seluruh panggung Indonesia.
+              <p className="mt-4 max-w-xl text-sm leading-7 text-[#68708a] sm:text-base">
+                Jelajahi profil, genre, dan perjalanan para musisi dari berbagai panggung. Temukan artis yang sesuai dengan seleramu, lalu lanjutkan ke jadwal konser untuk merencanakan pengalaman musik berikutnya.
               </p>
 
               {/* Stats Bar */}
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 rounded-full border border-[#e8e5ef] bg-white px-3 py-1.5">
+                <div className="flex items-center gap-2 rounded-full border border-[#e8e5ef] bg-[#faf9fc] px-3 py-1.5">
                   <Disc3 className="h-4 w-4 text-[#6264b5]" />
                   <span className="text-xs text-[#5c6482]">
                     <strong className="font-bold text-[#071653]">{artists.length || "24+"}</strong> Artis Pilihan
                   </span>
                 </div>
-                <div className="flex items-center gap-2 rounded-full border border-[#e8e5ef] bg-white px-3 py-1.5">
+                <div className="flex items-center gap-2 rounded-full border border-[#e8e5ef] bg-[#faf9fc] px-3 py-1.5">
                   <Music className="h-4 w-4 text-[#6264b5]" />
                   <span className="text-xs text-[#5c6482]">
                     <strong className="font-bold text-[#071653]">6+</strong> Genre Musik
                   </span>
                 </div>
-                <div className="flex items-center gap-2 rounded-full border border-[#e8e5ef] bg-white px-3 py-1.5">
+                <div className="flex items-center gap-2 rounded-full border border-[#e8e5ef] bg-[#faf9fc] px-3 py-1.5">
                   <Ticket className="h-4 w-4 text-[#397557]" />
                   <span className="text-xs text-[#5c6482]">
                     <strong className="font-bold text-[#071653]">Live</strong> Tiket Tersedia
@@ -219,12 +220,13 @@ export default function ArtistsPage() {
                 </div>
               ) : null}
             </div>
+            </div>
           </div>
         </section>
 
         {/* ==================== SEARCH & FILTERS HUB ==================== */}
         <section className="mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8">
-          <div className="rounded-2xl border border-[#e8e5ef] bg-white p-4 shadow-[0_8px_24px_-20px_rgba(7,22,83,0.18)] sm:p-6">
+          <div className="rounded-[1.5rem] border border-[#e6e0ef] bg-white p-4 shadow-[0_20px_60px_-42px_rgba(51,37,86,.25)] sm:p-6">
             {/* Search Input & Sort Grid */}
             <div className="grid gap-3 sm:grid-cols-12">
               {/* Search input */}
@@ -239,7 +241,7 @@ export default function ArtistsPage() {
                   <input
                     id="artist-search"
                     type="search"
-                    placeholder="Ketik Coldplay, Sheila On 7, NIKI, Taylor Swift..."
+                    placeholder="Cari nama artis, band, genre, atau asal..."
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     className="w-full bg-transparent text-sm font-medium text-[#071653] outline-none placeholder:text-[#8790a8]"
@@ -338,7 +340,7 @@ export default function ArtistsPage() {
                 {filteredArtists.length}
               </span>
               <p className="text-sm font-medium text-[#5c6482]">
-                Menampilkan <strong className="text-[#071653]">{filteredArtists.length}</strong> musisi
+                Menampilkan <strong className="text-[#071653]">{filteredArtists.length}</strong> artis yang cocok dengan pencarian dan pilihan filter kamu.
                 {selectedGenre !== "all" && <span> kategori <strong className="text-[#6264b5]">{GENRES.find((g) => g.id === selectedGenre)?.label}</strong></span>}
                 {searchQuery && <span> dengan pencarian &ldquo;<strong className="text-[#071653]">{searchQuery}</strong>&rdquo;</span>}
               </p>
@@ -404,7 +406,7 @@ export default function ArtistsPage() {
               <EmptyState
                 icon={Disc3}
                 title="Artis tidak ditemukan"
-                description="Tidak ada musisi yang cocok dengan kata kunci atau filter genre kamu."
+                description="Kami belum menemukan artis yang sesuai dengan kata kunci atau genre pilihanmu. Coba gunakan nama yang lebih umum atau hapus filter untuk melihat semua musisi."
                 actionLabel="Reset pencarian"
                 onAction={resetFilters}
                 variant="light"

@@ -53,7 +53,7 @@ export default function SingleOrderPage() {
 
   if (loading) {
     return (
-      <div className="landing-page flex min-h-screen flex-col bg-[#fffdf2] text-[#071653]">
+      <div className="landing-page customer-lavender-page flex min-h-screen flex-col bg-[#f5f2ff] text-[#071653]">
         <Navbar />
         <main className="flex flex-1 items-center justify-center px-4 pt-28">
           <div className="flex items-center gap-3 px-5 py-4 text-sm font-medium text-[#6264b5]">
@@ -69,7 +69,7 @@ export default function SingleOrderPage() {
 
   if (loadError || !order) {
     return (
-      <div className="landing-page flex min-h-screen flex-col bg-[#fffdf2] text-[#071653]">
+      <div className="landing-page customer-lavender-page flex min-h-screen flex-col bg-[#f5f2ff] text-[#071653]">
         <Navbar />
         <main className="flex flex-1 items-center justify-center px-4 pt-28">
           <div className="max-w-md rounded-[28px] border border-[#e8e5ef] bg-white p-8 text-center shadow-xl">
@@ -94,7 +94,7 @@ export default function SingleOrderPage() {
   }
 
   return (
-    <div className="landing-page flex min-h-screen flex-col bg-[#fffdf2] text-[#071653] selection:bg-[#6264b5]/25 selection:text-[#071653]">
+    <div className="landing-page customer-lavender-page flex min-h-screen flex-col bg-[#f5f2ff] text-[#071653] selection:bg-[#6264b5]/25 selection:text-[#071653]">
       <Navbar />
 
       <main className="relative mx-auto w-full max-w-4xl flex-1 px-5 pb-24 pt-32 sm:px-8 sm:pt-40">

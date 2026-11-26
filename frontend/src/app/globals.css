@@ -952,6 +952,8 @@ body { background: #fffdf2; color: #071653; }
 ::-webkit-scrollbar-thumb:hover { background: #6264b5; }
 
 .landing-page { background-color: #fffdf2; color: #071653; color-scheme: light; }
+.landing-page.customer-lavender-page { background-color: #f5f2ff; }
+.landing-page.tixora-event { background-color: #0b0917; color: #ffffff; color-scheme: dark; }
 .luxury-panel { border-color: #e8e5ef; background: #ffffff; box-shadow: 0 18px 44px -28px rgba(7, 22, 83, 0.18); }
 .luxury-panel-hover:hover { border-color: #c8b7db; background: #f7f4fa; }
 .luxury-eyebrow { color: #6264b5; }

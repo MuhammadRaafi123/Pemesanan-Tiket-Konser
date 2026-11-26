@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   ArrowUpDown,
   Check,
   MapPin,
@@ -17,6 +16,7 @@ import {
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { Loading } from "@/components/shared/Loading";
 import { EventGrid } from "@/features/events/components/EventGrid";
 import { fetchEvents } from "@/features/events/api";
 import type { Event } from "@/features/events/types";
@@ -133,6 +133,11 @@ export default function EventsPage() {
 
     // Sorting
     nextEvents.sort((a, b) => {
+      const now = Date.now();
+      const aUpcoming = a.status === "open" && Boolean(a.event_date) && new Date(a.event_date).getTime() >= now;
+      const bUpcoming = b.status === "open" && Boolean(b.event_date) && new Date(b.event_date).getTime() >= now;
+      if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
+
       if (sortBy === "lowest") {
         const aPrice = a.ticket_categories?.length ? Math.min(...a.ticket_categories.map((item) => item.price)) : (a.min_price ?? Number.POSITIVE_INFINITY);
         const bPrice = b.ticket_categories?.length ? Math.min(...b.ticket_categories.map((item) => item.price)) : (b.min_price ?? Number.POSITIVE_INFINITY);
@@ -181,30 +186,21 @@ export default function EventsPage() {
       <Navbar />
 
       <main className="mx-auto w-full max-w-7xl px-5 pb-20 pt-24 sm:px-8 sm:pt-28">
-        <section className="rounded-2xl border border-[#e8e5ef] bg-white p-5 shadow-[0_8px_24px_-20px_rgba(7,22,83,0.18)] sm:p-8">
-          {/* Header Title & Nav */}
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#6264b5]">Jadwal konser</p>
-              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#071653] sm:text-4xl">
-                Jelajahi Konser Pilihanmu
-              </h1>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-[#5c6482]">
-                Temukan jadwal konser, festival musik, dan musisi idola favoritmu di seluruh kota di Indonesia.
-              </p>
-            </div>
-
-            <Link
-              href={isCustomerCatalog ? "/home" : "/"}
-              className="inline-flex items-center gap-2 self-start rounded-xl border border-[#e8e5ef] bg-[#f7f4fa] px-4 py-2.5 text-xs font-semibold text-[#071653] transition-all hover:border-[#c8b7db] hover:bg-[#eeebf4] hover:text-[#6264b5] lg:self-auto"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Kembali ke Beranda
-            </Link>
+        <section className="rounded-2xl border border-[#e8e5ef] bg-white px-6 py-7 sm:px-9 sm:py-9">
+          <div className="max-w-3xl">
+            <p className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.18em] text-[#6264b5]"><Music className="h-3.5 w-3.5" />Jadwal live · Indonesia</p>
+            <h1 className="mt-3 max-w-3xl text-3xl font-bold leading-tight tracking-tight text-[#071653] sm:text-5xl">
+              Temukan konser <span className="text-[#6264b5]">yang ingin kamu kenang.</span>
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#68708a] sm:text-base">
+              Dari konser intim hingga festival besar, jelajahi jadwal pertunjukan dari berbagai kota di Indonesia. Temukan artis yang kamu suka, bandingkan lokasi dan tanggal, lalu pilih acara yang paling cocok untuk pengalaman musik berikutnya.
+            </p>
           </div>
+        </section>
 
+        <section aria-label="Filter konser" className="mt-5 rounded-[1.75rem] border border-[#e6e0ef] bg-gradient-to-br from-white via-white to-[#f7f3fb] p-4 shadow-[0_24px_70px_-48px_rgba(51,37,86,.28)] sm:p-7">
           {/* ==================== MAIN SEARCH BAR CONTAINER ==================== */}
-          <div className="mt-6 border-t border-[#e8e5ef] pt-5">
+          <div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-12">
               {/* 1. Keyword Search */}
               <div className="group relative flex items-center gap-3 rounded-xl border border-[#e8e5ef] bg-[#fffdf2] px-4 py-3 transition-all duration-200 focus-within:border-[#6264b5] focus-within:ring-2 focus-within:ring-[#6264b5]/10 hover:border-[#c8b7db] lg:col-span-6">
@@ -218,7 +214,7 @@ export default function EventsPage() {
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Ketik Coldplay, Sheila On 7, GBK..."
+                    placeholder="Cari nama konser, artis, kota, atau venue..."
                     className="w-full bg-transparent text-sm font-medium text-[#071653] outline-none placeholder:text-[#8790a8]"
                   />
                 </div>
@@ -294,7 +290,7 @@ export default function EventsPage() {
                     key={genre.id}
                     type="button"
                     onClick={() => setSelectedGenre(genre.id)}
-                    className={`group relative flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-95 ${
+                    className={`group relative flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-200 active:scale-95 ${
                       isSelected
                         ? "bg-[#eeebf4]"
                         : "bg-white text-[#5c6482] hover:border-[#c8b7db] hover:text-[#071653]"
@@ -333,14 +329,14 @@ export default function EventsPage() {
         </section>
 
         {/* ==================== RESULTS STATS BAR ==================== */}
-        <section className="mt-7">
+        <section className="mt-9">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-4 border-b border-[#e8e5ef] pb-4">
             <div className="flex items-center gap-3">
               <span className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-[#eeebf4] px-2 text-xs font-bold text-[#6264b5]">
                 {filteredEvents.length}
               </span>
               <p className="text-sm font-medium text-[#5c6482]">
-                Menampilkan <strong className="text-[#071653]">{filteredEvents.length}</strong> konser tersedia
+                Menampilkan <strong className="text-[#071653]">{filteredEvents.length}</strong> konser yang sesuai dengan pencarian dan pilihan filter kamu.
                 {selectedCity !== "all" && <span> di <strong className="text-[#6264b5]">{selectedCity}</strong></span>}
                 {selectedGenre !== "all" && <span> genre <strong className="text-[#6264b5]">{GENRES.find((g) => g.id === selectedGenre)?.label}</strong></span>}
                 {query && <span> dengan kata kunci &ldquo;<strong className="text-[#071653]">{query}</strong>&rdquo;</span>}

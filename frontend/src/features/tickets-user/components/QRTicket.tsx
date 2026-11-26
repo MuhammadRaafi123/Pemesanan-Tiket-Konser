@@ -71,31 +71,30 @@ export function QRTicket({ ticket }: QRTicketProps) {
   return (
     <>
       <Reveal>
-        <article className="overflow-hidden rounded-3xl border border-[#e8e5ef] bg-[#fffdf2] shadow-[0_20px_55px_-36px_rgba(7,22,83,.38)]">
-          <header className="relative overflow-hidden bg-[#071653] px-5 py-5 text-white sm:px-7">
-            <div className="absolute -right-14 -top-24 h-56 w-56 rounded-full bg-[#6264b5]/40 blur-3xl" />
-            <div className="relative flex flex-wrap items-center justify-between gap-4">
+        <article className="overflow-hidden rounded-2xl border border-[#e8e5ef] bg-white shadow-[0_16px_45px_-36px_rgba(7,22,83,.28)]">
+          <header className="border-b border-[#e8e5ef] bg-white px-5 py-5 sm:px-7">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-4">
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-white/10">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-[#e8e5ef] bg-[#f7f4fa]">
                   {poster ? (
                     <Image src={poster} alt={ticket.event.title} fill sizes="56px" className="object-cover" />
                   ) : (
-                    <Ticket className="m-auto h-6 w-6 text-[#c8b7db]" />
+                    <Ticket className="m-auto h-6 w-6 text-[#6264b5]" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#d9c8e8]">
+                  <p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#6264b5]">
                     Tiket digital resmi · {ticket.category.category_name}
                   </p>
-                  <h3 className="mt-1 truncate text-lg font-extrabold sm:text-xl">{ticket.event.title}</h3>
+                  <h3 className="mt-1 truncate text-lg font-bold text-[#071653] sm:text-xl">{ticket.event.title}</h3>
                 </div>
               </div>
               <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-bold ${
                 isActive
-                  ? "border-[#c7e0d1]/40 bg-[#e6f1eb]/15 text-[#d4f1df]"
-                  : "border-white/20 bg-white/10 text-white/75"
+                  ? "border-[#c7e0d1] bg-[#e6f1eb] text-[#397557]"
+                  : "border-[#e8e5ef] bg-[#f7f4fa] text-[#68708a]"
               }`}>
-                {isActive ? <><span className="h-1.5 w-1.5 rounded-full bg-[#9bd1ad]" /> Siap digunakan</> : <><CheckCircle2 className="h-3.5 w-3.5" /> Sudah digunakan</>}
+                {isActive ? <><span className="h-1.5 w-1.5 rounded-full bg-[#397557]" /> Siap digunakan</> : <><CheckCircle2 className="h-3.5 w-3.5" /> Sudah digunakan</>}
               </span>
             </div>
           </header>
@@ -109,7 +108,7 @@ export function QRTicket({ ticket }: QRTicketProps) {
                   { label: "Zona / kursi", value: ticket.seat_number || "General Area", icon: QrCode },
                   { label: "Pintu masuk", value: ticket.gate || "Pintu masuk utama", icon: MapPin },
                 ].map(({ label, value, icon: Icon }) => (
-                  <div key={label} className="rounded-xl border border-[#e8e5ef] bg-[#fffdf2] p-3.5">
+                  <div key={label} className="rounded-xl border border-[#e8e5ef] bg-[#faf9fc] p-3.5">
                     <p className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[.16em] text-[#6264b5]">
                       <Icon className="h-3.5 w-3.5" /> {label}
                     </p>
@@ -118,7 +117,7 @@ export function QRTicket({ ticket }: QRTicketProps) {
                 ))}
               </div>
 
-              <div className="mt-4 space-y-3 rounded-xl bg-[#f7f4fa] p-4 text-xs text-[#5c6482]">
+              <div className="mt-4 space-y-3 rounded-xl border border-[#e8e5ef] bg-white p-4 text-xs text-[#5c6482]">
                 <p className="flex items-center gap-2.5">
                   <CalendarDays className="h-4 w-4 shrink-0 text-[#6264b5]" />
                   <span className="font-semibold text-[#071653]">
@@ -155,46 +154,46 @@ export function QRTicket({ ticket }: QRTicketProps) {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center border-t border-[#e8e5ef] bg-[#f7f4fa] p-6 lg:border-l lg:border-t-0">
+            <div className="flex flex-col items-center justify-center border-t border-[#e8e5ef] bg-[#faf9fc] p-6 lg:border-l lg:border-t-0">
               <button
                 type="button"
                 onClick={() => setIsQrModalOpen(true)}
-                className="group relative flex h-52 w-52 items-center justify-center overflow-hidden rounded-2xl bg-[#fffdf2] p-3 shadow-[0_14px_38px_-22px_rgba(7,22,83,.32)] ring-4 ring-[#c8b7db]/45 transition hover:ring-[#6264b5]/50"
+                className="group relative flex h-52 w-52 items-center justify-center overflow-hidden rounded-2xl border border-[#e8e5ef] bg-white p-3 shadow-sm transition hover:border-[#6264b5] hover:shadow-md"
                 aria-label="Perbesar QR tiket"
               >
                 {qrCode}
                 <span className="absolute inset-0 flex flex-col items-center justify-center bg-[#071653]/75 text-white opacity-0 transition group-hover:opacity-100">
-                  <Maximize2 className="h-6 w-6 text-[#d9c8e8]" />
+                  <Maximize2 className="h-6 w-6 text-white" />
                   <span className="mt-2 text-[10px] font-bold uppercase tracking-wider">Perbesar QR</span>
                 </span>
               </button>
               <p className="mt-4 font-mono text-sm font-extrabold tracking-[.16em] text-[#6264b5]">{ticket.ticket_code}</p>
-              <p className="mt-1 text-center text-[10px] text-[#5c6482]">Tunjukkan QR ini saat memasuki gate.</p>
+              <p className="mt-1 max-w-52 text-center text-[10px] leading-5 text-[#5c6482]">Buka QR ini saat tiba di gate dan pastikan kode tiket terlihat jelas ketika dipindai petugas.</p>
             </div>
           </div>
         </article>
       </Reveal>
 
       {isQrModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#071653]/85 p-4 backdrop-blur-md">
-          <section className="relative w-full max-w-md rounded-3xl border border-[#c8b7db]/40 bg-[#071653] p-6 text-center text-white shadow-2xl sm:p-8">
-            <button type="button" onClick={() => setIsQrModalOpen(false)} aria-label="Tutup QR" className="absolute right-4 top-4 rounded-full border border-white/15 p-2 text-white/70 hover:bg-white/10 hover:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#071653]/65 p-4 backdrop-blur-sm">
+          <section className="relative w-full max-w-md rounded-2xl border border-[#e8e5ef] bg-white p-6 text-center text-[#071653] shadow-2xl sm:p-8">
+            <button type="button" onClick={() => setIsQrModalOpen(false)} aria-label="Tutup QR" className="absolute right-4 top-4 rounded-full border border-[#e8e5ef] p-2 text-[#68708a] hover:bg-[#f7f4fa] hover:text-[#071653]">
               <X className="h-4 w-4" />
             </button>
-            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-[#6264b5]/30 text-[#d9c8e8]"><QrCode className="h-5 w-5" /></div>
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-[#eeebf4] text-[#6264b5]"><QrCode className="h-5 w-5" /></div>
             <h3 className="mt-4 text-xl font-extrabold">Tiket masuk</h3>
-            <p className="mt-1 text-xs text-white/65">{ticket.event.title}</p>
-            <div className="relative mx-auto my-6 h-64 w-64 overflow-hidden rounded-2xl bg-[#fffdf2] p-4 ring-4 ring-[#c8b7db]/45">{qrCode}</div>
-            <p className="font-mono text-sm font-extrabold tracking-[.16em] text-[#d9c8e8]">{ticket.ticket_code}</p>
-            <p className="mt-2 text-[11px] leading-5 text-white/65">
-              <ShieldCheck className="mr-1 inline h-3.5 w-3.5 text-[#c8b7db]" />
-              Atur kecerahan layar agar QR mudah dipindai petugas.
+            <p className="mt-1 text-xs text-[#68708a]">{ticket.event.title}</p>
+            <div className="relative mx-auto my-6 h-64 w-64 overflow-hidden rounded-2xl border border-[#e8e5ef] bg-white p-4">{qrCode}</div>
+            <p className="font-mono text-sm font-extrabold tracking-[.16em] text-[#6264b5]">{ticket.ticket_code}</p>
+            <p className="mt-2 text-[11px] leading-5 text-[#68708a]">
+              <ShieldCheck className="mr-1 inline h-3.5 w-3.5 text-[#6264b5]" />
+              Atur kecerahan layar sebelum pemeriksaan dan tunjukkan QR asli dari halaman ini kepada petugas.
             </p>
             <div className="mt-6 flex justify-center gap-3">
-              <button type="button" onClick={handleDownload} className="inline-flex items-center gap-2 rounded-xl bg-[#c8b7db] px-5 py-2.5 text-xs font-extrabold text-[#071653] hover:bg-[#e2d5ec]">
+              <button type="button" onClick={handleDownload} className="inline-flex items-center gap-2 rounded-xl bg-[#6264b5] px-5 py-2.5 text-xs font-extrabold text-white hover:bg-[#51539f]">
                 <Download className="h-4 w-4" /> Unduh QR
               </button>
-              <button type="button" onClick={() => setIsQrModalOpen(false)} className="rounded-xl border border-white/20 px-5 py-2.5 text-xs font-bold text-white/80 hover:bg-white/10">
+              <button type="button" onClick={() => setIsQrModalOpen(false)} className="rounded-xl border border-[#e8e5ef] px-5 py-2.5 text-xs font-bold text-[#68708a] hover:bg-[#f7f4fa]">
                 Tutup
               </button>
             </div>

@@ -474,9 +474,13 @@ const sortByDate = (
   const multiplier = direction === "desc" ? -1 : 1;
 
   return items.slice().sort(
-    (a, b) =>
-      multiplier *
-      (eventDateValue(a) - eventDateValue(b))
+    (a, b) => {
+      const now = Date.now();
+      const aActive = a.status === "open" && eventDateValue(a) >= now;
+      const bActive = b.status === "open" && eventDateValue(b) >= now;
+      if (aActive !== bActive) return aActive ? -1 : 1;
+      return multiplier * (eventDateValue(a) - eventDateValue(b));
+    }
   );
 };
 

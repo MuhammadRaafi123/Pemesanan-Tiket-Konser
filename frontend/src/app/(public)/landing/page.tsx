@@ -98,11 +98,11 @@ export default function LandingPage() {
   const [showAllGenres, setShowAllGenres] = useState(false);
   useEffect(() => {
     let active = true;
-    fetchEvents({ status: "open", limit: 100, sort: "popular" })
+    fetchEvents({ limit: 100, sort: "asc" })
       .then((items) => {
         if (active) {
           setEvents(items);
-          setEvent(items.find((item) => item.slug === "peterpan-tour-of-love") || items.find((item) => item.featured) || items[0] || null);
+          setEvent(items.find((item) => item.status === "open" && new Date(item.event_date).getTime() >= Date.now()) || items[0] || null);
         }
       })
       .catch(() => undefined);
@@ -158,6 +158,7 @@ export default function LandingPage() {
         <div className="relative mx-auto grid w-full max-w-7xl items-end gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-8">
           <div className="max-w-3xl">
             <h1 className="max-w-3xl text-[clamp(2.7rem,7vw,5.8rem)] font-black uppercase leading-[.88] tracking-[-.065em] drop-shadow-[0_8px_35px_rgba(0,0,0,.35)]">{firstTitleWord}<br/><span className="bg-gradient-to-r from-violet-200 via-violet-400 to-fuchsia-300 bg-clip-text text-transparent">{titleRemainder}</span></h1>
+            {event ? <p className="mt-5 max-w-2xl text-lg font-extrabold leading-tight text-violet-200 sm:text-2xl">{event.title}</p> : null}
             <p className="mt-5 max-w-lg text-sm leading-6 text-white/80 sm:mt-6 sm:text-base sm:leading-7">Temukan konser favorit, kenali lineup artis, dan pesan tiket resmi dengan mudah lewat Tixora.</p>
             <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 text-xs font-semibold sm:text-sm">
               <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-black/25 px-3.5 py-2.5 backdrop-blur-md"><CalendarDays className="h-4 w-4 text-violet-300"/>{eventDate}</span>
@@ -344,7 +345,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
             <div><p className="text-xs font-bold uppercase tracking-[.24em] text-violet-300">Cerita penonton</p><h2 id="audience-reviews-title" className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Ulasan dari komunitas<span className="text-violet-300">.</span></h2><p className="mt-4 max-w-xl text-sm leading-7 text-white/55">Pengalaman penonton membantu orang lain menemukan acara yang tepat untuk mereka.</p></div>
-            <span className="rounded-full border border-violet-300/20 bg-violet-300/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-200">Contoh ulasan</span>
+
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {sampleReviews.map((review, index) => <article key={review.category} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.04] p-5 transition duration-300 hover:-translate-y-1 hover:border-violet-300/35 hover:bg-white/[.07] sm:p-6">

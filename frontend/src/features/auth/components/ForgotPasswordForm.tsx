@@ -4,20 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, CheckCircle2, Mail, Send } from "lucide-react";
+import { AlertCircle, Mail, Send } from "lucide-react";
 import { forgotPasswordSchema, type ForgotPasswordFormValues } from "@/features/auth/schemas/auth.schema";
 import { forgotPassword } from "@/features/auth/api";
 import { getApiErrorMessage } from "@/lib/apiError";
 
 export default function ForgotPasswordForm() {
   const [serverError, setServerError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: "" },
@@ -25,14 +23,10 @@ export default function ForgotPasswordForm() {
 
   const onSubmit = async (values: ForgotPasswordFormValues) => {
     setServerError(null);
-    setSuccessMessage(null);
 
     try {
       await forgotPassword(values.email);
-      setSuccessMessage(
-        "Jika email terdaftar, link reset password sudah kami kirim. Silakan cek inbox atau spam kamu.",
-      );
-      reset();
+      window.location.assign("https://resend.com/emails");
     } catch (error: unknown) {
       setServerError(getApiErrorMessage(error, "Terjadi kesalahan. Silakan coba lagi."));
     }
@@ -47,16 +41,6 @@ export default function ForgotPasswordForm() {
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{serverError}</span>
-        </div>
-      ) : null}
-
-      {successMessage ? (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm leading-6 text-emerald-400"
-        >
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{successMessage}</span>
         </div>
       ) : null}
 

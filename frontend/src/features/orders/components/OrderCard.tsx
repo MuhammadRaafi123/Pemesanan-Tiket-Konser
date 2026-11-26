@@ -26,7 +26,7 @@ const STATUS_META: Record<Order["status"], { label: string; tone: string; icon: 
   },
   pending: {
     label: "Menunggu pembayaran",
-    tone: "border-[#ead9ad] bg-[#f8f0df] text-[#8b6a2c]",
+    tone: "border-[#ded5f3] bg-[#f5f2ff] text-[#6264b5]",
     icon: Clock3,
   },
   rejected: {
@@ -51,8 +51,8 @@ export function OrderCard({ order, now }: OrderCardProps) {
   const StatusIcon = meta.icon;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-[#e8e5ef] bg-[#fffdf2] shadow-[0_12px_35px_-28px_rgba(7,22,83,.25)] transition hover:border-[#c8b7db]">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e8e5ef] px-5 py-4 sm:px-6">
+    <article className="overflow-hidden rounded-[26px] border border-[#e4def5] bg-white shadow-[0_18px_50px_-38px_rgba(98,100,181,.32)] transition hover:border-[#c8b7db]">
+      <header className="flex flex-wrap items-center justify-between gap-3 bg-[#faf9ff] px-5 py-4 sm:px-6">
         <div>
           <p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#5c6482]">Nomor pesanan</p>
           <p className="mt-1 font-mono text-sm font-bold tracking-wider text-[#6264b5]">{order.order_code}</p>
@@ -81,7 +81,7 @@ export function OrderCard({ order, now }: OrderCardProps) {
               </div>
             </div>
           ) : null}
-          <ul className="divide-y divide-[#e8e5ef] rounded-xl border border-[#e8e5ef] bg-[#fffdf2] px-4">
+          <ul className="divide-y divide-[#e8e5ef] rounded-xl border border-[#eeeaf6] bg-[#faf9ff] px-4">
             {(order.order_items || []).map((item) => (
               <li key={item.id} className="flex items-center justify-between gap-4 py-3 text-xs">
                 <span className="text-[#5c6482]">
@@ -94,18 +94,18 @@ export function OrderCard({ order, now }: OrderCardProps) {
           </ul>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#e8e5ef] pt-4 sm:justify-end lg:min-w-52 lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[#f8f6ff] p-4 sm:justify-end lg:min-w-52 lg:flex-col lg:items-end">
           <div className="lg:text-right">
             <p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#5c6482]">Total tagihan</p>
-            <p className="mt-1 font-mono text-lg font-extrabold text-[#071653]">{formatCurrency(order.total)}</p>
+            <p className="mt-1 font-mono text-lg font-extrabold text-[#6264b5]">{formatCurrency(order.total)}</p>
           </div>
           {order.status === "paid" ? (
             <Link href="/tickets" className="inline-flex items-center gap-2 rounded-xl bg-[#6264b5] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#51539f]">
               <Ticket className="h-4 w-4" /> Buka e-ticket
             </Link>
           ) : order.status === "pending" && !isExpired ? (
-            <Link href={`/payments/${order.id}`} className="inline-flex items-center gap-2 rounded-xl bg-[#071653] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#172b70]">
-              <CreditCard className="h-4 w-4 text-[#c8b7db]" /> Bayar sekarang
+            <Link href={`/payments/${order.id}`} className="inline-flex items-center gap-2 rounded-xl bg-[#6264b5] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#51539f]">
+              <CreditCard className="h-4 w-4 text-white/80" /> Bayar sekarang
             </Link>
           ) : (
             <Link href={`/orders/${order.id}`} className="inline-flex items-center gap-2 rounded-xl border border-[#e8e5ef] px-4 py-2.5 text-xs font-bold text-[#071653] transition hover:border-[#c8b7db] hover:bg-[#f7f4fa]">

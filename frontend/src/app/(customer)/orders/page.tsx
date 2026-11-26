@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   Clock3,
   Filter,
-  PackageCheck,
   ShoppingBag,
   Ticket,
   XCircle,
@@ -78,49 +77,32 @@ export default function OrdersPage() {
     .reduce((total, order) => total + order.total, 0);
 
   return (
-    <div className="landing-page min-h-screen bg-[#fffdf2] text-[#071653]">
+    <div className="landing-page customer-lavender-page min-h-screen bg-[#f5f2ff] text-[#071653]">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 pb-24 pt-28 sm:px-8 sm:pt-32">
-        <section className="relative overflow-hidden rounded-[2rem] bg-[#eeebf4] p-6 sm:p-9">
-          <div className="absolute -right-12 -top-28 h-80 w-80 rounded-full bg-[#c8b7db]/60 blur-3xl" />
-          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-2xl">
-              <p className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.2em] text-[#6264b5]">
-                <ShoppingBag className="h-4 w-4" /> Catatan transaksi
-              </p>
-              <h1 className="mt-4 text-4xl font-extrabold leading-tight sm:text-5xl">Pesanan dan pembayaran.</h1>
-              <p className="mt-3 max-w-xl text-sm leading-7 text-[#5c6482]">
-                Semua invoice dan status pembayaran konsermu, tersusun jelas dalam satu daftar.
-              </p>
-            </div>
-            <Link href="/home/events" className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#071653] px-5 py-3 text-xs font-bold text-white transition hover:bg-[#172b70]">
-              <Ticket className="h-4 w-4 text-[#c8b7db]" /> Pesan tiket baru
+      <main className="mx-auto max-w-7xl px-5 pb-20 pt-24 sm:px-8 sm:pt-28">
+        <section className="grid gap-6 rounded-[28px] border border-[#e4def5] bg-white p-5 shadow-[0_18px_50px_-38px_rgba(98,100,181,.24)] sm:p-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
+          <div className="max-w-2xl">
+            <p className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.18em] text-[#6264b5]"><ShoppingBag className="h-4 w-4" />Riwayat transaksi</p>
+            <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight text-[#071653] sm:text-5xl">Pesanan konsermu, <span className="text-[#6264b5]">tersusun rapi.</span></h1>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-[#68708a]">Pantau status pembayaran dan rincian setiap transaksi di satu tempat. Buka invoice untuk melihat detail pesanan, lanjutkan pembayaran yang masih menunggu, atau akses e-ticket setelah transaksi dinyatakan lunas.</p>
+            <Link href="/home/events" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#6264b5] px-5 py-3 text-xs font-bold text-white transition hover:bg-[#51539f]">
+              <Ticket className="h-4 w-4" /> Pesan tiket baru
             </Link>
           </div>
-        </section>
-
-        <section className="mt-6 grid gap-3 sm:grid-cols-3">
-          <div className="flex items-center gap-4 rounded-2xl border border-[#e8e5ef] bg-[#fffdf2] p-5">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eeebf4] text-[#6264b5]"><ShoppingBag className="h-5 w-5" /></span>
-            <div><p className="text-2xl font-extrabold">{orders.length}</p><p className="text-[10px] font-bold uppercase tracking-wider text-[#5c6482]">Total pesanan</p></div>
-          </div>
-          <div className="flex items-center gap-4 rounded-2xl border border-[#c7e0d1] bg-[#e6f1eb] p-5">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#fffdf2] text-[#397557]"><PackageCheck className="h-5 w-5" /></span>
-            <div><p className="text-2xl font-extrabold text-[#245d43]">{paidCount}</p><p className="text-[10px] font-bold uppercase tracking-wider text-[#397557]">Pembayaran lunas</p></div>
-          </div>
-          <div className="flex items-center gap-4 rounded-2xl border border-[#e8e5ef] bg-[#fffdf2] p-5">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eeebf4] text-[#6264b5]"><Clock3 className="h-5 w-5" /></span>
-            <div><p className="text-2xl font-extrabold">{pendingCount}</p><p className="text-[10px] font-bold uppercase tracking-wider text-[#5c6482]">Menunggu pembayaran</p></div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="min-w-0 rounded-2xl bg-[#f8f6ff] px-3 py-3.5 sm:px-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#68708a]">Pesanan</p><p className="mt-1 text-2xl font-bold text-[#071653]">{orders.length}</p></div>
+            <div className="min-w-0 rounded-2xl bg-[#f0f6f2] px-3 py-3.5 sm:px-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#397557]">Lunas</p><p className="mt-1 text-2xl font-bold text-[#245d43]">{paidCount}</p></div>
+            <div className="min-w-0 rounded-2xl bg-[#f8f6ff] px-3 py-3.5 sm:px-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#68708a]">Menunggu</p><p className="mt-1 text-2xl font-bold text-[#071653]">{pendingCount}</p></div>
           </div>
         </section>
 
-        <section className="mt-8 rounded-2xl border border-[#e8e5ef] bg-[#fffdf2] p-4 shadow-[0_12px_35px_-28px_rgba(7,22,83,.25)] sm:p-5">
+        <section className="mt-5 rounded-[28px] border border-[#e4def5] bg-white p-4 shadow-[0_18px_50px_-38px_rgba(98,100,181,.2)] sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#6264b5]">Riwayat akunmu</p>
               <h2 className="mt-1 text-lg font-extrabold">Daftar pesanan</h2>
             </div>
-            <p className="text-xs text-[#5c6482]">Total pembayaran lunas: <strong className="text-[#071653]">{new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(totalSpent)}</strong></p>
+            <p className="max-w-sm text-xs leading-5 text-[#68708a]">Pilih status untuk menyaring riwayat. Pesanan menunggu dapat dilanjutkan pembayarannya, sedangkan pesanan lunas menyediakan akses ke e-ticket.</p>
           </div>
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
             {FILTERS.map(({ id, label, icon: Icon }) => {
@@ -134,7 +116,7 @@ export default function OrdersPage() {
                   onClick={() => setSelectedStatus(id)}
                   aria-pressed={selectedStatus === id}
                   className={`inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition ${
-                    selectedStatus === id ? "bg-[#6264b5] text-white" : "border border-[#e8e5ef] text-[#5c6482] hover:border-[#c8b7db]"
+                    selectedStatus === id ? "bg-[#6264b5] text-white" : "border border-[#e8e5ef] bg-[#fffdf2] text-[#5c6482] hover:border-[#c8b7db]"
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" /> {label}<span className="opacity-70">{count}</span>
@@ -145,6 +127,10 @@ export default function OrdersPage() {
         </section>
 
         <section className="mt-6">
+          {!loading && !loadError && filteredOrders.length > 0 ? <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white/75 px-1 py-2">
+            <p className="text-sm text-[#68708a]">Menampilkan <strong className="text-[#071653]">{filteredOrders.length}</strong> pesanan</p>
+            <p className="text-xs text-[#68708a]">Total pembayaran lunas: <strong className="text-[#071653]">{new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(totalSpent)}</strong></p>
+          </div> : null}
           {loading ? (
             <div className="rounded-2xl border border-[#e8e5ef] bg-[#fffdf2] py-16"><Loading message="Memuat riwayat transaksi..." /></div>
           ) : loadError ? (
@@ -168,7 +154,7 @@ export default function OrdersPage() {
             <EmptyState
               icon={ShoppingBag}
               title="Belum ada pesanan"
-              description="Pesanan dengan status ini akan muncul di sini setelah kamu memilih konser."
+              description="Pesanan dengan status ini akan muncul di sini setelah kamu memilih konser. Cek filter yang dipilih, atau jelajahi jadwal konser untuk membuat pesanan baru."
               actionLabel="Jelajahi konser"
               actionHref="/home/events"
               variant="light"

@@ -9,6 +9,8 @@ import {
   Compass,
   Home,
   LogIn,
+  MapPin,
+  Music2,
   Search,
   ShoppingBag,
   Ticket,
@@ -20,6 +22,10 @@ import { UserMenu } from "@/components/layout/UserMenu";
 import { ScrollProgress } from "@/components/shared/ScrollProgress";
 import { useAuthStore } from "@/stores/authStore";
 import { useCartStore } from "@/stores/cartStore";
+import { fetchEvents } from "@/features/events/api";
+import type { Event } from "@/features/events/types";
+import { fetchPopularArtists } from "@/features/artists/api";
+import type { Artist } from "@/features/artists/types";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -28,7 +34,8 @@ export function Navbar() {
   const isMemberPage =
     pathname.startsWith("/home") ||
     pathname.startsWith("/tickets") ||
-    pathname.startsWith("/orders");
+    pathname.startsWith("/orders") ||
+    pathname.startsWith("/payments");
   const isCatalog =
     pathname.startsWith("/events") ||
     pathname.startsWith("/artists") ||
@@ -40,7 +47,11 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
+  const [recommendedArtists, setRecommendedArtists] = useState<Artist[]>([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const isLightChrome = isCatalog || isMemberPage || (isLanding && scrolled);
+  const isLightSearch = isLightChrome || isLanding;
   const usesPurpleChrome = isLanding || isCatalog || isMemberPage;
 
   useEffect(() => {
@@ -58,6 +69,26 @@ export function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [searchOpen]);
+
+  useEffect(() => {
+    if (!searchOpen || recommendedEvents.length || recommendedArtists.length) return;
+    let active = true;
+    setLoadingRecommendations(true);
+    Promise.all([fetchEvents({ limit: 100, sort: "asc" }), fetchPopularArtists(4)])
+      .then(([events, artists]) => {
+        if (!active) return;
+        const upcoming = events.filter(
+          (event) => event.status === "open" && new Date(event.event_date).getTime() >= Date.now(),
+        );
+        setRecommendedEvents(upcoming.slice(0, 4));
+        setRecommendedArtists(artists.slice(0, 4));
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setLoadingRecommendations(false);
+      });
+    return () => { active = false; };
+  }, [searchOpen, recommendedEvents.length, recommendedArtists.length]);
 
   const navLinks = [
     { label: user ? "Untukmu" : "Beranda", href: user ? "/home" : "/", icon: user ? Compass : Home },
@@ -78,6 +109,13 @@ export function Navbar() {
     setSearchOpen(false);
     router.push(`${user ? "/home/events" : "/events"}?q=${encodeURIComponent(query)}`);
   };
+
+  const openRecommendation = (href: string) => {
+    setSearchOpen(false);
+    router.push(href);
+  };
+
+  const fillSearch = (value: string) => setSearchQuery(value);
 
   return (
     <>
@@ -227,27 +265,27 @@ export function Navbar() {
             aria-label="Tutup pencarian"
             onClick={() => setSearchOpen(false)}
             className={`absolute inset-0 cursor-default backdrop-blur-md ${
-              isLightChrome ? "bg-[#071653]/20" : "bg-[#07090e]/85"
+              isLightSearch ? "bg-[#071653]/20" : "bg-[#07090e]/85"
             }`}
             style={{ animation: "page-enter 240ms ease both" }}
           />
           <div
-            className={`login-form-card relative w-full max-w-xl rounded-3xl border p-6 shadow-2xl backdrop-blur-2xl sm:p-8 ${
-              isLightChrome
-                ? "border-[#c8b7db]/50 bg-[#fffdf2] text-[#071653]"
+            className={`relative w-full max-w-xl rounded-2xl border p-5 shadow-xl sm:p-6 ${
+              isLightSearch
+                ? "border-[#e6e0ef] bg-white text-[#071653]"
                 : "border-[#2a2e3d]/70 bg-[#0d111c]/95 text-white"
             }`}
           >
             <div className="mb-6 flex items-center justify-between">
-              <div className={`flex items-center gap-2 text-sm font-semibold ${isLightChrome ? "text-[#6264b5]" : "text-[#ffb703]"}`}>
+              <div className={`flex items-center gap-2 text-sm font-semibold ${isLightSearch ? "text-[#6264b5]" : "text-[#ffb703]"}`}>
                 <Compass className="h-4 w-4" />
-                Cari live experience
+                Cari konser
               </div>
               <button
                 type="button"
                 onClick={() => setSearchOpen(false)}
                 className={`rounded-full p-2 transition ${
-                  isLightChrome
+                  isLightSearch
                     ? "text-[#071653]/60 hover:bg-[#c8b7db]/20 hover:text-[#071653]"
                     : "text-[#c8b7db] hover:bg-[#6264b5]/20 hover:text-[#fffdf2]"
                 }`}
@@ -259,28 +297,28 @@ export function Navbar() {
 
             <form
               onSubmit={submitSearch}
-              className={`flex items-center gap-3 rounded-2xl border px-4 py-2 transition ${
-                isLightChrome
-                  ? "border-[#c8b7db]/40 bg-[#fffdf2] focus-within:border-[#6264b5] focus-within:ring-4 focus-within:ring-[#6264b5]/15"
+              className={`flex items-center gap-3 rounded-xl border px-3 py-2 transition ${
+                isLightSearch
+                  ? "border-[#e8e5ef] bg-[#fffdf2] focus-within:border-[#6264b5] focus-within:ring-2 focus-within:ring-[#6264b5]/10"
                   : "border-[#c8b7db]/20 bg-[#071653]/80 focus-within:border-[#6264b5] focus-within:ring-4 focus-within:ring-[#6264b5]/20"
               }`}
             >
-              <Search className={`h-4 w-4 shrink-0 ${isLightChrome ? "text-[#6264b5]" : "text-[#ffb703]"}`} />
+              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${isLightSearch ? "border-[#c8b7db] bg-[#eeebf4] text-[#6264b5]" : "border-[#c8b7db]/20 bg-white/5 text-[#ffb703]"}`}><Search className="h-4 w-4" /></span>
               <input
                 autoFocus
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Cari artis, kota, atau konser..."
                 className={`min-w-0 flex-1 bg-transparent py-2.5 text-sm outline-none ${
-                  isLightChrome
+                  isLightSearch
                     ? "text-[#101b4f] placeholder:text-[#77768c]"
                     : "text-[#e1e2ec] placeholder:text-[#514532]"
                 }`}
               />
               <button
                 type="submit"
-                className={`press inline-flex h-9 items-center gap-1.5 rounded-xl px-4 text-xs font-bold transition ${
-                  isLightChrome
+                className={`press inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-xs font-bold transition ${
+                  isLightSearch
                     ? "bg-[#6264b5] text-white hover:bg-[#51539f]"
                     : "bg-[#ffb703] text-[#0b0e15] hover:bg-[#ffdea9]"
                 }`}
@@ -289,7 +327,36 @@ export function Navbar() {
               </button>
             </form>
 
-            <p className={`mt-5 text-[11px] uppercase tracking-[0.18em] ${isLightChrome ? "text-[#77768c]" : "text-[#514532]"}`}>
+            <div className="mt-5 border-t border-[#e8e5ef] pt-4">
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[#6264b5]">Rekomendasi pencarian</p>
+              {recommendedEvents.length || recommendedArtists.length ? (
+                <div className="grid max-h-56 gap-2 overflow-y-auto sm:grid-cols-2">
+                  {recommendedEvents.slice(0, 3).map((event) => (
+                    <button key={`event-${event.id}`} type="button" onClick={() => openRecommendation(`${user ? "/home/events" : "/events"}/${event.id}`)} className="flex min-w-0 items-center gap-3 rounded-xl border border-[#e8e5ef] bg-[#fffdf2] p-3 text-left transition hover:border-[#c8b7db] hover:bg-[#eeebf4]">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#c8b7db] bg-[#eeebf4] text-[#6264b5]"><CalendarDays className="h-4 w-4" /></span>
+                      <span className="min-w-0"><span className="block truncate text-xs font-semibold text-[#071653]">{event.title}</span><span className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-[#77768c]"><MapPin className="h-3 w-3 shrink-0" />{event.location || event.venue || "Konser mendatang"}</span></span>
+                    </button>
+                  ))}
+                  {recommendedArtists.slice(0, 3).map((artist) => (
+                    <button key={`artist-${artist.id}`} type="button" onClick={() => openRecommendation(`${user ? "/home/artists" : "/artists"}/${artist.id}`)} className="flex min-w-0 items-center gap-3 rounded-xl border border-[#e8e5ef] bg-[#fffdf2] p-3 text-left transition hover:border-[#c8b7db] hover:bg-[#eeebf4]">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#c8b7db] bg-[#eeebf4] text-[#6264b5]"><Music2 className="h-4 w-4" /></span>
+                      <span className="min-w-0"><span className="block truncate text-xs font-semibold text-[#071653]">{artist.name}</span><span className="mt-0.5 block truncate text-[10px] text-[#77768c]">{artist.genre || "Artis populer"}</span></span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-[#77768c]">
+                    {loadingRecommendations ? "Memuat rekomendasi konser dan artis..." : "Coba cari berdasarkan kota, genre, atau nama musisi."}
+                  </p>
+                  {!loadingRecommendations ? <div className="mt-3 flex flex-wrap gap-2">
+                    {["Jakarta", "Pop", "Festival", "Jazz"].map((term) => <button key={term} type="button" onClick={() => fillSearch(term)} className="rounded-full border border-[#e8e5ef] bg-white px-3 py-1.5 text-[10px] font-semibold text-[#6264b5] transition hover:border-[#c8b7db] hover:bg-[#eeebf4]">{term}</button>)}
+                  </div> : null}
+                </>
+              )}
+            </div>
+
+            <p className={`mt-4 text-[11px] uppercase tracking-[0.18em] ${isLightSearch ? "text-[#77768c]" : "text-[#514532]"}`}>
               Try: Coldplay · Jakarta · Jazz
             </p>
           </div>

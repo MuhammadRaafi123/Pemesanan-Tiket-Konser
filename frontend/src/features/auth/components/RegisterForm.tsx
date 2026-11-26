@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -82,8 +83,8 @@ function PasswordStrength({ password }: { password: string }) {
    MAIN REGISTER FORM COMPONENT
    ═════════════════════════════════════════════ */
 export default function RegisterForm() {
+  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -96,7 +97,6 @@ export default function RegisterForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
     watch,
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -107,7 +107,6 @@ export default function RegisterForm() {
 
   const onSubmit = async (values: RegisterFormValues) => {
     setServerError(null);
-    setSuccessMessage(null);
 
     try {
       await registerUser({
@@ -117,10 +116,7 @@ export default function RegisterForm() {
         phone: values.phone || undefined,
       });
 
-      setSuccessMessage(
-        "Akun berhasil dibuat. Sekarang masuk untuk menemukan momen live berikutnya."
-      );
-      reset();
+      router.replace("/login");
     } catch (error: unknown) {
       setServerError(
         getApiErrorMessage(error, "Registrasi gagal. Silakan coba lagi.")
@@ -251,19 +247,6 @@ export default function RegisterForm() {
                         <AlertCircle className="h-3 w-3" />
                       </div>
                       <span>{serverError}</span>
-                    </div>
-                  )}
-
-                  {/* Success */}
-                  {successMessage && (
-                    <div
-                      role="status"
-                      className="flex items-start gap-3 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.06] px-4 py-3.5 text-sm leading-6 text-emerald-400 backdrop-blur-sm"
-                    >
-                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
-                        <CheckCircle2 className="h-3 w-3" />
-                      </div>
-                      <span>{successMessage}</span>
                     </div>
                   )}
 

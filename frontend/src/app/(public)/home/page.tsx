@@ -17,7 +17,6 @@ import {
   ShieldCheck,
   Sparkles,
   Ticket,
-  TrendingUp,
   X,
   Zap,
   type LucideIcon,
@@ -36,12 +35,19 @@ type DateFilter = "all" | "week" | "month";
 type SortOption = "popular" | "date" | "price";
 
 const GENRES = [
-  { value: "Pop", label: "Pop", tone: "from-fuchsia-950/90" },
-  { value: "Rock", label: "Rock & Indie", tone: "from-slate-950/90" },
-  { value: "K-Pop", label: "K-Pop", tone: "from-violet-950/90" },
-  { value: "EDM", label: "EDM", tone: "from-indigo-950/90" },
-  { value: "Jazz", label: "Jazz & Soul", tone: "from-amber-950/90" },
-  { value: "Festival", label: "Festival", tone: "from-emerald-950/90" },
+  { value: "pop", label: "Pop", tone: "from-fuchsia-950/90" },
+  { value: "rock", label: "Rock & Indie", tone: "from-slate-950/90" },
+  { value: "kpop", label: "K-Pop", tone: "from-violet-950/90" },
+  { value: "hiphop", label: "Hip-Hop & Rap", tone: "from-rose-950/90" },
+  { value: "rnb", label: "R&B & Soul", tone: "from-pink-950/90" },
+  { value: "edm", label: "EDM & Electronic", tone: "from-indigo-950/90" },
+  { value: "jazz", label: "Jazz & Blues", tone: "from-amber-950/90" },
+  { value: "metal", label: "Metal & Punk", tone: "from-zinc-950/90" },
+  { value: "folk", label: "Folk & Country", tone: "from-orange-950/90" },
+  { value: "reggae", label: "Reggae", tone: "from-emerald-950/90" },
+  { value: "classical", label: "Klasik", tone: "from-blue-950/90" },
+  { value: "dangdut", label: "Dangdut", tone: "from-yellow-950/90" },
+  { value: "festival", label: "Festival", tone: "from-teal-950/90" },
 ];
 
 function getLowestPrice(event: Event): number | null {
@@ -57,12 +63,20 @@ function getCity(event: Event): string {
 
 function matchesGenre(event: Event, genre: string): boolean {
   if (genre === "all") return true;
-  const value = `${event.genre || ""} ${event.artists?.genre || ""}`.toLowerCase();
-  if (genre === "Rock") return value.includes("rock") || value.includes("indie");
-  if (genre === "K-Pop") return value.includes("k-pop") || value.includes("kpop") || value.includes("korean");
-  if (genre === "EDM") return value.includes("edm") || value.includes("electronic") || value.includes("dance");
-  if (genre === "Jazz") return value.includes("jazz") || value.includes("soul") || value.includes("blues");
-  return value.includes(genre.toLowerCase());
+  const value = `${event.genre || ""} ${event.artists?.genre || ""} ${event.artists_list?.map((artist) => artist.genre || "").join(" ") || ""}`.toLowerCase();
+  if (genre === "rock") return value.includes("rock") || value.includes("indie");
+  if (genre === "kpop") return value.includes("k-pop") || value.includes("kpop") || value.includes("korean");
+  if (genre === "edm") return value.includes("edm") || value.includes("electronic") || value.includes("dance");
+  if (genre === "hiphop") return value.includes("hip-hop") || value.includes("hip hop") || value.includes("hiphop") || value.includes("rap");
+  if (genre === "rnb") return value.includes("r&b") || value.includes("rnb") || value.includes("rhythm and blues") || value.includes("soul");
+  if (genre === "jazz") return value.includes("jazz") || value.includes("blues");
+  if (genre === "metal") return value.includes("metal") || value.includes("punk") || value.includes("hardcore");
+  if (genre === "folk") return value.includes("folk") || value.includes("country") || value.includes("bluegrass");
+  if (genre === "reggae") return value.includes("reggae") || value.includes("ska") || value.includes("dancehall");
+  if (genre === "classical") return value.includes("classical") || value.includes("klasik") || value.includes("orchestra") || value.includes("orchestral");
+  if (genre === "dangdut") return value.includes("dangdut");
+  if (genre === "festival") return value.includes("festival");
+  return value.includes(genre);
 }
 
 function eventHref(event: Event, isMember: boolean): string {
@@ -139,6 +153,7 @@ export default function HomePage() {
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [upcomingWindow, setUpcomingWindow] = useState<DateFilter>("week");
+  const [showAllGenres, setShowAllGenres] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -177,12 +192,24 @@ export default function HomePage() {
     const search = query.trim().toLocaleLowerCase("id");
 
     return events.filter((event) => {
-      const searchable = [event.title, ...(event.artist_names || []), event.artists?.name, event.venue, event.location, event.genre]
+      const searchable = [
+        event.title,
+        ...(event.artist_names || []),
+        ...(event.artists_list?.map((artist) => artist.name) || []),
+        event.artists?.name,
+        event.venue,
+        event.location,
+        event.location_detail?.city,
+        event.location_detail?.name,
+        event.genre,
+        ...(event.artists_list?.map((artist) => artist.genre) || []),
+      ]
         .filter(Boolean).join(" ").toLocaleLowerCase("id");
       if (search && !searchable.includes(search)) return false;
       if (city !== "all" && getCity(event) !== city) return false;
       if (!matchesGenre(event, genre)) return false;
       const eventDate = new Date(event.event_date);
+      eventDate.setHours(0, 0, 0, 0);
       if (dateFilter !== "all" && (eventDate < now || eventDate > end)) return false;
       return true;
     }).sort((a, b) => {
@@ -198,18 +225,24 @@ export default function HomePage() {
     const end = new Date(now);
     if (upcomingWindow === "week") end.setDate(end.getDate() + 7);
     else if (upcomingWindow === "month") end.setMonth(end.getMonth() + 1);
-    return [...events]
+    return [...filteredEvents]
       .filter((event) => new Date(event.event_date) >= now && (upcomingWindow === "all" || new Date(event.event_date) <= end))
       .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
       .slice(0, 4);
-  }, [events, upcomingWindow]);
+  }, [filteredEvents, upcomingWindow]);
 
   const featureEvent = featuredEvents[0];
   const recommendations = events.filter((event) => !event.featured && event.id !== featureEvent?.id).slice(0, 4);
 
+  const showFilteredResults = () => {
+    window.requestAnimationFrame(() => {
+      document.getElementById("filtered-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
   const applyGenre = (value: string) => {
     setGenre(value);
-    document.getElementById("event-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    showFilteredResults();
   };
 
   return (
@@ -268,30 +301,30 @@ export default function HomePage() {
               <label className="flex min-h-12 items-center gap-3 rounded-xl border border-[#e4deec] bg-[#f8f6fb] px-3.5 focus-within:border-[#6264b5] focus-within:ring-4 focus-within:ring-[#6264b5]/15">
                 <Search className="h-4 w-4 shrink-0 text-[#6264b5]" />
                 <span className="sr-only">Cari konser atau artis</span>
-                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Konser, artis, atau venue" className="min-w-0 flex-1 bg-transparent text-xs font-medium outline-none placeholder:text-[#9691a1]" />
-                {query ? <button type="button" aria-label="Hapus pencarian" onClick={() => setQuery("")}><X className="h-4 w-4 text-[#898396]" /></button> : null}
+                <input value={query} onChange={(event) => setQuery(event.target.value)} onBlur={showFilteredResults} placeholder="Konser, artis, atau venue" className="min-w-0 flex-1 bg-transparent text-xs font-medium outline-none placeholder:text-[#9691a1]" />
+                {query ? <button type="button" aria-label="Hapus pencarian" onClick={() => { setQuery(""); showFilteredResults(); }}><X className="h-4 w-4 text-[#898396]" /></button> : null}
               </label>
               <label className="flex min-h-12 items-center gap-2.5 rounded-xl border border-[#e4deec] bg-[#f8f6fb] px-3.5 text-xs">
                 <MapPin className="h-4 w-4 shrink-0 text-[#6264b5]" /><span className="sr-only">Pilih kota</span>
-                <select value={city} onChange={(event) => setCity(event.target.value)} className="w-full bg-transparent font-semibold outline-none">
+                <select value={city} onChange={(event) => { setCity(event.target.value); showFilteredResults(); }} className="w-full bg-transparent font-semibold outline-none">
                   <option value="all">Semua kota</option>{cities.map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
               <label className="flex min-h-12 items-center gap-2.5 rounded-xl border border-[#e4deec] bg-[#f8f6fb] px-3.5 text-xs">
                 <Music2 className="h-4 w-4 shrink-0 text-[#6264b5]" /><span className="sr-only">Pilih genre</span>
-                <select value={genre} onChange={(event) => setGenre(event.target.value)} className="w-full bg-transparent font-semibold outline-none">
+                <select value={genre} onChange={(event) => { setGenre(event.target.value); showFilteredResults(); }} className="w-full bg-transparent font-semibold outline-none">
                   <option value="all">Semua genre</option>{GENRES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                 </select>
               </label>
               <label className="flex min-h-12 items-center gap-2.5 rounded-xl border border-[#e4deec] bg-[#f8f6fb] px-3.5 text-xs">
                 <CalendarDays className="h-4 w-4 shrink-0 text-[#6264b5]" /><span className="sr-only">Filter tanggal</span>
-                <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value as DateFilter)} className="w-full bg-transparent font-semibold outline-none">
+                <select value={dateFilter} onChange={(event) => { setDateFilter(event.target.value as DateFilter); showFilteredResults(); }} className="w-full bg-transparent font-semibold outline-none">
                   <option value="all">Semua tanggal</option><option value="week">7 hari ke depan</option><option value="month">30 hari ke depan</option>
                 </select>
               </label>
               <label className="flex min-h-12 items-center gap-2.5 rounded-xl border border-[#e4deec] bg-[#f8f6fb] px-3.5 text-xs">
                 <ArrowDownUp className="h-4 w-4 shrink-0 text-[#6264b5]" /><span className="sr-only">Urutkan konser</span>
-                <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortOption)} className="w-full bg-transparent font-semibold outline-none">
+                <select value={sortBy} onChange={(event) => { setSortBy(event.target.value as SortOption); showFilteredResults(); }} className="w-full bg-transparent font-semibold outline-none">
                   <option value="popular">Populer</option><option value="date">Tanggal terdekat</option><option value="price">Harga terendah</option>
                 </select>
               </label>
@@ -299,7 +332,7 @@ export default function HomePage() {
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <span className="mr-1 text-[10px] font-bold uppercase tracking-wider text-[#858091]">Genre cepat</span>
               {GENRES.map((item) => (
-                <button key={item.value} type="button" onClick={() => setGenre(genre === item.value ? "all" : item.value)} className={`rounded-full px-3 py-1.5 text-[10px] font-bold transition ${genre === item.value ? "bg-[#071653] text-white" : "bg-[#efebf5] text-[#5c5570] hover:bg-[#e4dced]"}`}>
+                <button key={item.value} type="button" onClick={() => { setGenre(genre === item.value ? "all" : item.value); showFilteredResults(); }} className={`rounded-full px-3 py-1.5 text-[10px] font-bold transition ${genre === item.value ? "bg-[#071653] text-white" : "bg-[#efebf5] text-[#5c5570] hover:bg-[#e4dced]"}`}>
                   {item.label}
                 </button>
               ))}
@@ -311,7 +344,7 @@ export default function HomePage() {
         <section className="mx-auto mt-14 max-w-7xl px-5 sm:px-8">
           <SectionTitle eyebrow="Pilih suasana" title="Jelajahi berdasarkan genre" detail="Temukan panggung yang sesuai dengan musik favoritmu." />
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {GENRES.map((item, index) => {
+            {GENRES.slice(0, showAllGenres ? GENRES.length : 6).map((item, index) => {
               const art = events.find((event) => matchesGenre(event, item.value)) || events[index];
               const image = resolveMediaUrl(art?.poster || "");
               return (
@@ -327,6 +360,29 @@ export default function HomePage() {
               );
             })}
           </div>
+          {GENRES.length > 6 ? (
+            <div className="mt-5 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowAllGenres((current) => !current)}
+                aria-expanded={showAllGenres}
+                className="inline-flex items-center gap-2 rounded-full border border-[#ded5e9] bg-white px-4 py-2.5 text-xs font-bold text-[#624589] shadow-sm transition hover:border-[#bda9d5] hover:bg-[#faf8fc]"
+              >
+                {showAllGenres ? "Lihat lebih sedikit" : "Lihat lebih banyak"}
+                <ChevronRight className={`h-4 w-4 transition-transform ${showAllGenres ? "-rotate-90" : "rotate-90"}`} />
+              </button>
+            </div>
+          ) : null}
+        </section>
+
+        <section id="filtered-results" className="mx-auto mt-8 max-w-7xl scroll-mt-24 px-5 sm:px-8">
+          <div className="flex items-end justify-between gap-4">
+            <SectionTitle eyebrow="Hasil pencarian" title="Konser sesuai pilihanmu" detail="Daftar ini diperbarui berdasarkan kata kunci dan filter yang dipilih." />
+            <span className="shrink-0 text-xs font-semibold text-[#777087]">{filteredEvents.length} event</span>
+          </div>
+          {loading ? <div className="mt-5 flex min-h-48 items-center justify-center rounded-2xl bg-white"><Loading message="Memuat konser..." /></div> : error ? <InlineError message={error} onRetry={() => setReloadKey((key) => key + 1)} /> : filteredEvents.length ? (
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{filteredEvents.map((event) => <DiscoveryCard key={event.id} event={event} isMember={Boolean(user)} />)}</div>
+          ) : <EmptyEvents />}
         </section>
 
         <section className="mx-auto mt-16 max-w-7xl px-5 sm:px-8">
@@ -337,18 +393,6 @@ export default function HomePage() {
           {loading ? <div className="mt-5 flex min-h-48 items-center justify-center rounded-2xl bg-white"><Loading message="Memuat konser pilihan..." /></div> : error ? <InlineError message={error} onRetry={() => setReloadKey((key) => key + 1)} /> : featuredEvents.length ? (
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{featuredEvents.map((event) => <DiscoveryCard key={event.id} event={event} isMember={Boolean(user)} />)}</div>
           ) : <EmptyEvents />}
-        </section>
-
-        <section className="mt-16 border-y border-[#e5dced] bg-[#eee9f4] py-12 sm:py-14">
-          <div className="mx-auto max-w-7xl px-5 sm:px-8">
-            <div className="flex items-end justify-between gap-4">
-              <SectionTitle eyebrow="Sedang diminati" title="Trending konser" detail="Urutan populer mengikuti data event yang tersedia." />
-              <TrendingUp className="mb-1 hidden h-7 w-7 text-[#7959a6] sm:block" />
-            </div>
-            {loading ? <div className="mt-5 flex min-h-48 items-center justify-center rounded-2xl bg-white"><Loading message="Memuat event populer..." /></div> : filteredEvents.length ? (
-              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{filteredEvents.slice(0, 4).map((event) => <DiscoveryCard key={event.id} event={event} isMember={Boolean(user)} />)}</div>
-            ) : <EmptyEvents />}
-          </div>
         </section>
 
         <section id="event-results" className="mx-auto mt-16 max-w-7xl scroll-mt-28 px-5 sm:px-8">
@@ -371,7 +415,6 @@ export default function HomePage() {
         <section className="mx-auto mt-16 max-w-7xl px-5 sm:px-8">
           <div className="flex items-end justify-between gap-4">
             <SectionTitle eyebrow="Pilihan berikutnya" title="Mungkin kamu suka" detail="Rekomendasi dari event yang tersedia saat ini." />
-            <Sparkles className="mb-1 hidden h-6 w-6 text-[#8767a8] sm:block" />
           </div>
           {loading ? <div className="mt-5 flex min-h-48 items-center justify-center rounded-2xl bg-white"><Loading message="Menyiapkan rekomendasi..." /></div> : recommendations.length ? (
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{recommendations.map((event) => <DiscoveryCard key={event.id} event={event} isMember={Boolean(user)} />)}</div>
